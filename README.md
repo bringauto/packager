@@ -30,7 +30,7 @@ bap-builder build-image --context ./example --name debian11
 3. Build all packages for given distro
 
 ```
-bap-builder build-package --context ./example --image-name debian11 --output-dir ./lfsrepo
+bap-builder build-package --context ./example --image-name debian11 --output-dir ./lfsrepo --all
 ```
 
 ## Motivation
@@ -82,7 +82,7 @@ You can easily build and track dependencies for your project, download then and 
 The project requires go >= 1.18.
 
 ```
-go get  system/bap-builder
+go get system/bap-builder
 cd bap-builder
 go build
 ```

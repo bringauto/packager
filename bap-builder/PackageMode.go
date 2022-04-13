@@ -34,8 +34,8 @@ func (list *buildDepList) TopologicalSort(buildMap ConfigMapType) []*bringauto_c
 		dependsMapCopy[key] = value
 	}
 	var rootList []string
-	for depdnecyName, _ := range allDependencies {
-		delete(dependsMapCopy, depdnecyName)
+	for dependencyName, _ := range allDependencies {
+		delete(dependsMapCopy, dependencyName)
 	}
 	for key, _ := range dependsMapCopy {
 		rootList = append(rootList, key)

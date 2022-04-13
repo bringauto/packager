@@ -121,28 +121,28 @@ func (context *ContextManager) validateContextPath() error {
 	var err error
 	ContextStat, err := os.Stat(context.ContextPath)
 	if os.IsNotExist(err) {
-		return fmt.Errorf("context path does not exist - %s", context.ContextPath)
+		return fmt.Errorf("context path does not exist - %s\n", context.ContextPath)
 	}
 	if !ContextStat.IsDir() {
-		return fmt.Errorf("context path is not a directory - %s", context.ContextPath)
+		return fmt.Errorf("context path is not a directory - %s\n", context.ContextPath)
 	}
 
 	dockerDirPath := path.Join(context.ContextPath, DockerDirectoryNameConst)
 	DockerStat, err := os.Stat(dockerDirPath)
 	if os.IsNotExist(err) {
-		return fmt.Errorf("docker dir path does not exist - %s", dockerDirPath)
+		return fmt.Errorf("docker dir path does not exist - %s\n", dockerDirPath)
 	}
 	if !DockerStat.IsDir() {
-		return fmt.Errorf("docker path is not a directory - %s", dockerDirPath)
+		return fmt.Errorf("docker path is not a directory - %s\n", dockerDirPath)
 	}
 
 	packageDirPath := path.Join(context.ContextPath, PackageDirectoryNameConst)
 	packageStat, err := os.Stat(packageDirPath)
 	if os.IsNotExist(err) {
-		return fmt.Errorf("package path does not exist - %s", packageDirPath)
+		return fmt.Errorf("package path does not exist - %s\n", packageDirPath)
 	}
 	if !packageStat.IsDir() {
-		return fmt.Errorf("package path is not a directory - %s", packageDirPath)
+		return fmt.Errorf("package path is not a directory - %s\n", packageDirPath)
 	}
 
 	return nil

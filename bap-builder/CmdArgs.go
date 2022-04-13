@@ -27,7 +27,7 @@ type BuildPackageCmdLineArgs struct {
 	All *bool
 	// Name of the package to build (name of the directory in packages/ dir)
 	Name *string
-	// DockerImageName is a name of docker image to which packages wil lbe build.
+	// DockerImageName is a name of docker image to which packages will be build.
 	// If empty all docker images from DockerMatrix in config file are used for a given package.
 	// If not empty, only packages which contains DockerImageName in DockerMatrix will be built.
 	// If not empty, packages are built only by toolchain represented by DockerImageName
