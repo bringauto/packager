@@ -1,0 +1,35 @@
+{
+  "Env": {
+    "CC": "gcc",
+    "CFLAGS": "",
+    "CXX": "g++",
+    "CXXFLAGS": ""
+  },
+  "DependsOn": [
+  ],
+  "Git": {
+    "URI": "https://github.com/bringauto/boost-cmake-build.git",
+    "Revision": "master"
+  },
+  "Build": {
+    "CMake": {
+      "Defines": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "BOOST_VERSION": "1.78.0"
+      }
+    }
+  },
+  "Package": {
+    "Name": "boost",
+    "VersionTag": "v1.78.0",
+    "PlatformString": {
+      "Mode": "auto"
+    },
+    "IsLibrary": true,
+    "IsDevLib": true,
+    "IsDebug": true
+  },
+  "DockerMatrix": {
+    "ImageNames":  [ ]
+  }
+}

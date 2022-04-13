@@ -1,0 +1,40 @@
+{
+  "Env": {
+    "CC": "gcc",
+    "CFLAGS": "",
+    "CXX": "g++",
+    "CXXFLAGS": ""
+  },
+  "DependsOn": [
+    "pahomqttc"
+  ],
+  "Git": {
+    "URI": "https://github.com/eclipse/paho.mqtt.cpp.git",
+    "Revision": "v1.2.0"
+  },
+  "Build": {
+    "CMake": {
+      "Defines": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "PAHO_BUILD_STATIC": "OFF",
+        "PAHO_BUILD_SHARED": "ON",
+        "PAHO_BUILD_DOCUMENTATION": "OFF",
+        "PAHO_BUILD_SAMPLES": "OFF",
+        "PAHO_WITH_SSL": "ON"
+      }
+    }
+  },
+  "Package": {
+    "Name": "pahomqttcpp",
+    "VersionTag": "v1.2.0",
+    "PlatformString": {
+      "Mode": "auto"
+    },
+    "IsLibrary": true,
+    "IsDevLib": true,
+    "IsDebug": false
+  },
+  "DockerMatrix": {
+    "ImageNames":  [ "ubuntu1804", "ubuntu2004", "debian11" ]
+  }
+}

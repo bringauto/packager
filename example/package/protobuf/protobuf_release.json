@@ -1,0 +1,36 @@
+{
+  "Env": {
+    "CC": "gcc",
+    "CFLAGS": "",
+    "CXX": "g++",
+    "CXXFLAGS": ""
+  },
+  "DependsOn": [
+  ],
+  "Git": {
+    "URI": "https://github.com/protocolbuffers/protobuf.git",
+    "Revision": "v3.17.3"
+  },
+  "Build": {
+    "CMake": {
+      "CMakeListDir": "cmake/",
+      "Defines": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "protobuf_BUILD_TESTS": "OFF"
+      }
+    }
+  },
+  "Package": {
+    "Name": "protobuf",
+    "VersionTag": "v3.17.3",
+    "PlatformString": {
+      "Mode": "auto"
+    },
+    "IsLibrary": true,
+    "IsDevLib": true,
+    "IsDebug": false
+  },
+  "DockerMatrix": {
+    "ImageNames":  [ "ubuntu1804", "ubuntu2004", "debian11" ]
+  }
+}

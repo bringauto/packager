@@ -1,0 +1,36 @@
+{
+  "Env": {
+    "CC": "gcc",
+    "CFLAGS": "",
+    "CXX": "g++",
+    "CXXFLAGS": ""
+  },
+  "DependsOn": [
+  ],
+  "Git": {
+    "URI": "https://github.com/jarro2783/cxxopts.git",
+    "Revision": "v3.0.5"
+  },
+  "Build": {
+    "CMake": {
+      "Defines": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CXXOPTS_BUILD_EXAMPLES": "OFF",
+        "CXXOPTS_BUILD_TESTS": "OFF"
+      }
+    }
+  },
+  "Package": {
+    "Name": "cxxopts",
+    "VersionTag": "v3.0.5",
+    "PlatformString": {
+      "Mode": "any_machine"
+    },
+    "IsLibrary": true,
+    "IsDevLib": true,
+    "IsDebug": true
+  },
+  "DockerMatrix": {
+    "ImageNames":  [ "ubuntu1804", "ubuntu2004", "debian11" ]
+  }
+}

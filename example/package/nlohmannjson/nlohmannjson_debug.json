@@ -1,0 +1,35 @@
+{
+  "Env": {
+    "CC": "gcc",
+    "CFLAGS": "",
+    "CXX": "g++",
+    "CXXFLAGS": ""
+  },
+  "DependsOn": [
+  ],
+  "Git": {
+    "URI": "https://github.com/nlohmann/json.git",
+    "Revision": "v3.10.5"
+  },
+  "Build": {
+    "CMake": {
+      "Defines": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "JSON_BuildTests": "OFF"
+      }
+    }
+  },
+  "Package": {
+    "Name": "nlohmann-json",
+    "VersionTag": "v3.10.5",
+    "PlatformString": {
+      "Mode": "any_machine"
+    },
+    "IsLibrary": true,
+    "IsDevLib": true,
+    "IsDebug": true
+  },
+  "DockerMatrix": {
+    "ImageNames":  [ "ubuntu1804", "ubuntu2004", "debian11" ]
+  }
+}
