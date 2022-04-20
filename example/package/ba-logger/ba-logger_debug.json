@@ -1,10 +1,5 @@
 {
   "Env": {
-    "CC": "gcc",
-    "CFLAGS": "",
-    "CXX": "g++",
-    "CXXFLAGS": "",
-    "CMLIB_DIR": "/cmakelib"
   },
   "DependsOn": [
   ],

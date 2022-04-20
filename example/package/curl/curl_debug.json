@@ -1,9 +1,5 @@
 {
   "Env": {
-    "CC": "gcc",
-    "CFLAGS": "",
-    "CXX": "g++",
-    "CXXFLAGS": ""
   },
   "DependsOn": [
     "zlib"
@@ -30,6 +26,6 @@
     "IsDebug": true
   },
   "DockerMatrix": {
-    "ImageNames":  [ "ubuntu1804", "ubuntu2004", "debian11" ]
+    "ImageNames":  [ "ubuntu1804", "ubuntu2004", "debian11", "autonomy_host" ]
   }
 }

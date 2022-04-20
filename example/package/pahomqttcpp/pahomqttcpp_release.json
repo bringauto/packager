@@ -1,9 +1,5 @@
 {
   "Env": {
-    "CC": "gcc",
-    "CFLAGS": "",
-    "CXX": "g++",
-    "CXXFLAGS": ""
   },
   "DependsOn": [
     "pahomqttc"
