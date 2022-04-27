@@ -1,8 +1,6 @@
 {
-  "Env": {
-  },
-  "DependsOn": [
-  ],
+  "Env": {},
+  "DependsOn": [],
   "Git": {
     "URI": "https://github.com/eclipse/paho.mqtt.c.git",
     "Revision": "v1.3.9"
@@ -30,6 +28,11 @@
     "IsDebug": false
   },
   "DockerMatrix": {
-    "ImageNames":  [ "ubuntu1804", "ubuntu2004", "debian11" ]
+    "ImageNames": [
+      "ubuntu1804",
+      "ubuntu2004",
+      "debian11",
+      "fleet-os"
+    ]
   }
 }

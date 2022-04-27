@@ -1,6 +1,5 @@
 {
-  "Env": {
-  },
+  "Env": {},
   "DependsOn": [
     "zlib"
   ],
@@ -26,6 +25,11 @@
     "IsDebug": false
   },
   "DockerMatrix": {
-    "ImageNames":  [ "ubuntu1804", "ubuntu2004", "debian11" ]
+    "ImageNames": [
+      "ubuntu1804",
+      "ubuntu2004",
+      "debian11",
+      "fleet-os"
+    ]
   }
 }

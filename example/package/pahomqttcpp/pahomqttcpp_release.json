@@ -1,6 +1,5 @@
 {
-  "Env": {
-  },
+  "Env": {},
   "DependsOn": [
     "pahomqttc"
   ],
@@ -31,6 +30,11 @@
     "IsDebug": false
   },
   "DockerMatrix": {
-    "ImageNames":  [ "ubuntu1804", "ubuntu2004", "debian11" ]
+    "ImageNames": [
+      "ubuntu1804",
+      "ubuntu2004",
+      "debian11",
+      "fleet-os"
+    ]
   }
 }

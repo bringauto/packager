@@ -1,8 +1,6 @@
 {
-  "Env": {
-  },
-  "DependsOn": [
-  ],
+  "Env": {},
+  "DependsOn": [],
   "Git": {
     "URI": "https://github.com/bringauto/ba-logger.git",
     "Revision": "v1.1.1"
@@ -27,6 +25,10 @@
     "IsDebug": false
   },
   "DockerMatrix": {
-    "ImageNames":  [ "ubuntu2004", "debian11" ]
+    "ImageNames": [
+      "ubuntu2004",
+      "debian11",
+      "fleet-os"
+    ]
   }
 }

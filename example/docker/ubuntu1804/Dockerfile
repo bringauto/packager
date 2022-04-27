@@ -19,7 +19,7 @@ RUN apt-get update && \
       rm -rf /var/lib/apt/lists/*
 
 RUN git clone https://github.com/cmakelib/cmakelib.git /cmakelib
-RUN echo "CMLIB_DIR=/cmakelib" >> /root/.bashrc
+RUN echo "export CMLIB_DIR=/cmakelib" >> /root/.bashrc
 
 RUN sed -ri 's/#?PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
 RUN mkdir -p /run/sshd

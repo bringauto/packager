@@ -1,8 +1,6 @@
 {
-  "Env": {
-  },
-  "DependsOn": [
-  ],
+  "Env": {},
+  "DependsOn": [],
   "Git": {
     "URI": "https://github.com/bringauto/boost-cmake-build.git",
     "Revision": "master"
@@ -26,6 +24,8 @@
     "IsDebug": true
   },
   "DockerMatrix": {
-    "ImageNames":  [ ]
+    "ImageNames": [
+      "fleet-os"
+    ]
   }
 }
