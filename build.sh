@@ -2,6 +2,13 @@
 
 set -e
 
+INSTALL_DIR="./install_dir"
+
+if [[ -d ${INSTALL_DIR} ]]; then
+  echo "${INSTALL_DIR} already exist. Delete it pls" >&2
+  exit 1
+fi
+
 go get bringauto/bap-builder
 go get bringauto/tools/lsb_release
 go get bringauto/tools/uname
@@ -21,21 +28,23 @@ pushd tools/lsb_release
   CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -ldflags '-w'
 popd
 
-if [ -d install_dir ]; then
-  echo "install_dir already exist. Delete it pls" >&2
-  exit 1
-fi
-mkdir -p install_dir
-mkdir -p install_dir/tools
+mkdir -p "${INSTALL_DIR}"
+mkdir -p "${INSTALL_DIR}/tools"
 
-cp bap-builder/bap-builder                 install_dir/
-cp -r doc                                  install_dir/
-cp README.md                               install_dir/
-cp LICENSE                                 install_dir/
-cp tools/lsb_release/lsb_release           install_dir/tools/
-cp tools/lsb_release/lsb_release.txt       install_dir/tools/
-cp tools/lsb_release/lsb_release_README.md install_dir/tools/
-cp tools/uname/uname_README.md             install_dir/tools/
-cp tools/uname/uname                       install_dir/tools/
-cp tools/uname/uname.txt                   install_dir/tools/
+cp bap-builder/bap-builder                 "${INSTALL_DIR}/"
+cp -r doc                                  "${INSTALL_DIR}/"
+cp README.md                               "${INSTALL_DIR}/"
+cp LICENSE                                 "${INSTALL_DIR}/"
+cp tools/lsb_release/lsb_release           "${INSTALL_DIR}/tools/"
+cp tools/lsb_release/lsb_release.txt       "${INSTALL_DIR}/tools/"
+cp tools/lsb_release/lsb_release_README.md "${INSTALL_DIR}/tools/"
+cp tools/uname/uname_README.md             "${INSTALL_DIR}/tools/"
+cp tools/uname/uname                       "${INSTALL_DIR}/tools/"
+cp tools/uname/uname.txt                   "${INSTALL_DIR}/tools/"
 
+
+VERSION=$(sed -E -n 's/version=([^=]+)/\1/p' < version.txt)
+MACHINE=$(uname -m | sed -E 's/_/-/')
+zip -r "bringauto-packager_v${VERSION}_${MACHINE}-linux.zip" ${INSTALL_DIR}/
+
+rm -fr install_dir
