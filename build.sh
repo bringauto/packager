@@ -2,10 +2,19 @@
 
 set -e
 
-INSTALL_DIR="./install_dir"
+VERSION=$(sed -E -n 's/version=([^=]+)/\1/p' < version.txt)
+MACHINE=$(uname -m | sed -E 's/_/-/')
+
+INSTALL_DIR="./bap_${VERSION}_${MACHINE}-linux"
+INSTALL_DIR_TOOLS="./bap_tools_${VERSION}_${MACHINE}-linux"
 
 if [[ -d ${INSTALL_DIR} ]]; then
   echo "${INSTALL_DIR} already exist. Delete it pls" >&2
+  exit 1
+fi
+
+if [[ -d ${INSTALL_DIR_TOOLS} ]]; then
+  echo "${INSTALL_DIR_TOOLS} already exist. Delete it pls" >&2
   exit 1
 fi
 
@@ -29,22 +38,22 @@ pushd tools/lsb_release
 popd
 
 mkdir -p "${INSTALL_DIR}"
-mkdir -p "${INSTALL_DIR}/tools"
+mkdir -p "${INSTALL_DIR_TOOLS}"
 
 cp bap-builder/bap-builder                 "${INSTALL_DIR}/"
 cp -r doc                                  "${INSTALL_DIR}/"
 cp README.md                               "${INSTALL_DIR}/"
 cp LICENSE                                 "${INSTALL_DIR}/"
-cp tools/lsb_release/lsb_release           "${INSTALL_DIR}/tools/"
-cp tools/lsb_release/lsb_release.txt       "${INSTALL_DIR}/tools/"
-cp tools/lsb_release/lsb_release_README.md "${INSTALL_DIR}/tools/"
-cp tools/uname/uname_README.md             "${INSTALL_DIR}/tools/"
-cp tools/uname/uname                       "${INSTALL_DIR}/tools/"
-cp tools/uname/uname.txt                   "${INSTALL_DIR}/tools/"
+cp tools/lsb_release/lsb_release           "${INSTALL_DIR_TOOLS}/"
+cp tools/lsb_release/lsb_release.txt       "${INSTALL_DIR_TOOLS}/"
+cp tools/lsb_release/lsb_release_README.md "${INSTALL_DIR_TOOLS}/"
+cp tools/uname/uname_README.md             "${INSTALL_DIR_TOOLS}/"
+cp tools/uname/uname                       "${INSTALL_DIR_TOOLS}/"
+cp tools/uname/uname.txt                   "${INSTALL_DIR_TOOLS}/"
 
 
-VERSION=$(sed -E -n 's/version=([^=]+)/\1/p' < version.txt)
-MACHINE=$(uname -m | sed -E 's/_/-/')
 zip -r "bringauto-packager_v${VERSION}_${MACHINE}-linux.zip" ${INSTALL_DIR}/
+zip -r "bringauto-packager-tools_v${VERSION}_${MACHINE}-linux.zip" ${INSTALL_DIR_TOOLS}/
 
-rm -fr install_dir
+rm -fr "${INSTALL_DIR}"
+rm -fr "${INSTALL_DIR_TOOLS}"

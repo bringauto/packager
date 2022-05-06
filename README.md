@@ -77,15 +77,26 @@ You can easily build and track dependencies for your project, download then and 
 - Docker >= 20.10 (installed by official Docker documentation)
 - git >= 2.25
 
+Standalone binaries are built for Linux kernel >= 5.10.0-9-amd64
+
 ## Build
 
 The project requires go >= 1.18.
 
 ```
-go get system/bap-builder
-cd bap-builder
-go build
+go get bringauto/bap-builder
+go build bringauto/bap-builder
 ```
+
+## Build standalone binaries
+
+There is a script `build.sh` by that we can build a complete release package.
+
+Additional requirements for `build.sh`:
+
+- zip
+- uname
+- sed
 
 ## FAQ
 
@@ -93,7 +104,6 @@ go build
 
 Many errors are caused by problem with SSh connection to the Docker container
 or impossibility to start Docker container.
-
 
 In this case
 
