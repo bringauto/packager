@@ -143,7 +143,7 @@ func (pstr *PlatformString) determinePlatformString(credentials bringauto_ssh.SS
 // that can be used for package naming.
 func (pstr *PlatformString) Serialize() string {
 	if pstr.String.DistroName == "" && pstr.String.Machine == "" && pstr.String.DistroRelease == "" {
-		panic("Sorry, invalid platformstring")
+		panic("Sorry, invalid platform string")
 	}
 	return pstr.String.Machine + "-" + pstr.String.DistroName + "-" + pstr.String.DistroRelease
 }

@@ -147,7 +147,7 @@ func buildAllPackages(cmdLine *BuildPackageCmdLineArgs, contextPath string) erro
 		if len(buildConfigs) == 0 {
 			continue
 		}
-		log.Println("Build %s", buildConfigs[0].Package.CreatePackageName())
+		log.Printf("Build %s\n", buildConfigs[0].Package.CreatePackageName())
 		err = buildAndCopyPackage(cmdLine, &buildConfigs)
 		if err != nil {
 			panic(fmt.Errorf("cannot build package '%s' - %s", config.Package.Name, err))

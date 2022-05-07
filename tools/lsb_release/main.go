@@ -30,21 +30,18 @@ func (cmd *CmdLineArgs) InitFlags() {
 	cmd.FlagR = cmd.parser.Flag("r", "r",
 		&argparse.Options{
 			Required: false,
-			Default:  false,
 			Help:     "r",
 		},
 	)
 	cmd.FlagS = cmd.parser.Flag("s", "s",
 		&argparse.Options{
 			Required: false,
-			Default:  false,
 			Help:     "s",
 		},
 	)
 	cmd.FlagI = cmd.parser.Flag("i", "i",
 		&argparse.Options{
 			Required: false,
-			Default:  false,
 			Help:     "i",
 		},
 	)

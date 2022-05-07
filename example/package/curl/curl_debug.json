@@ -29,7 +29,6 @@
       "ubuntu1804",
       "ubuntu2004",
       "debian11",
-      "autonomy_host",
       "fleet-os"
     ]
   }
