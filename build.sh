@@ -6,7 +6,7 @@ VERSION=$(sed -E -n 's/version=([^=]+)/\1/p' < version.txt)
 MACHINE=$(uname -m | sed -E 's/_/-/')
 
 INSTALL_DIR="./bap_${VERSION}_${MACHINE}-linux"
-INSTALL_DIR_TOOLS="./bap_tools_${VERSION}_${MACHINE}-linux"
+INSTALL_DIR_TOOLS="./bringauto-packager-tools_${VERSION}_${MACHINE}-linux"
 
 if [[ -d ${INSTALL_DIR} ]]; then
   echo "${INSTALL_DIR} already exist. Delete it pls" >&2

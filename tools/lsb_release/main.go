@@ -26,7 +26,7 @@ type CmdLineArgs struct {
 }
 
 func (cmd *CmdLineArgs) InitFlags() {
-	cmd.parser = argparse.NewParser("Dummy LSB Release ", "My Test Parser")
+	cmd.parser = argparse.NewParser("Dummy LSB Release ", "Dummy LSB Release")
 	cmd.FlagR = cmd.parser.Flag("r", "r",
 		&argparse.Options{
 			Required: false,
@@ -64,18 +64,18 @@ type DataStruct struct {
 func (data *DataStruct) ReadFromFile(filePath string) {
 	var err error
 
-	jsonFile, err := os.Open(filePath)
+	file, err := os.Open(filePath)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer jsonFile.Close()
+	defer file.Close()
 
 	parseStruct := map[string]func(string){
 		"^Distributor ID:\t([^\t]+)$": func(s string) { data.DistributorID = s },
 		"^Release:\t([^\t]+)$":        func(s string) { data.ReleaseNumber, _ = strconv.Atoi(s) },
 	}
 
-	scanner := bufio.NewScanner(jsonFile)
+	scanner := bufio.NewScanner(file)
 	for k, callback := range parseStruct {
 		if !scanner.Scan() {
 			log.Fatal("cannot scan next line in the input file")
@@ -86,9 +86,9 @@ func (data *DataStruct) ReadFromFile(filePath string) {
 }
 
 func parseLine(line string, regexpStr string) string {
-	regex, err := regexp.CompilePOSIX(regexpStr)
+	regex, err := regexp.Compile(regexpStr)
 	if err != nil {
-		log.Fatalf("Cannot parse '%s' from '%s'", regexpStr, line)
+		log.Fatalf("Cannot compile regex '%s'", regexpStr)
 	}
 	subMatch := regex.FindStringSubmatch(line)
 	if subMatch == nil {
@@ -132,5 +132,4 @@ func main() {
 			fmt.Printf("Release:\t%d\n", lsbReleaseData.ReleaseNumber)
 		}
 	}
-
 }

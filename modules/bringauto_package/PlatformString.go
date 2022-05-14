@@ -23,6 +23,8 @@ const (
 	ModeAnyMachine = "any_machine"
 	// ModeAuto compute platform string automatically by lsb_release and uname
 	ModeAuto = "auto"
+	// NumberOfTriesForFakeCommands try to call fake lsb_release multiple times if fails
+	NumberOfTriesForFakeCommands = 5
 )
 
 // PlatformString represents standard platform string
@@ -154,8 +156,18 @@ func runShellCommandOverSSH(credentials bringauto_ssh.SSHCredentials, command st
 		Command: command,
 	}
 
+	// If the fake lsb_release run in the Docker container
+	// it fails in 2/3. So we try to run fake lsb_release and fake uname multiple times.
+	i := 0
 	var commandStdOut string
-	commandStdOut, err = commandSsh.RunCommandOverSSH(credentials)
+	for {
+		commandStdOut, err = commandSsh.RunCommandOverSSH(credentials)
+		if err != nil && i < NumberOfTriesForFakeCommands {
+			i++
+			continue
+		}
+		break
+	}
 	if err != nil {
 		panic(fmt.Errorf("cannot run command '%s', error: %s", command, err))
 	}

@@ -3,6 +3,7 @@ package bringauto_ssh
 import (
 	"bytes"
 	"os"
+	"time"
 )
 
 type Command struct {
@@ -31,6 +32,7 @@ func (command *Command) RunCommandOverSSH(credentials SSHCredentials) (string, e
 	if err != nil {
 		return "", err
 	}
+	time.Sleep(10 * time.Millisecond)
 	err = session.Wait()
 	if err != nil {
 		return "", err
