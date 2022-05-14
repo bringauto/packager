@@ -1,4 +1,4 @@
-FROM ubuntu:bionic
+FROM ubuntu:22.04
 
 USER root
 RUN echo root:1234 | chpasswd

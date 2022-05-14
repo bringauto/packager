@@ -29,7 +29,7 @@
   },
   "DockerMatrix": {
     "ImageNames": [
-      "ubuntu1804",
+      "ubuntu2204",
       "ubuntu2004",
       "debian11",
       "fleet-os"

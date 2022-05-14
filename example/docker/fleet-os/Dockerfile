@@ -8,7 +8,7 @@ RUN echo root:1234 | chpasswd
 #
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
-      xz-utils sed git libssl-dev openssh-server wget unzip python3 build-essential && \
+      xz-utils sed git libssl-dev openssh-server wget unzip python3 make&& \
     rm -rf /var/lib/apt/lists/*
 
 RUN wget "https://github.com/Kitware/CMake/releases/download/v3.22.2/cmake-3.22.2-linux-x86_64.sh" -O cmake.sh && \
@@ -25,30 +25,11 @@ RUN mkdir -p /run/sshd
 #
 # Install our BringAuto Fleet
 #
-RUN mkdir -p /root/toolchain-install && \
-    wget https://gitlab.bringauto.com/bringauto-public/fleet-os-toolchain/-/raw/master/pre-release/toolchain.bringauto-image-compile.ba-raspberrypi4-64.deploy_development.zip \
-    -O /root/toolchain-install/oecore.sh.zip
-RUN cd /root/toolchain-install/ && \
-    unzip oecore.sh.zip && \
-    rm oecore.sh.zip && \
-    chmod +x *
-RUN /root/toolchain-install/* -S -y -d /root/toolchain/ || exit 0
-RUN echo ". /root/toolchain/environment-setup-cortexa72-oe-linux" >> /environment.sh
-RUN rm -r /root/toolchain-install/
-
-RUN wget https://github.com/bringauto/packager/releases/download/v0.2.0-rc/bringauto-packager-tools_v0.2.0_x86-64-linux.zip \
-    -O /root/bringauto-packager-tools_v0.2.0_x86-64-linux.zip
-
-RUN cd /root && \
-    unzip bringauto-packager-tools_v0.2.0_x86-64-linux.zip && \
-    mv bap_tools_0.2.0_x86-64-linux/* /root/ && \
-    rm -r bap_tools_0.2.0_x86-64-linux
-
-COPY lsb_release.txt /root/
-COPY uname.txt /root/
-RUN chmod +x /root/lsb_release
-RUN chmod +x /root/uname
-RUN echo 'PATH=/root/:$PATH' >> /root/.bashrc
+COPY lsb_release.txt /root/tools/
+COPY uname.txt /root/tools/
+COPY init_toolchain.sh /root/
+RUN chmod +x /root/init_toolchain.sh && \
+    /root/init_toolchain.sh /root/toolchain /root/tools
 
 RUN apt-get update && \
     apt-get purge -y \
