@@ -3,6 +3,7 @@ package main
 import (
 	"bringauto/modules/bringauto_build"
 	"bringauto/modules/bringauto_config"
+	"bringauto/modules/bringauto_package"
 	"bringauto/modules/bringauto_prerequisites"
 	"bringauto/modules/bringauto_repository"
 	"bringauto/modules/bringauto_sysroot"
@@ -204,9 +205,14 @@ func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_bu
 	}
 
 	for _, buildConfig := range *build {
+		platformString, err := determinePlatformString(&buildConfig)
+		if err != nil {
+			return err
+		}
+
 		sysroot := bringauto_sysroot.Sysroot{
 			IsDebug:        buildConfig.Package.IsDebug,
-			PlatformString: &buildConfig.Package.PlatformString,
+			PlatformString: platformString,
 		}
 		err = bringauto_prerequisites.Initialize(&sysroot)
 
@@ -232,4 +238,26 @@ func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_bu
 		}
 	}
 	return nil
+}
+
+// determinePlatformString will construct platform string suitable
+// for sysroot.
+// For example: the any_machine platformString must be copied to all machine-specific sysroot for
+// a given image.
+func determinePlatformString(build *bringauto_build.Build) (*bringauto_package.PlatformString, error) {
+	platformStringSpecialized := build.Package.PlatformString
+	if build.Package.PlatformString.Mode == bringauto_package.ModeAnyMachine {
+		platformStringStruct := bringauto_package.PlatformString{
+			Mode: bringauto_package.ModeAuto,
+		}
+		platformStringStruct.Mode = bringauto_package.ModeAuto
+		err := bringauto_prerequisites.Initialize[bringauto_package.PlatformString](&platformStringStruct,
+			build.SSHCredentials, build.Docker,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("")
+		}
+		platformStringSpecialized.String.Machine = platformStringStruct.String.Machine
+	}
+	return &platformStringSpecialized, nil
 }

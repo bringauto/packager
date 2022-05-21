@@ -37,28 +37,31 @@ func (cmd *CmdLineArgs) ParseArgs(args []string) error {
 }
 
 type DataStruct struct {
-	Machine string
+	Machine    string
+	KernelName string
 }
 
 func (data *DataStruct) ReadFromFile(filePath string) {
 	var err error
 
-	jsonFile, err := os.Open(filePath)
+	file, err := os.Open(filePath)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer jsonFile.Close()
+	defer file.Close()
 
 	parseStruct := map[string]func(string){
 		" +([^ ]+) [^ ]+$": func(s string) { data.Machine = s },
+		"^([^ ]+) ":        func(s string) { data.KernelName = s },
 	}
 
-	scanner := bufio.NewScanner(jsonFile)
+	scanner := bufio.NewScanner(file)
+	if !scanner.Scan() {
+		log.Fatal("cannot scan next line in the input file")
+	}
+	unameTxt := scanner.Text()
 	for k, callback := range parseStruct {
-		if !scanner.Scan() {
-			log.Fatal("cannot scan next line in the input file")
-		}
-		data := parseLine(scanner.Text(), k)
+		data := parseLine(unameTxt, k)
 		callback(data)
 	}
 }
@@ -96,6 +99,8 @@ func main() {
 
 	if *args.Machine {
 		fmt.Printf("%s\n", unameData.Machine)
+	} else {
+		fmt.Printf("%s\n", unameData.KernelName)
 	}
 
 }

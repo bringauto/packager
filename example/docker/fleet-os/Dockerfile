@@ -8,7 +8,7 @@ RUN echo root:1234 | chpasswd
 #
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
-      xz-utils sed git libssl-dev openssh-server wget unzip python3 make&& \
+      build-essential xz-utils sed git libssl-dev openssh-server wget unzip python3 make&& \
     rm -rf /var/lib/apt/lists/*
 
 RUN wget "https://github.com/Kitware/CMake/releases/download/v3.22.2/cmake-3.22.2-linux-x86_64.sh" -O cmake.sh && \
@@ -25,11 +25,11 @@ RUN mkdir -p /run/sshd
 #
 # Install our BringAuto Fleet
 #
-COPY lsb_release.txt /root/tools/
-COPY uname.txt /root/tools/
 COPY init_toolchain.sh /root/
 RUN chmod +x /root/init_toolchain.sh && \
     /root/init_toolchain.sh /root/toolchain /root/tools
+COPY lsb_release.txt /root/tools/
+COPY uname.txt /root/tools/
 
 RUN apt-get update && \
     apt-get purge -y \
