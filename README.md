@@ -77,7 +77,7 @@ You can easily build and track dependencies for your project, download then and 
 - Docker >= 20.10 (installed by official Docker documentation)
 - git >= 2.25
 
-Standalone binaries are built for Linux kernel >= 5.10.0-9-amd64
+Standalone binaries are built for Linux kernel >= 5.10.0-amd64
 
 ## Build
 

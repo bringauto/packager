@@ -1,1 +1,1 @@
-Linux k14 5.10.0-9-amd64 #1 SMP Debian 5.10.70-1 (2021-09-30) aarch64 GNU/Linux
+Linux k14 5.10.0-9-amd64 #1 SMP fleet-os 5.10.70-1 (2021-09-30) aarch64 GNU/Linux

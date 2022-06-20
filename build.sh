@@ -42,6 +42,7 @@ mkdir -p "${INSTALL_DIR_TOOLS}"
 
 cp bap-builder/bap-builder                 "${INSTALL_DIR}/"
 cp -r doc                                  "${INSTALL_DIR}/"
+cp -r example                              "${INSTALL_DIR}/"
 cp README.md                               "${INSTALL_DIR}/"
 cp LICENSE                                 "${INSTALL_DIR}/"
 cp tools/lsb_release/lsb_release           "${INSTALL_DIR_TOOLS}/"

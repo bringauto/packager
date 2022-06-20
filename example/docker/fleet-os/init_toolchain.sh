@@ -50,7 +50,7 @@ function install_toolchain() {
     echo ". ${INSTALL_DIR}/environment-setup-cortexa72-oe-linux" >> /environment.sh
 
     #
-    # We need to overwrite
+    # We need to overwrite default setting from Yocto Toolchain.
     #
     echo "set( CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH )" >> "${INSTALL_DIR}/sysroots/x86_64-oesdk-linux/usr/share/cmake/OEToolchainConfig.cmake"
     echo "set( CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH )" >> "${INSTALL_DIR}/sysroots/x86_64-oesdk-linux/usr/share/cmake/OEToolchainConfig.cmake"
