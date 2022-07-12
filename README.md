@@ -6,8 +6,6 @@ Build and track C/C++ project dependencies for apps for TODO any Linux distro!
 BAM - simple way how to build and maintain our dependencies with almost zero learning curve and out-of-the
 box integration into our workflows.
 
-Build by Docker, store by Git!
-
 ## Usage
 
 bap-builder build and stores all dependencies in the git repository
@@ -102,8 +100,8 @@ Additional requirements for `build.sh`:
 
 ### Q: I have got a wierd error
 
-Many errors are caused by problem with SSh connection to the Docker container
-or impossibility to start Docker container.
+Many errors are caused by problem with SSH connection to the Docker container
+or impossibility to start Docker container itself.
 
 In this case
 

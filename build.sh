@@ -5,7 +5,7 @@ set -e
 VERSION=$(sed -E -n 's/version=([^=]+)/\1/p' < version.txt)
 MACHINE=$(uname -m | sed -E 's/_/-/')
 
-INSTALL_DIR="./bap_${VERSION}_${MACHINE}-linux"
+INSTALL_DIR="./bringauto-packager_${VERSION}_${MACHINE}-linux"
 INSTALL_DIR_TOOLS="./bringauto-packager-tools_${VERSION}_${MACHINE}-linux"
 
 if [[ -d ${INSTALL_DIR} ]]; then
