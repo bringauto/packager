@@ -1,22 +1,19 @@
 {
   "Env": {},
-  "DependsOn": [],
   "Git": {
-    "URI": "https://github.com/bringauto/ba-logger.git",
-    "Revision": "v1.1.1"
+    "URI": "https://github.com/bringauto/bzip2.git",
+    "Revision": "1ea1ac188ad4b9cb662e3f8314673c63df95a589"
   },
   "Build": {
     "CMake": {
       "Defines": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "LIB_TYPE": "SPDLOG",
-        "BRINGAUTO_INSTALL": "ON"
+        "CMAKE_BUILD_TYPE": "Release"
       }
     }
   },
   "Package": {
-    "Name": "ba-logger",
-    "VersionTag": "v1.1.1",
+    "Name": "bzip2",
+    "VersionTag": "v1.0.8",
     "PlatformString": {
       "Mode": "auto"
     },
@@ -27,7 +24,8 @@
   "DockerMatrix": {
     "ImageNames": [
       "ubuntu2004",
-      "debian11"
+      "debian11",
+      "fleet-os"
     ]
   }
 }

@@ -2,20 +2,19 @@
   "Env": {},
   "DependsOn": [],
   "Git": {
-    "URI": "https://github.com/bringauto/boost-cmake-build.git",
-    "Revision": "josef.melkus/remove_headers-only"
+    "URI": "https://github.com/mapbox/protozero.git",
+    "Revision": "v1.7.1"
   },
   "Build": {
     "CMake": {
       "Defines": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "BOOST_VERSION": "1.78.0"
+        "CMAKE_BUILD_TYPE": "Release"
       }
     }
   },
   "Package": {
-    "Name": "boost",
-    "VersionTag": "v1.78.0",
+    "Name": "protozero",
+    "VersionTag": "v1.7.1",
     "PlatformString": {
       "Mode": "auto"
     },
@@ -25,10 +24,10 @@
   },
   "DockerMatrix": {
     "ImageNames": [
-    	"ubuntu2004",
     	"ubuntu2204",
-    	"fleet-os",
-    	"debian11"
+    	"ubuntu2004",
+    	"debian11",
+    	"fleet-os"
     ]
   }
 }

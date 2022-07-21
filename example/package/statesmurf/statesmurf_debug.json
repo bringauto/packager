@@ -1,22 +1,22 @@
 {
   "Env": {},
-  "DependsOn": [],
+  "DependsOn": ["ba-logger"],
   "Git": {
-    "URI": "https://github.com/bringauto/ba-logger.git",
-    "Revision": "v1.1.1"
+    "URI": "https://github.com/Melky-Phoe/StateSmurf.git",
+    "Revision": "v1.0.1"
   },
   "Build": {
     "CMake": {
       "Defines": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "LIB_TYPE": "SPDLOG",
-        "BRINGAUTO_INSTALL": "ON"
+        "BRINGAUTO_INSTALL": "ON",
+        "BRINGAUTO_PACKAGE": "ON"
       }
     }
   },
   "Package": {
-    "Name": "ba-logger",
-    "VersionTag": "v1.1.1",
+    "Name": "statesmurf",
+    "VersionTag": "v1.0.1",
     "PlatformString": {
       "Mode": "auto"
     },
@@ -26,8 +26,8 @@
   },
   "DockerMatrix": {
     "ImageNames": [
-      "ubuntu2004",
-      "debian11"
+    	"ubuntu2004",
+    	"debian11"
     ]
   }
 }
