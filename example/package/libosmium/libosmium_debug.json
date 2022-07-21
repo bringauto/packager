@@ -1,22 +1,20 @@
 {
   "Env": {},
-  "DependsOn": ["ba-logger"],
+  "DependsOn": ["boost", "protozero", "bzip2", "zlib", "expat"],
   "Git": {
-    "URI": "https://github.com/Melky-Phoe/StateSmurf.git",
-    "Revision": "v1.0.1"
+    "URI": "https://github.com/osmcode/libosmium.git",
+    "Revision": "v2.18.0"
   },
   "Build": {
     "CMake": {
       "Defines": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "BRINGAUTO_INSTALL": "ON",
-        "BRINGAUTO_PACKAGE": "ON"
+        "CMAKE_BUILD_TYPE": "Debug"
       }
     }
   },
   "Package": {
-    "Name": "statesmurf",
-    "VersionTag": "v1.0.1",
+    "Name": "libosmium",
+    "VersionTag": "v2.18.0",
     "PlatformString": {
       "Mode": "auto"
     },
@@ -27,7 +25,8 @@
   "DockerMatrix": {
     "ImageNames": [
     	"ubuntu2004",
-    	"debian11"
+    	"debian11",
+    	"fleet-os"
     ]
   }
 }

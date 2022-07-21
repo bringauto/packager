@@ -3,7 +3,7 @@
   "DependsOn": [],
   "Git": {
     "URI": "https://github.com/bringauto/boost-cmake-build.git",
-    "Revision": "master"
+    "Revision": "josef.melkus/remove_headers-only"
   },
   "Build": {
     "CMake": {
@@ -25,7 +25,10 @@
   },
   "DockerMatrix": {
     "ImageNames": [
-      "fleet-os"
+    	"ubuntu2004",
+    	"ubuntu2204",
+    	"fleet-os",
+    	"debian11"
     ]
   }
 }

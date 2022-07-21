@@ -2,32 +2,33 @@
   "Env": {},
   "DependsOn": [],
   "Git": {
-    "URI": "https://github.com/bringauto/ba-logger.git",
-    "Revision": "v1.1.1"
+    "URI": "https://github.com/libexpat/libexpat.git",
+    "Revision": "R_2_4_8"
   },
   "Build": {
     "CMake": {
+      "CMakeListDir": "expat/",
       "Defines": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "LIB_TYPE": "SPDLOG",
-        "BRINGAUTO_INSTALL": "ON"
+        "CMAKE_BUILD_TYPE": "Release"
       }
     }
   },
   "Package": {
-    "Name": "ba-logger",
-    "VersionTag": "v1.1.1",
+    "Name": "expat",
+    "VersionTag": "v2.4.8",
     "PlatformString": {
       "Mode": "auto"
     },
     "IsLibrary": true,
     "IsDevLib": true,
-    "IsDebug": true
+    "IsDebug": false
   },
   "DockerMatrix": {
     "ImageNames": [
+      "ubuntu2204",
       "ubuntu2004",
-      "debian11"
+      "debian11",
+      "fleet-os"
     ]
   }
 }

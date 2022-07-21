@@ -2,21 +2,19 @@
   "Env": {},
   "DependsOn": [],
   "Git": {
-    "URI": "https://github.com/bringauto/ba-logger.git",
-    "Revision": "v1.1.1"
+    "URI": "https://github.com/mapbox/protozero.git",
+    "Revision": "v1.7.1"
   },
   "Build": {
     "CMake": {
       "Defines": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "LIB_TYPE": "SPDLOG",
-        "BRINGAUTO_INSTALL": "ON"
+        "CMAKE_BUILD_TYPE": "Debug"
       }
     }
   },
   "Package": {
-    "Name": "ba-logger",
-    "VersionTag": "v1.1.1",
+    "Name": "protozero",
+    "VersionTag": "v1.7.1",
     "PlatformString": {
       "Mode": "auto"
     },
@@ -26,8 +24,10 @@
   },
   "DockerMatrix": {
     "ImageNames": [
-      "ubuntu2004",
-      "debian11"
+    	"ubuntu2204",
+    	"ubuntu2004",
+    	"debian11",
+    	"fleet-os"
     ]
   }
 }

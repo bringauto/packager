@@ -27,8 +27,7 @@
   "DockerMatrix": {
     "ImageNames": [
       "ubuntu2004",
-      "debian11",
-      "fleet-os"
+      "debian11"
     ]
   }
 }
