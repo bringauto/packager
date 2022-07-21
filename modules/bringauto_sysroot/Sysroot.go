@@ -59,7 +59,9 @@ func (sysroot *Sysroot) GetSysrootPath() string {
 		panic(fmt.Errorf("cannot call Getwd - %s", err))
 	}
 
-	platformString := sysroot.PlatformString.Serialize()
+	plt := *sysroot.PlatformString
+
+	platformString := plt.Serialize()
 	sysrootDirName := platformString
 	if sysroot.IsDebug {
 		sysrootDirName += "_debug"

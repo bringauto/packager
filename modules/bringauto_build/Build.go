@@ -95,9 +95,11 @@ func (build *Build) RunBuild() error {
 
 	gitClone := bringauto_git.GitClone{Git: *build.Git}
 	gitCheckout := bringauto_git.GitCheckout{Git: *build.Git}
+	startupScript := bringauto_prerequisites.CreateAndInitialize[StartupScript]()
 
 	buildChain := BuildChain{
 		Chain: []CMDLineInterface{
+			startupScript,
 			build.Env,
 			&gitClone,
 			&gitCheckout,

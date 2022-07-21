@@ -1,0 +1,32 @@
+{
+  "Env": {},
+  "DependsOn": ["boost", "protozero", "bzip2", "zlib", "expat"],
+  "Git": {
+    "URI": "https://github.com/osmcode/libosmium.git",
+    "Revision": "v2.18.0"
+  },
+  "Build": {
+    "CMake": {
+      "Defines": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    }
+  },
+  "Package": {
+    "Name": "libosmium",
+    "VersionTag": "v2.18.0",
+    "PlatformString": {
+      "Mode": "auto"
+    },
+    "IsLibrary": true,
+    "IsDevLib": true,
+    "IsDebug": true
+  },
+  "DockerMatrix": {
+    "ImageNames": [
+    	"ubuntu2004",
+    	"debian11",
+    	"fleet-os"
+    ]
+  }
+}

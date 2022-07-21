@@ -63,7 +63,7 @@ type CmdLineArgs struct {
 // Initialize flags and fill up CmdLineArgs struct
 // Function must be called before any use of CmdLineArgs
 func (cmd *CmdLineArgs) InitFlags() {
-	cmd.parser = argparse.NewParser("TestParser", "My Test Parser")
+	cmd.parser = argparse.NewParser("BringAuto Packager", "Build and track C++ dependencies")
 	cmd.Context = cmd.parser.String("", "context",
 		&argparse.Options{
 			Required: false,
