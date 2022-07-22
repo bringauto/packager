@@ -10,7 +10,8 @@
       "Defines": {
         "CMAKE_BUILD_TYPE": "Debug",
         "BRINGAUTO_INSTALL": "ON",
-        "BRINGAUTO_PACKAGE": "ON"
+        "BRINGAUTO_PACKAGE": "ON",
+        "BRINGAUTO_SYSTEM_DEP": "ON"
       }
     }
   },
@@ -27,7 +28,8 @@
   "DockerMatrix": {
     "ImageNames": [
     	"ubuntu2004",
-    	"debian11"
+    	"debian11",
+    	"ubuntu2204"
     ]
   }
 }

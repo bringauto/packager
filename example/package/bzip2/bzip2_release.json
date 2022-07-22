@@ -25,7 +25,8 @@
     "ImageNames": [
       "ubuntu2004",
       "debian11",
-      "fleet-os"
+      "fleet-os",
+      "ubuntu2204"
     ]
   }
 }
