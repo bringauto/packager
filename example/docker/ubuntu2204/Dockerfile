@@ -5,7 +5,7 @@ RUN echo root:1234 | chpasswd
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
-      	coreutils lsb-release build-essential  openssh-server git libssl-dev wget liblz4-dev && \
+      	coreutils lsb-release build-essential  openssh-server git libssl-dev wget && \
     rm -rf /var/lib/apt/lists/*
 
 RUN wget "https://github.com/Kitware/CMake/releases/download/v3.22.2/cmake-3.22.2-linux-x86_64.sh" -O cmake.sh && \

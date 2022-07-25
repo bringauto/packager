@@ -103,24 +103,29 @@ func (sftpd *SFTP) copyRecursive(sftpClient *sftp.Client, remoteDir string, loca
 			return err
 		}
 
-		sourceFileBuff := bufio.NewReaderSize(sourceFile, 1024*1024*8)
-		destFileBuff := bufio.NewWriterSize(destFile, 1027*1024*8)
+		go func() {
+			sourceFileBuff := bufio.NewReaderSize(sourceFile, 1024*1024*2)
+			destFileBuff := bufio.NewWriterSize(destFile, 1027*1024*2)
 
-		_, err = io.Copy(destFileBuff, sourceFileBuff)
-		if err != nil {
-			return fmt.Errorf("cannot copy remote file %s to dest file %s", remotePath, absoluteLocalPath)
-		}
+			_, err = io.Copy(destFileBuff, sourceFileBuff)
+			if err != nil {
+				//return fmt.Errorf("cannot copy remote file %s to dest file %s", remotePath, absoluteLocalPath)
+				return
+			}
 
-		_ = destFileBuff.Flush()
+			_ = destFileBuff.Flush()
 
-		err = destFile.Close()
-		if err != nil {
-			return fmt.Errorf("cannot close destFile: %s", err)
-		}
-		err = sourceFile.Close()
-		if err != nil {
-			return fmt.Errorf("cannot close sourceFile: %s", err)
-		}
+			err = destFile.Close()
+			if err != nil {
+				//return fmt.Errorf("cannot close destFile: %s", err)
+				return
+			}
+			err = sourceFile.Close()
+			if err != nil {
+				//return fmt.Errorf("cannot close sourceFile: %s", err)
+				return
+			}
+		}()
 
 	}
 	return nil

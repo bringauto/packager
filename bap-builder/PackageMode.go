@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 )
 
 type (
@@ -20,6 +21,21 @@ type (
 
 type buildDepList struct {
 	dependsMap map[string]*map[string]bool
+}
+
+func removeDuplicates(configList *[]*bringauto_config.Config) []*bringauto_config.Config {
+	var newConfigList []*bringauto_config.Config
+	packageMap := make(map[string]bool)
+	for _, cconfig := range *configList {
+		packageName := cconfig.Package.Name + ":" + strconv.FormatBool(cconfig.Package.IsDebug)
+		exist, _ := packageMap[packageName]
+		if exist {
+			continue
+		}
+		packageMap[packageName] = true
+		newConfigList = append(newConfigList, cconfig)
+	}
+	return newConfigList
 }
 
 func (list *buildDepList) TopologicalSort(buildMap ConfigMapType) []*bringauto_config.Config {
@@ -58,7 +74,7 @@ func (list *buildDepList) TopologicalSort(buildMap ConfigMapType) []*bringauto_c
 		sortedDependenciesConfig = append(sortedDependenciesConfig, buildMap[packageName]...)
 	}
 
-	return sortedDependenciesConfig
+	return removeDuplicates(&sortedDependenciesConfig)
 }
 
 func (list *buildDepList) createDependsMap(buildMap *ConfigMapType) (dependsMapType, allDependenciesType) {
