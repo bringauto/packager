@@ -23,6 +23,6 @@ func (startupScript *StartupScript) CheckPrerequisites(*bringauto_prerequisites.
 }
 
 func (startupScript *StartupScript) ConstructCMDLine() []string {
-	command := fmt.Sprintf(". \"%s\"", startupScript.ScriptPath)
+	command := fmt.Sprintf("test -f \"%s\" && . \"%s\"", startupScript.ScriptPath, startupScript.ScriptPath)
 	return []string{command}
 }

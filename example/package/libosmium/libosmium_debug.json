@@ -3,18 +3,21 @@
   "DependsOn": ["boost", "protozero", "bzip2", "zlib", "expat"],
   "Git": {
     "URI": "https://github.com/osmcode/libosmium.git",
-    "Revision": "v2.18.0"
+    "Revision": "v2.17.3"
   },
   "Build": {
     "CMake": {
       "Defines": {
-        "CMAKE_BUILD_TYPE": "Debug"
+        "CMAKE_BUILD_TYPE": "Debug",
+        "BUILD_DATA_TESTS": "OFF",
+        "BUILD_EXAMPLES": "OFF",
+        "BUILD_TESTING": "OFF"
       }
     }
   },
   "Package": {
-    "Name": "libosmium",
-    "VersionTag": "v2.18.0",
+    "Name": "osmium",
+    "VersionTag": "v2.17.3",
     "PlatformString": {
       "Mode": "auto"
     },

@@ -1,23 +1,21 @@
 {
   "Env": {},
-  "DependsOn": ["boost", "protozero", "bzip2", "zlib", "expat"],
+  "DependsOn": [],
   "Git": {
-    "URI": "https://github.com/osmcode/libosmium.git",
-    "Revision": "v2.17.3"
+    "URI": "https://github.com/bringauto/lz4-cmake-build.git",
+    "Revision": "master"
   },
   "Build": {
     "CMake": {
       "Defines": {
         "CMAKE_BUILD_TYPE": "Release",
-        "BUILD_DATA_TESTS": "OFF",
-        "BUILD_EXAMPLES": "OFF",
-        "BUILD_TESTING": "OFF"
+        "LZ4_VERSION": "1.9.3"
       }
     }
   },
   "Package": {
-    "Name": "libosmium",
-    "VersionTag": "v2.17.3",
+    "Name": "lz4",
+    "VersionTag": "v1.9.3",
     "PlatformString": {
       "Mode": "auto"
     },
@@ -28,9 +26,9 @@
   "DockerMatrix": {
     "ImageNames": [
     	"ubuntu2004",
-    	"debian11",
+    	"ubuntu2204",
     	"fleet-os",
-      	"ubuntu2204"
+    	"debian11"
     ]
   }
 }

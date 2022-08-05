@@ -1,23 +1,21 @@
 {
   "Env": {},
-  "DependsOn": ["ba-logger", "cxxopts"],
+  "DependsOn": [],
   "Git": {
-    "URI": "https://github.com/Melky-Phoe/StateSmurf.git",
-    "Revision": "v1.0.2"
+    "URI": "https://github.com/bringauto/lz4-cmake-build.git",
+    "Revision": "master"
   },
   "Build": {
     "CMake": {
       "Defines": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "BRINGAUTO_INSTALL": "ON",
-        "BRINGAUTO_PACKAGE": "ON",
-        "BRINGAUTO_SYSTEM_DEP": "ON"
+        "LZ4_VERSION": "1.9.3"
       }
     }
   },
   "Package": {
-    "Name": "statesmurf",
-    "VersionTag": "v1.0.2",
+    "Name": "lz4",
+    "VersionTag": "v1.9.3",
     "PlatformString": {
       "Mode": "auto"
     },
@@ -28,8 +26,9 @@
   "DockerMatrix": {
     "ImageNames": [
     	"ubuntu2004",
-    	"debian11",
-    	"ubuntu2204"
+    	"ubuntu2204",
+    	"fleet-os",
+    	"debian11"
     ]
   }
 }
