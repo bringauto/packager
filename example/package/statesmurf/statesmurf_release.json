@@ -3,7 +3,7 @@
   "DependsOn": ["ba-logger"],
   "Git": {
     "URI": "https://github.com/Melky-Phoe/StateSmurf.git",
-    "Revision": "v1.0.1"
+    "Revision": "v1.0.2"
   },
   "Build": {
     "CMake": {
@@ -17,7 +17,7 @@
   },
   "Package": {
     "Name": "statesmurf",
-    "VersionTag": "v1.0.1",
+    "VersionTag": "v1.0.2",
     "PlatformString": {
       "Mode": "auto"
     },
