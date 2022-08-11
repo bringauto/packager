@@ -56,6 +56,7 @@ Each package config mas have '.json' extension.
   },
   "Build": {
     "CMake": {
+      "CMakeListDir": "<path_to_cmake_list_dir>",
       "Defines": { // CMake variables passed to CMake -D switch
         "CMAKE_BUILD_TYPE": "Debug",
         "MY_NICE_VAR": "VarValue"
@@ -88,6 +89,11 @@ valid Git URi that can be used by `git clone` command
 
 Valid git Hash, Tag or branch
 
+### path_to_cmake_list_dir
+
+Directory where the CMakeLists.txt is located. Default value is "./"
+
+Path is relative against project git root.
 
 ### version_tag
 

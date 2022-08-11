@@ -84,8 +84,9 @@ func (pstr *PlatformString) CheckPrerequisites(args *bringauto_prerequisites.Arg
 	switch pstr.Mode {
 	case ModeAuto:
 	case ModeAnyMachine:
-	case ModeExplicit:
 		return nil
+	case ModeExplicit:
+		break
 	default:
 		return fmt.Errorf("unsupported PlatformStringMode '%s'", pstr.Mode)
 	}

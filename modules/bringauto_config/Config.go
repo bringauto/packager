@@ -100,19 +100,32 @@ func (config *Config) GetBuildStructure(imageName string) []bringauto_build.Buil
 }
 
 func (config *Config) fillBuildStructure(dockerImageName string) bringauto_build.Build {
+	var err error
 	defaultDocker := bringauto_prerequisites.CreateAndInitialize[bringauto_docker.Docker]()
 	defaultDocker.ImageName = dockerImageName
 
 	env := &bringauto_build.EnvironmentVariables{
 		Env: config.Env,
 	}
-	bringauto_prerequisites.Initialize(env)
-	bringauto_prerequisites.Initialize(&config.Git)
-	bringauto_prerequisites.Initialize(config.Build.CMake)
+	err = bringauto_prerequisites.Initialize(env)
+	if err != nil {
+		panic(err)
+	}
+	err = bringauto_prerequisites.Initialize(&config.Git)
+	if err != nil {
+		panic(err)
+	}
+	err = bringauto_prerequisites.Initialize(config.Build.CMake)
+	if err != nil {
+		panic(err)
+	}
 
 	sshCreds := bringauto_prerequisites.CreateAndInitialize[bringauto_ssh.SSHCredentials]()
 	tmpPackage := config.Package
-	bringauto_prerequisites.Initialize(&tmpPackage, sshCreds, defaultDocker)
+	err = bringauto_prerequisites.Initialize(&tmpPackage, sshCreds, defaultDocker)
+	if err != nil {
+		panic(err)
+	}
 
 	build := bringauto_build.Build{
 		Env:     env,

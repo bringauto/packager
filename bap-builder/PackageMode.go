@@ -271,7 +271,7 @@ func determinePlatformString(build *bringauto_build.Build) (*bringauto_package.P
 			build.SSHCredentials, build.Docker,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("")
+			return nil, err
 		}
 		platformStringSpecialized.String.Machine = platformStringStruct.String.Machine
 	}
