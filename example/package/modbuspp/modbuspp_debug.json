@@ -1,0 +1,33 @@
+{
+  "Env": {},
+  "DependsOn": [],
+  "Git": {
+    "URI": "https://github.com/bringauto/modbuspp.git",
+    "Revision": "master"
+  },
+  "Build": {
+    "CMake": {
+      "Defines": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    }
+  },
+  "Package": {
+    "Name": "modbuspp",
+    "VersionTag": "v1.0.0",
+    "PlatformString": {
+      "Mode": "any_machine"
+    },
+    "IsLibrary": true,
+    "IsDevLib": true,
+    "IsDebug": true
+  },
+  "DockerMatrix": {
+    "ImageNames": [
+      "ubuntu2204",
+      "ubuntu2004",
+      "debian11",
+      "fleet-os"
+    ]
+  }
+}
