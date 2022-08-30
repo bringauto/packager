@@ -2,7 +2,7 @@
   "Env": {},
   "DependsOn": [],
   "Git": {
-    "URI": "https://github.com/fz-lyu/modbuspp.git",
+    "URI": "https://github.com/bringauto/modbuspp.git",
     "Revision": "master"
   },
   "Build": {
@@ -14,9 +14,9 @@
   },
   "Package": {
     "Name": "modbuspp",
-    "VersionTag": "v0.3.0",
+    "VersionTag": "v1.0.0",
     "PlatformString": {
-      "Mode": "auto"
+      "Mode": "any_machine"
     },
     "IsLibrary": true,
     "IsDevLib": true,
