@@ -1,6 +1,6 @@
 {
   "Env": {},
-  "DependsOn": ["boost", "protozero", "bzip2", "zlib", "expat"],
+  "DependsOn": ["boost", "protozero", "bzip2", "zlib", "expat", "lz4"],
   "Git": {
     "URI": "https://github.com/osmcode/libosmium.git",
     "Revision": "v2.17.3"
