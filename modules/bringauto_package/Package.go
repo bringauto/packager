@@ -1,10 +1,9 @@
 package bringauto_package
 
 import (
-	"archive/zip"
 	"bringauto/modules/bringauto_prerequisites"
 	"fmt"
-	"io"
+	"github.com/mholt/archiver/v3"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -125,48 +124,19 @@ func createZIPArchive(sourceDir string, archivePath string) error {
 	},
 	)
 	if err != nil {
-		return fmt.Errorf("cannot get list of files")
+		return fmt.Errorf("cannot get list of files: %s", err)
 	}
 
-	var archive *os.File
-	archive, err = os.Create(archivePath)
-	defer archive.Close()
-
-	zipArchive := zip.NewWriter(archive)
-	defer zipArchive.Close()
-	for _, value := range files {
-		err = addFileToArchive(zipArchive, sourceDir, value)
-		if err != nil {
-			fmt.Printf("Cann add file %s to archive", value)
-		}
+	zipArchive := archiver.Zip{
+		MkdirAll:          true,
+		FileMethod:        archiver.Deflate,
+		OverwriteExisting: true,
 	}
-	return nil
-}
 
-func addFileToArchive(zipWriter *zip.Writer, basePath string, filePath string) error {
-	var err error
-	var file *os.File
-	file, err = os.Open(filePath)
+	err = zipArchive.Archive(files, archivePath)
 	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	var relativeFilePath string
-	var fileWriter io.Writer
-	relativeFilePath, err = filepath.Rel(basePath, filePath)
-	if err != nil {
-		fmt.Printf("cannot make path relative: %s", filePath)
-		return nil
-	}
-	fileWriter, err = zipWriter.Create(relativeFilePath)
-	if err != nil {
-		return err
+		return fmt.Errorf("cannot create archive: %s", err)
 	}
 
-	_, err = io.Copy(fileWriter, file)
-	if err != nil {
-		return err
-	}
 	return nil
 }
