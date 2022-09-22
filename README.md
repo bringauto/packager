@@ -83,6 +83,7 @@ The project requires go >= 1.18.
 
 ```
 go get bringauto/bap-builder
+cd bap-builder
 go build bringauto/bap-builder
 ```
 
