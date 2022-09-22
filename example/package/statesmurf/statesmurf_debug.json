@@ -3,7 +3,7 @@
   "DependsOn": ["ba-logger", "cxxopts"],
   "Git": {
     "URI": "https://github.com/Melky-Phoe/StateSmurf.git",
-    "Revision": "v2.0.0"
+    "Revision": "v2.0.1"
   },
   "Build": {
     "CMake": {
@@ -17,7 +17,7 @@
   },
   "Package": {
     "Name": "statesmurf",
-    "VersionTag": "v2.0.0",
+    "VersionTag": "v2.0.1",
     "PlatformString": {
       "Mode": "auto"
     },
