@@ -33,7 +33,12 @@ func (sftpd *SFTP) DownloadDirectory() error {
 		return fmt.Errorf("SFTP DownloadDirectory error - %s", err)
 	}
 
-	sftpClient, err := sftp.NewClient(sshSession.sshClient)
+	sftpClient, err := sftp.NewClient(sshSession.sshClient,
+		sftp.MaxConcurrentRequestsPerFile(64),
+		sftp.UseConcurrentReads(true),
+		sftp.UseFstat(true),
+		sftp.MaxPacket(1<<15),
+	)
 	if err != nil {
 		return fmt.Errorf("SFTP DownloadDirectory problem - %s", err)
 	}

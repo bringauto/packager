@@ -4,8 +4,9 @@ import (
 	"bringauto/modules/bringauto_prerequisites"
 	"fmt"
 	"github.com/mholt/archiver/v3"
+	"io/ioutil"
 	"os"
-	"path/filepath"
+	"path"
 	"regexp"
 	"strings"
 )
@@ -116,15 +117,9 @@ func createZIPArchive(sourceDir string, archivePath string) error {
 	var files []string
 	var err error
 
-	err = filepath.Walk(sourceDir, func(path string, info os.FileInfo, err error) error {
-		if !info.IsDir() {
-			files = append(files, path)
-		}
-		return nil
-	},
-	)
-	if err != nil {
-		return fmt.Errorf("cannot get list of files: %s", err)
+	fileInfoList, err := ioutil.ReadDir(sourceDir)
+	for _, fileInfo := range fileInfoList {
+		files = append(files, path.Join(sourceDir, fileInfo.Name()))
 	}
 
 	zipArchive := archiver.Zip{
