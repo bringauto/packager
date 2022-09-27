@@ -3,7 +3,7 @@
   "DependsOn": [],
   "Git": {
     "URI": "https://github.com/bringauto/modbuspp.git",
-    "Revision": "master"
+    "Revision": "v0.3.1"
   },
   "Build": {
     "CMake": {
@@ -14,7 +14,7 @@
   },
   "Package": {
     "Name": "modbuspp",
-    "VersionTag": "v1.0.0",
+    "VersionTag": "v0.3.1",
     "PlatformString": {
       "Mode": "any_machine"
     },
