@@ -1,6 +1,8 @@
 {
   "Env": {},
-  "DependsOn": ["spdlog"],
+  "DependsOn": [
+    "spdlog"
+  ],
   "Git": {
     "URI": "https://github.com/bringauto/ba-logger.git",
     "Revision": "v1.2.0"

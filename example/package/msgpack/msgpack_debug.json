@@ -1,6 +1,8 @@
 {
   "Env": {},
-  "DependsOn": [ "boost" ],
+  "DependsOn": [
+    "boost"
+  ],
   "Git": {
     "URI": "https://github.com/msgpack/msgpack-c.git",
     "Revision": "cpp-4.1.2"
@@ -27,7 +29,7 @@
       "ubuntu2204",
       "ubuntu2004",
       "debian11",
-      "fleet-os"
+      "fleet-os-2"
     ]
   }
 }

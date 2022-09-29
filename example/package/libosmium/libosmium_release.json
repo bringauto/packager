@@ -1,6 +1,13 @@
 {
   "Env": {},
-  "DependsOn": ["boost", "protozero", "bzip2", "zlib", "expat", "lz4"],
+  "DependsOn": [
+    "boost",
+    "protozero",
+    "bzip2",
+    "zlib",
+    "expat",
+    "lz4"
+  ],
   "Git": {
     "URI": "https://github.com/osmcode/libosmium.git",
     "Revision": "v2.17.3"
@@ -27,10 +34,10 @@
   },
   "DockerMatrix": {
     "ImageNames": [
-    	"ubuntu2004",
-    	"debian11",
-    	"fleet-os",
-      	"ubuntu2204"
+      "ubuntu2004",
+      "debian11",
+      "fleet-os-2",
+      "ubuntu2204"
     ]
   }
 }

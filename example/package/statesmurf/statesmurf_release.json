@@ -1,6 +1,9 @@
 {
   "Env": {},
-  "DependsOn": ["ba-logger", "cxxopts"],
+  "DependsOn": [
+    "ba-logger",
+    "cxxopts"
+  ],
   "Git": {
     "URI": "https://github.com/Melky-Phoe/StateSmurf.git",
     "Revision": "v2.0.1"

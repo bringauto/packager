@@ -1,0 +1,2 @@
+Distributor ID:	fleet-os
+Release:	2
