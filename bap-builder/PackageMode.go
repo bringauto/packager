@@ -159,16 +159,21 @@ func buildAllPackages(cmdLine *BuildPackageCmdLineArgs, contextPath string) erro
 	depsList := buildDepList{}
 	configList := depsList.TopologicalSort(defsList)
 
+	count := int32(0)
 	for _, config := range configList {
 		buildConfigs := config.GetBuildStructure(*cmdLine.DockerImageName)
 		if len(buildConfigs) == 0 {
 			continue
 		}
+		count++
 		log.Printf("Build %s\n", buildConfigs[0].Package.CreatePackageName())
 		err = buildAndCopyPackage(cmdLine, &buildConfigs)
 		if err != nil {
 			panic(fmt.Errorf("cannot build package '%s' - %s", config.Package.Name, err))
 		}
+	}
+	if count == 0 {
+		log.Printf("Nothing to build. Did you enter correct image name?")
 	}
 
 	return nil
