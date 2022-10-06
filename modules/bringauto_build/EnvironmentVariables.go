@@ -6,6 +6,7 @@ import (
 	"regexp"
 )
 
+// EnvironmentVariables export env variables in the same shell instance as the build is run
 type EnvironmentVariables struct {
 	Env map[string]string
 }

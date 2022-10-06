@@ -5,7 +5,10 @@ import (
 	"fmt"
 )
 
+// StartupScript represents possibility tu run script before build as part of the build shell
+// eq "startup script is run in the same shell instance as a build itself"
 type StartupScript struct {
+	// ScriptPath path of the script to run. Default value is set to "/environment.sh"
 	ScriptPath string
 }
 
