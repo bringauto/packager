@@ -78,6 +78,7 @@ Each package name consist from three parts
 ## Detail documentation
 
 - [Context Directory Structure]
+- [Package JSON Structure]
 - [Docker Container Requirements]
 - [Build a Reliable Package Source]
 - [CMake Project Requirements]
@@ -86,9 +87,10 @@ Each package name consist from three parts
 
 
 
-[Context Directory Structure]:   ./ContextDirectoryStructure.md
-[Docker Container Requirements]: ./DockerContainerRequiremetns.md
-[CMake Project Requirements]: ./CMakeProjectRequirements.md
+[Context Directory Structure]:     ./ContextDirectoryStructure.md
+[Package JSON Structure]:          ./PackageJSONStructure.md
+[Docker Container Requirements]:   ./DockerContainerRequiremetns.md
+[CMake Project Requirements]:      ./CMakeProjectRequirements.md
 [Build a Reliable Package Source]: ./ReliablePackageSource.md
-[Build Process]: ./BuildProcess.md
-[Package Dependencies]: ./PackageDependencies.md
+[Build Process]:                   ./BuildProcess.md
+[Package Dependencies]:            ./PackageDependencies.md
