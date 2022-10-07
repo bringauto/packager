@@ -23,6 +23,10 @@ const (
 	ModeAnyMachine = "any_machine"
 	// ModeAuto compute platform string automatically by lsb_release and uname
 	ModeAuto = "auto"
+	// NumberOfTriesForFakeCommands try to call fake lsb_release multiple times if fails.
+	// For same reason the fake lsb_release fail 1 of 3 (max). It's not clear why.
+	// We choose 5 as a good compromise: 3 + 1 + 1
+	NumberOfTriesForFakeCommands = 5
 )
 
 // PlatformString represents standard platform string
@@ -82,8 +86,9 @@ func (pstr *PlatformString) CheckPrerequisites(args *bringauto_prerequisites.Arg
 	switch pstr.Mode {
 	case ModeAuto:
 	case ModeAnyMachine:
-	case ModeExplicit:
 		return nil
+	case ModeExplicit:
+		break
 	default:
 		return fmt.Errorf("unsupported PlatformStringMode '%s'", pstr.Mode)
 	}
@@ -143,7 +148,7 @@ func (pstr *PlatformString) determinePlatformString(credentials bringauto_ssh.SS
 // that can be used for package naming.
 func (pstr *PlatformString) Serialize() string {
 	if pstr.String.DistroName == "" && pstr.String.Machine == "" && pstr.String.DistroRelease == "" {
-		panic("Sorry, invalid platformstring")
+		panic("Sorry, invalid platform string")
 	}
 	return pstr.String.Machine + "-" + pstr.String.DistroName + "-" + pstr.String.DistroRelease
 }
@@ -154,8 +159,18 @@ func runShellCommandOverSSH(credentials bringauto_ssh.SSHCredentials, command st
 		Command: command,
 	}
 
+	// If the fake lsb_release run in the Docker container
+	// it fails in 2/3. So we try to run fake lsb_release and fake uname multiple times.
+	i := 0
 	var commandStdOut string
-	commandStdOut, err = commandSsh.RunCommandOverSSH(credentials)
+	for {
+		commandStdOut, err = commandSsh.RunCommandOverSSH(credentials)
+		if err != nil && i < NumberOfTriesForFakeCommands {
+			i++
+			continue
+		}
+		break
+	}
 	if err != nil {
 		panic(fmt.Errorf("cannot run command '%s', error: %s", command, err))
 	}

@@ -1,12 +1,6 @@
 {
-  "Env": {
-    "CC": "gcc",
-    "CFLAGS": "",
-    "CXX": "g++",
-    "CXXFLAGS": ""
-  },
-  "DependsOn": [
-  ],
+  "Env": {},
+  "DependsOn": [],
   "Git": {
     "URI": "https://github.com/bringauto/boost-cmake-build.git",
     "Revision": "master"
@@ -30,6 +24,11 @@
     "IsDebug": false
   },
   "DockerMatrix": {
-    "ImageNames":  [ ]
+    "ImageNames": [
+      "ubuntu2004",
+      "ubuntu2204",
+      "fleet-os-2",
+      "debian11"
+    ]
   }
 }

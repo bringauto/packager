@@ -3,12 +3,14 @@ package main
 import (
 	"bringauto/modules/bringauto_build"
 	"bringauto/modules/bringauto_config"
+	"bringauto/modules/bringauto_package"
 	"bringauto/modules/bringauto_prerequisites"
 	"bringauto/modules/bringauto_repository"
 	"bringauto/modules/bringauto_sysroot"
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 )
 
 type (
@@ -19,6 +21,21 @@ type (
 
 type buildDepList struct {
 	dependsMap map[string]*map[string]bool
+}
+
+func removeDuplicates(configList *[]*bringauto_config.Config) []*bringauto_config.Config {
+	var newConfigList []*bringauto_config.Config
+	packageMap := make(map[string]bool)
+	for _, cconfig := range *configList {
+		packageName := cconfig.Package.Name + ":" + strconv.FormatBool(cconfig.Package.IsDebug)
+		exist, _ := packageMap[packageName]
+		if exist {
+			continue
+		}
+		packageMap[packageName] = true
+		newConfigList = append(newConfigList, cconfig)
+	}
+	return newConfigList
 }
 
 func (list *buildDepList) TopologicalSort(buildMap ConfigMapType) []*bringauto_config.Config {
@@ -57,7 +74,7 @@ func (list *buildDepList) TopologicalSort(buildMap ConfigMapType) []*bringauto_c
 		sortedDependenciesConfig = append(sortedDependenciesConfig, buildMap[packageName]...)
 	}
 
-	return sortedDependenciesConfig
+	return removeDuplicates(&sortedDependenciesConfig)
 }
 
 func (list *buildDepList) createDependsMap(buildMap *ConfigMapType) (dependsMapType, allDependenciesType) {
@@ -142,16 +159,21 @@ func buildAllPackages(cmdLine *BuildPackageCmdLineArgs, contextPath string) erro
 	depsList := buildDepList{}
 	configList := depsList.TopologicalSort(defsList)
 
+	count := int32(0)
 	for _, config := range configList {
 		buildConfigs := config.GetBuildStructure(*cmdLine.DockerImageName)
 		if len(buildConfigs) == 0 {
 			continue
 		}
-		log.Println("Build %s", buildConfigs[0].Package.CreatePackageName())
+		count++
+		log.Printf("Build %s\n", buildConfigs[0].Package.CreatePackageName())
 		err = buildAndCopyPackage(cmdLine, &buildConfigs)
 		if err != nil {
 			panic(fmt.Errorf("cannot build package '%s' - %s", config.Package.Name, err))
 		}
+	}
+	if count == 0 {
+		log.Printf("Nothing to build. Did you enter correct image name?")
 	}
 
 	return nil
@@ -204,9 +226,14 @@ func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_bu
 	}
 
 	for _, buildConfig := range *build {
+		platformString, err := determinePlatformString(&buildConfig)
+		if err != nil {
+			return err
+		}
+
 		sysroot := bringauto_sysroot.Sysroot{
 			IsDebug:        buildConfig.Package.IsDebug,
-			PlatformString: &buildConfig.Package.PlatformString,
+			PlatformString: platformString,
 		}
 		err = bringauto_prerequisites.Initialize(&sysroot)
 
@@ -232,4 +259,26 @@ func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_bu
 		}
 	}
 	return nil
+}
+
+// determinePlatformString will construct platform string suitable
+// for sysroot.
+// For example: the any_machine platformString must be copied to all machine-specific sysroot for
+// a given image.
+func determinePlatformString(build *bringauto_build.Build) (*bringauto_package.PlatformString, error) {
+	platformStringSpecialized := build.Package.PlatformString
+	if build.Package.PlatformString.Mode == bringauto_package.ModeAnyMachine {
+		platformStringStruct := bringauto_package.PlatformString{
+			Mode: bringauto_package.ModeAuto,
+		}
+		platformStringStruct.Mode = bringauto_package.ModeAuto
+		err := bringauto_prerequisites.Initialize[bringauto_package.PlatformString](&platformStringStruct,
+			build.SSHCredentials, build.Docker,
+		)
+		if err != nil {
+			return nil, err
+		}
+		platformStringSpecialized.String.Machine = platformStringStruct.String.Machine
+	}
+	return &platformStringSpecialized, nil
 }

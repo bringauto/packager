@@ -1,0 +1,34 @@
+{
+  "Env": {},
+  "DependsOn": [],
+  "Git": {
+    "URI": "https://github.com/mapbox/protozero.git",
+    "Revision": "v1.7.1"
+  },
+  "Build": {
+    "CMake": {
+      "Defines": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "BUILD_TESTING": "OFF"
+      }
+    }
+  },
+  "Package": {
+    "Name": "protozero",
+    "VersionTag": "v1.7.1",
+    "PlatformString": {
+      "Mode": "auto"
+    },
+    "IsLibrary": true,
+    "IsDevLib": true,
+    "IsDebug": true
+  },
+  "DockerMatrix": {
+    "ImageNames": [
+      "ubuntu2204",
+      "ubuntu2004",
+      "debian11",
+      "fleet-os-2"
+    ]
+  }
+}

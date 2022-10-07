@@ -1,0 +1,35 @@
+{
+  "Env": {},
+  "DependsOn": [
+    "boost"
+  ],
+  "Git": {
+    "URI": "https://github.com/msgpack/msgpack-c.git",
+    "Revision": "cpp-4.1.2"
+  },
+  "Build": {
+    "CMake": {
+      "Defines": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  },
+  "Package": {
+    "Name": "msgpack",
+    "VersionTag": "v4.1.2",
+    "PlatformString": {
+      "Mode": "auto"
+    },
+    "IsLibrary": true,
+    "IsDevLib": true,
+    "IsDebug": false
+  },
+  "DockerMatrix": {
+    "ImageNames": [
+      "ubuntu2204",
+      "ubuntu2004",
+      "debian11",
+      "fleet-os-2"
+    ]
+  }
+}

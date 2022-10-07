@@ -6,8 +6,6 @@ Build and track C/C++ project dependencies for apps for TODO any Linux distro!
 BAM - simple way how to build and maintain our dependencies with almost zero learning curve and out-of-the
 box integration into our workflows.
 
-Build by Docker, store by Git!
-
 ## Usage
 
 bap-builder build and stores all dependencies in the git repository
@@ -77,23 +75,34 @@ You can easily build and track dependencies for your project, download then and 
 - Docker >= 20.10 (installed by official Docker documentation)
 - git >= 2.25
 
+Standalone binaries are built for Linux kernel >= 5.10.0-amd64
+
 ## Build
 
 The project requires go >= 1.18.
 
 ```
-go get system/bap-builder
+go get bringauto/bap-builder
 cd bap-builder
-go build
+go build bringauto/bap-builder
 ```
+
+## Build standalone binaries
+
+There is a script `build.sh` by that we can build a complete release package.
+
+Additional requirements for `build.sh`:
+
+- zip
+- uname
+- sed
 
 ## FAQ
 
 ### Q: I have got a wierd error
 
-Many errors are caused by problem with SSh connection to the Docker container
-or impossibility to start Docker container.
-
+Many errors are caused by problem with SSH connection to the Docker container
+or impossibility to start Docker container itself.
 
 In this case
 

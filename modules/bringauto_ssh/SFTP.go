@@ -33,7 +33,12 @@ func (sftpd *SFTP) DownloadDirectory() error {
 		return fmt.Errorf("SFTP DownloadDirectory error - %s", err)
 	}
 
-	sftpClient, err := sftp.NewClient(sshSession.sshClient)
+	sftpClient, err := sftp.NewClient(sshSession.sshClient,
+		sftp.MaxConcurrentRequestsPerFile(64),
+		sftp.UseConcurrentReads(true),
+		sftp.UseFstat(true),
+		sftp.MaxPacket(1<<15),
+	)
 	if err != nil {
 		return fmt.Errorf("SFTP DownloadDirectory problem - %s", err)
 	}
@@ -65,6 +70,9 @@ func (sftpd *SFTP) copyRecursive(sftpClient *sftp.Client, remoteDir string, loca
 	}
 	normalizedRemoteDir, _ := normalizePath(remoteDir)
 	normalizedLocalDir, _ := normalizePath(localDir)
+
+	allDone := make(chan bool)
+	fileCount := 0
 
 	walk := sftpClient.Walk(normalizedRemoteDir)
 	for walk.Step() {
@@ -103,26 +111,35 @@ func (sftpd *SFTP) copyRecursive(sftpClient *sftp.Client, remoteDir string, loca
 			return err
 		}
 
-		sourceFileBuff := bufio.NewReaderSize(sourceFile, 1024*1024*8)
-		destFileBuff := bufio.NewWriterSize(destFile, 1027*1024*8)
+		fileCount += 1
+		go func() {
+			defer func() { allDone <- true }()
+			sourceFileBuff := bufio.NewReaderSize(sourceFile, 1024*1024*2)
+			destFileBuff := bufio.NewWriterSize(destFile, 1027*1024*2)
 
-		_, err = io.Copy(destFileBuff, sourceFileBuff)
-		if err != nil {
-			return fmt.Errorf("cannot copy remote file %s to dest file %s", remotePath, absoluteLocalPath)
-		}
+			_, err = io.Copy(destFileBuff, sourceFileBuff)
+			if err != nil {
+				panic(fmt.Errorf("cannot copy remote file %s to dest file %s", remotePath, absoluteLocalPath))
+			}
 
-		_ = destFileBuff.Flush()
+			_ = destFileBuff.Flush()
 
-		err = destFile.Close()
-		if err != nil {
-			return fmt.Errorf("cannot close destFile: %s", err)
-		}
-		err = sourceFile.Close()
-		if err != nil {
-			return fmt.Errorf("cannot close sourceFile: %s", err)
-		}
+			err = destFile.Close()
+			if err != nil {
+				panic(fmt.Errorf("cannot close destFile: %s", err))
+			}
+			err = sourceFile.Close()
+			if err != nil {
+				panic(fmt.Errorf("cannot close sourceFile: %s", err))
+			}
+		}()
 
 	}
+	// just stupid wait mechanism
+	for i := 0; i < fileCount; i++ {
+		<-allDone
+	}
+
 	return nil
 }
 

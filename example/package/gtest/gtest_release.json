@@ -1,0 +1,32 @@
+{
+  "Env": {},
+  "Git": {
+    "URI": "https://github.com/google/googletest.git",
+    "Revision": "v1.12.1"
+  },
+  "Build": {
+    "CMake": {
+      "Defines": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  },
+  "Package": {
+    "Name": "gtest",
+    "VersionTag": "v1.12.1",
+    "PlatformString": {
+      "Mode": "auto"
+    },
+    "IsLibrary": true,
+    "IsDevLib": true,
+    "IsDebug": false
+  },
+  "DockerMatrix": {
+    "ImageNames": [
+      "ubuntu2204",
+      "ubuntu2004",
+      "debian11",
+      "fleet-os-2"
+    ]
+  }
+}

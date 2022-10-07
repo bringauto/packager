@@ -1,12 +1,6 @@
 {
-  "Env": {
-    "CC": "gcc",
-    "CFLAGS": "",
-    "CXX": "g++",
-    "CXXFLAGS": ""
-  },
-  "DependsOn": [
-  ],
+  "Env": {},
+  "DependsOn": [],
   "Git": {
     "URI": "https://github.com/jarro2783/cxxopts.git",
     "Revision": "v3.0.5"
@@ -31,6 +25,11 @@
     "IsDebug": true
   },
   "DockerMatrix": {
-    "ImageNames":  [ "ubuntu1804", "ubuntu2004", "debian11" ]
+    "ImageNames": [
+      "ubuntu2204",
+      "ubuntu2004",
+      "debian11",
+      "fleet-os-2"
+    ]
   }
 }

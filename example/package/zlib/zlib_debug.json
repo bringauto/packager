@@ -1,10 +1,5 @@
 {
-  "Env": {
-    "CC": "gcc",
-    "CFLAGS": "",
-    "CXX": "g++",
-    "CXXFLAGS": ""
-  },
+  "Env": {},
   "Git": {
     "URI": "https://github.com/madler/zlib.git",
     "Revision": "v1.2.11"
@@ -27,6 +22,11 @@
     "IsDebug": true
   },
   "DockerMatrix": {
-    "ImageNames":  [ "ubuntu1804", "ubuntu2004", "debian11" ]
+    "ImageNames": [
+      "ubuntu2204",
+      "ubuntu2004",
+      "debian11",
+      "fleet-os-2"
+    ]
   }
 }

@@ -1,0 +1,43 @@
+{
+  "Env": {},
+  "DependsOn": [
+    "boost",
+    "protozero",
+    "bzip2",
+    "zlib",
+    "expat",
+    "lz4"
+  ],
+  "Git": {
+    "URI": "https://github.com/osmcode/libosmium.git",
+    "Revision": "v2.17.3"
+  },
+  "Build": {
+    "CMake": {
+      "Defines": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "BUILD_DATA_TESTS": "OFF",
+        "BUILD_EXAMPLES": "OFF",
+        "BUILD_TESTING": "OFF"
+      }
+    }
+  },
+  "Package": {
+    "Name": "osmium",
+    "VersionTag": "v2.17.3",
+    "PlatformString": {
+      "Mode": "auto"
+    },
+    "IsLibrary": true,
+    "IsDevLib": true,
+    "IsDebug": false
+  },
+  "DockerMatrix": {
+    "ImageNames": [
+      "ubuntu2004",
+      "debian11",
+      "fleet-os-2",
+      "ubuntu2204"
+    ]
+  }
+}

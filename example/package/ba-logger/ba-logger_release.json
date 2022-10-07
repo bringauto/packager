@@ -1,29 +1,25 @@
 {
-  "Env": {
-    "CC": "gcc",
-    "CFLAGS": "",
-    "CXX": "g++",
-    "CXXFLAGS": "",
-    "CMLIB_DIR": "/cmakelib"
-  },
+  "Env": {},
   "DependsOn": [
+    "spdlog"
   ],
   "Git": {
     "URI": "https://github.com/bringauto/ba-logger.git",
-    "Revision": "v1.1.1"
+    "Revision": "v1.2.0"
   },
   "Build": {
     "CMake": {
       "Defines": {
         "CMAKE_BUILD_TYPE": "Release",
         "LIB_TYPE": "SPDLOG",
-        "BRINGAUTO_INSTALL": "ON"
+        "BRINGAUTO_INSTALL": "ON",
+        "BRINGAUTO_SYSTEM_DEP": "ON"
       }
     }
   },
   "Package": {
     "Name": "ba-logger",
-    "VersionTag": "v1.1.1",
+    "VersionTag": "v1.2.0",
     "PlatformString": {
       "Mode": "auto"
     },
@@ -32,6 +28,10 @@
     "IsDebug": false
   },
   "DockerMatrix": {
-    "ImageNames":  [ "ubuntu2004", "debian11" ]
+    "ImageNames": [
+      "ubuntu2004",
+      "debian11",
+      "ubuntu2204"
+    ]
   }
 }

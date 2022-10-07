@@ -194,7 +194,7 @@ func (session *SSHSession) Start(command string) error {
 }
 
 // Wait
-// Wat until command started by 'Start' function ends
+// Wait until command started by 'Start' function ends
 //
 func (session *SSHSession) Wait() error {
 	if !session.IsLoggedIn() {
