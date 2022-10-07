@@ -119,21 +119,18 @@ func (sftpd *SFTP) copyRecursive(sftpClient *sftp.Client, remoteDir string, loca
 
 			_, err = io.Copy(destFileBuff, sourceFileBuff)
 			if err != nil {
-				//return fmt.Errorf("cannot copy remote file %s to dest file %s", remotePath, absoluteLocalPath)
-				return
+				panic(fmt.Errorf("cannot copy remote file %s to dest file %s", remotePath, absoluteLocalPath))
 			}
 
 			_ = destFileBuff.Flush()
 
 			err = destFile.Close()
 			if err != nil {
-				//return fmt.Errorf("cannot close destFile: %s", err)
-				return
+				panic(fmt.Errorf("cannot close destFile: %s", err))
 			}
 			err = sourceFile.Close()
 			if err != nil {
-				//return fmt.Errorf("cannot close sourceFile: %s", err)
-				return
+				panic(fmt.Errorf("cannot close sourceFile: %s", err))
 			}
 		}()
 

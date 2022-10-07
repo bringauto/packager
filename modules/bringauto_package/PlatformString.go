@@ -23,7 +23,9 @@ const (
 	ModeAnyMachine = "any_machine"
 	// ModeAuto compute platform string automatically by lsb_release and uname
 	ModeAuto = "auto"
-	// NumberOfTriesForFakeCommands try to call fake lsb_release multiple times if fails
+	// NumberOfTriesForFakeCommands try to call fake lsb_release multiple times if fails.
+	// For same reason the fake lsb_release fail 1 of 3 (max). It's not clear why.
+	// We choose 5 as a good compromise: 3 + 1 + 1
 	NumberOfTriesForFakeCommands = 5
 )
 
