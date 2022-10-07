@@ -71,6 +71,9 @@ func (sftpd *SFTP) copyRecursive(sftpClient *sftp.Client, remoteDir string, loca
 	normalizedRemoteDir, _ := normalizePath(remoteDir)
 	normalizedLocalDir, _ := normalizePath(localDir)
 
+	allDone := make(chan bool)
+	fileCount := 0
+
 	walk := sftpClient.Walk(normalizedRemoteDir)
 	for walk.Step() {
 		if walk.Err() != nil {
@@ -108,7 +111,9 @@ func (sftpd *SFTP) copyRecursive(sftpClient *sftp.Client, remoteDir string, loca
 			return err
 		}
 
+		fileCount += 1
 		go func() {
+			defer func() { allDone <- true }()
 			sourceFileBuff := bufio.NewReaderSize(sourceFile, 1024*1024*2)
 			destFileBuff := bufio.NewWriterSize(destFile, 1027*1024*2)
 
@@ -133,6 +138,11 @@ func (sftpd *SFTP) copyRecursive(sftpClient *sftp.Client, remoteDir string, loca
 		}()
 
 	}
+	// just stupid wait mechanism
+	for i := 0; i < fileCount; i++ {
+		<-allDone
+	}
+
 	return nil
 }
 
