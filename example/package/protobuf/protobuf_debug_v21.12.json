@@ -3,7 +3,7 @@
   "DependsOn": [],
   "Git": {
     "URI": "https://github.com/protocolbuffers/protobuf.git",
-    "Revision": "v3.22.1"
+    "Revision": "v21.12"
   },
   "Build": {
     "CMake": {
@@ -16,7 +16,7 @@
   },
   "Package": {
     "Name": "protobuf",
-    "VersionTag": "v3.22.1",
+    "VersionTag": "v4.21.12",
     "PlatformString": {
       "Mode": "auto"
     },
