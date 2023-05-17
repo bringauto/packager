@@ -10,7 +10,8 @@
       "CMakeListDir": "cmake/",
       "Defines": {
         "CMAKE_BUILD_TYPE": "Release",
-        "protobuf_BUILD_TESTS": "OFF"
+        "protobuf_BUILD_TESTS": "OFF",
+        "CMAKE_CXX_FLAGS": "${CMAKE_CXX_FLAGS} -fPIC"
       }
     }
   },
