@@ -9,7 +9,7 @@
     "CMake": {
       "CMakeListDir": "cmake/",
       "Defines": {
-        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_BUILD_TYPE": "Debug",
         "protobuf_BUILD_TESTS": "OFF"
       }
     }
@@ -22,14 +22,10 @@
     },
     "IsLibrary": true,
     "IsDevLib": true,
-    "IsDebug": false
+    "IsDebug": true
   },
   "DockerMatrix": {
     "ImageNames": [
-      "ubuntu2204",
-      "ubuntu2004",
-      "debian11",
-      "fleet-os-2"
     ]
   }
 }

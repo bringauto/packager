@@ -1,0 +1,36 @@
+{
+  "Env": {},
+  "DependsOn": [],
+  "Git": {
+    "URI": "https://github.com/protocolbuffers/protobuf.git",
+    "Revision": "v21.12"
+  },
+  "Build": {
+    "CMake": {
+      "CMakeListDir": "cmake/",
+      "Defines": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "protobuf_BUILD_TESTS": "OFF",
+        "CMAKE_CXX_FLAGS": "${CMAKE_CXX_FLAGS} -fPIC"
+      }
+    }
+  },
+  "Package": {
+    "Name": "protobuf",
+    "VersionTag": "v4.21.12",
+    "PlatformString": {
+      "Mode": "auto"
+    },
+    "IsLibrary": true,
+    "IsDevLib": true,
+    "IsDebug": true
+  },
+  "DockerMatrix": {
+    "ImageNames": [
+      "ubuntu2204",
+      "ubuntu2004",
+      "debian11",
+      "fleet-os-2"
+    ]
+  }
+}
