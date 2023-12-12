@@ -32,7 +32,8 @@
     "ImageNames": [
       "ubuntu2004",
       "debian11",
-      "ubuntu2204"
+      "ubuntu2204",
+      "debian12"
     ]
   }
 }

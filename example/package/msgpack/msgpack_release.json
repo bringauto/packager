@@ -29,7 +29,8 @@
       "ubuntu2204",
       "ubuntu2004",
       "debian11",
-      "fleet-os-2"
+      "fleet-os-2",
+      "debian12"
     ]
   }
 }
