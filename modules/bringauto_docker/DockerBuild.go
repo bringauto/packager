@@ -3,7 +3,7 @@ package bringauto_docker
 import (
 	"bytes"
 	"fmt"
-	"os"
+	"log"
 	"os/exec"
 )
 
@@ -21,6 +21,7 @@ func (dockerBuild *DockerBuild) Build() error {
 	if dockerBuild.DockerfileDir == "" {
 		return fmt.Errorf("DockerBuild - DockerfileDir is empty")
 	}
+	log.Printf("Build Docker Image: %s", dockerBuild.Tag)
 	var ok, _, err = dockerBuild.prepareAndRun(prepareBuildArgs)
 	if !ok {
 		return fmt.Errorf("DockerBuild build error - %s", err)
@@ -36,7 +37,7 @@ func (dockerBuild *DockerBuild) prepareAndRun(f func(build *DockerBuild) []strin
 	cmd.Args = cmdArgs
 	cmd.Path = DockerExecutablePathConst
 	cmd.Stderr = &errBuffer
-	cmd.Stdout = os.Stdout
+	cmd.Stdout = &outBuffer
 	err := cmd.Run()
 	if err != nil {
 		return false, &outBuffer, &errBuffer

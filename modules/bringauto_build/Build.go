@@ -26,7 +26,6 @@ type Build struct {
 
 // FillDefault
 // It fills up defaults for all members in the Build structure.
-//
 func (build *Build) FillDefault(*bringauto_prerequisites.Args) error {
 	if build.Git == nil {
 		build.Git = bringauto_prerequisites.CreateAndInitialize[bringauto_git.Git]()
@@ -95,6 +94,7 @@ func (build *Build) RunBuild() error {
 
 	gitClone := bringauto_git.GitClone{Git: *build.Git}
 	gitCheckout := bringauto_git.GitCheckout{Git: *build.Git}
+	gitSubmoduleUpdate := bringauto_git.GitSubmoduleUpdate{Git: *build.Git}
 	startupScript := bringauto_prerequisites.CreateAndInitialize[StartupScript]()
 
 	buildChain := BuildChain{
@@ -103,6 +103,7 @@ func (build *Build) RunBuild() error {
 			build.Env,
 			&gitClone,
 			&gitCheckout,
+			&gitSubmoduleUpdate,
 			build.CMake,
 			build.GNUMake,
 		},

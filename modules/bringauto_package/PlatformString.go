@@ -186,12 +186,12 @@ func stripNewline(str string) string {
 }
 
 func getDistributionName(credentials bringauto_ssh.SSHCredentials) string {
-	distroNameLSBRelease := runShellCommandOverSSH(credentials, "lsb_release -is")
+	distroNameLSBRelease := runShellCommandOverSSH(credentials, "lsb_release -is 2> /dev/null")
 	distroName := strings.ToLower(stripNewline(distroNameLSBRelease))
 	return distroName
 }
 func getReleaseVersion(credentials bringauto_ssh.SSHCredentials) string {
-	releaseVersionLSBRelease := runShellCommandOverSSH(credentials, "lsb_release -rs")
+	releaseVersionLSBRelease := runShellCommandOverSSH(credentials, "lsb_release -rs 2> /dev/null")
 	releaseVersion := strings.ToLower(stripNewline(releaseVersionLSBRelease))
 	return releaseVersion
 }
