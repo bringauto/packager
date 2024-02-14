@@ -2,6 +2,7 @@ package bringauto_package
 
 import (
 	"bringauto/modules/bringauto_prerequisites"
+	"compress/flate"
 	"fmt"
 	"github.com/mholt/archiver/v3"
 	"io/ioutil"
@@ -67,10 +68,9 @@ func (packg *Package) CheckPrerequisites(*bringauto_prerequisites.Args) error {
 }
 
 // CreatePackage creates a package from sourceDir directory
-//	- construct package name
-//	- zip all files into archive with name <package_name>.zip
-//	- copy the zip archive to the outputDir
-//
+//   - construct package name
+//   - zip all files into archive with name <package_name>.zip
+//   - copy the zip archive to the outputDir
 func (packg *Package) CreatePackage(sourceDir string, outputDir string) error {
 	var err error
 	if _, err = os.Stat(sourceDir); os.IsNotExist(err) {
@@ -123,9 +123,11 @@ func createZIPArchive(sourceDir string, archivePath string) error {
 	}
 
 	zipArchive := archiver.Zip{
-		MkdirAll:          true,
-		FileMethod:        archiver.Deflate,
-		OverwriteExisting: true,
+		MkdirAll:             true,
+		FileMethod:           archiver.Deflate,
+		OverwriteExisting:    true,
+		SelectiveCompression: true,
+		CompressionLevel:     flate.BestSpeed,
 	}
 
 	err = zipArchive.Archive(files, archivePath)

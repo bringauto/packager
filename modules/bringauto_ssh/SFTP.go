@@ -23,7 +23,6 @@ type SFTP struct {
 // Download directory from RemoteDir to EmptyLocalDir.
 // EmptyLocalDir must be empty!
 // Function returns error in case of problem or nil if succeeded.
-//
 func (sftpd *SFTP) DownloadDirectory() error {
 	var err error
 
@@ -71,7 +70,7 @@ func (sftpd *SFTP) copyRecursive(sftpClient *sftp.Client, remoteDir string, loca
 	normalizedRemoteDir, _ := normalizePath(remoteDir)
 	normalizedLocalDir, _ := normalizePath(localDir)
 
-	allDone := make(chan bool)
+	allDone := make(chan bool, 2000)
 	fileCount := 0
 
 	walk := sftpClient.Walk(normalizedRemoteDir)
@@ -114,8 +113,9 @@ func (sftpd *SFTP) copyRecursive(sftpClient *sftp.Client, remoteDir string, loca
 		fileCount += 1
 		go func() {
 			defer func() { allDone <- true }()
-			sourceFileBuff := bufio.NewReaderSize(sourceFile, 1024*1024*2)
-			destFileBuff := bufio.NewWriterSize(destFile, 1027*1024*2)
+
+			sourceFileBuff := bufio.NewReaderSize(sourceFile, 1024*1024)
+			destFileBuff := bufio.NewWriterSize(destFile, 1027*1024)
 
 			_, err = io.Copy(destFileBuff, sourceFileBuff)
 			if err != nil {
@@ -144,7 +144,6 @@ func (sftpd *SFTP) copyRecursive(sftpClient *sftp.Client, remoteDir string, loca
 }
 
 // normalizePath
-//
 func normalizePath(p string) (string, error) {
 	regexp, regexpErr := regexp.CompilePOSIX("[/]{2,}")
 	if regexpErr != nil {
