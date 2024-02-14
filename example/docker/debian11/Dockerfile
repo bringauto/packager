@@ -8,7 +8,7 @@ RUN apt-get update && \
       build-essential binutils lsb-release make git libssl-dev openssh-server wget && \
     rm -rf /var/lib/apt/lists/*
 
-RUN wget "https://github.com/Kitware/CMake/releases/download/v3.22.2/cmake-3.22.2-linux-x86_64.sh" -O cmake.sh && \
+RUN wget "https://github.com/Kitware/CMake/releases/download/v3.28.0/cmake-3.28.0-linux-x86_64.sh" -O cmake.sh && \
     chmod +x cmake.sh && \
     ./cmake.sh --skip-license --prefix=/usr/local && \
     rm ./cmake.sh

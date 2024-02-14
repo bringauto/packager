@@ -1,12 +1,11 @@
 {
   "Env": {},
   "DependsOn": [
-    "ba-logger",
-    "cxxopts"
+    "pahomqttc"
   ],
   "Git": {
-    "URI": "https://github.com/Melky-Phoe/StateSmurf.git",
-    "Revision": "v2.0.1"
+    "URI": "https://github.com/bringauto/internal-client-cpp.git",
+    "Revision": "v1.0.0"
   },
   "Build": {
     "CMake": {
@@ -19,8 +18,8 @@
     }
   },
   "Package": {
-    "Name": "statesmurf",
-    "VersionTag": "v2.0.1",
+    "Name": "internal-client",
+    "VersionTag": "v1.0.0",
     "PlatformString": {
       "Mode": "auto"
     },
@@ -31,9 +30,9 @@
   "DockerMatrix": {
     "ImageNames": [
       "ubuntu2004",
-      "debian11",
       "ubuntu2204",
       "debian12",
+      "debian11",
       "ubuntu2304",
       "ubuntu2310"
     ]

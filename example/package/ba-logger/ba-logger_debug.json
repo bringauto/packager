@@ -32,7 +32,9 @@
       "ubuntu2004",
       "debian11",
       "ubuntu2204",
-      "debian12"
+      "debian12",
+      "ubuntu2304",
+      "ubuntu2310"
     ]
   }
 }

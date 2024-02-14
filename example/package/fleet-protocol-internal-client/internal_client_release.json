@@ -1,21 +1,25 @@
 {
   "Env": {},
-  "DependsOn": [],
+  "DependsOn": [
+    "pahomqttc"
+  ],
   "Git": {
-    "URI": "https://github.com/bringauto/lz4-cmake-build.git",
-    "Revision": "master"
+    "URI": "https://github.com/bringauto/internal-client-cpp.git",
+    "Revision": "v1.0.0"
   },
   "Build": {
     "CMake": {
       "Defines": {
         "CMAKE_BUILD_TYPE": "Release",
-        "LZ4_VERSION": "1.9.3"
+        "BRINGAUTO_INSTALL": "ON",
+        "BRINGAUTO_PACKAGE": "ON",
+        "BRINGAUTO_SYSTEM_DEP": "ON"
       }
     }
   },
   "Package": {
-    "Name": "lz4",
-    "VersionTag": "v1.9.3",
+    "Name": "internal-client",
+    "VersionTag": "v1.0.0",
     "PlatformString": {
       "Mode": "auto"
     },
@@ -25,11 +29,9 @@
   },
   "DockerMatrix": {
     "ImageNames": [
-      "ubuntu2004",
       "ubuntu2204",
-      "fleet-os-2",
-      "debian11",
       "debian12",
+      "debian11",
       "ubuntu2304",
       "ubuntu2310"
     ]
