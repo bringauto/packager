@@ -135,6 +135,7 @@ func (sftpd *SFTP) copyRecursive(sftpClient *sftp.Client, remoteDir string, loca
 		}()
 
 	}
+	//Problem: this system copy files directory by directory in linear manner
 	// just stupid wait mechanism
 	for i := 0; i < fileCount; i++ {
 		<-allDone
