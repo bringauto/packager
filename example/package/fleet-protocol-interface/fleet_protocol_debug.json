@@ -1,0 +1,39 @@
+{
+  "Env": {},
+  "DependsOn": [],
+  "Git": {
+    "URI": "https://github.com/bringauto/fleet-protocol.git",
+    "Revision": "v2.0.0"
+  },
+  "Build": {
+    "CMake": {
+      "Defines": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "BRINGAUTO_INSTALL": "ON",
+        "BRINGAUTO_PACKAGE": "ON",
+        "BRINGAUTO_SYSTEM_DEP": "ON",
+        "BRINGAUTO_SAMPLES" : "OFF"
+      }
+    }
+  },
+  "Package": {
+    "Name": "fleet-protocol-interface",
+    "VersionTag": "v2.0.0",
+    "PlatformString": {
+      "Mode": "any_machine"
+    },
+    "IsLibrary": true,
+    "IsDevLib": true,
+    "IsDebug": true
+  },
+  "DockerMatrix": {
+    "ImageNames": [
+      "ubuntu2004",
+      "ubuntu2204",
+      "debian12",
+      "debian11",
+      "ubuntu2304",
+      "ubuntu2310"
+    ]
+  }
+}
