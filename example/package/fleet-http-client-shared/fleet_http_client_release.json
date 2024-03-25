@@ -1,0 +1,40 @@
+{
+  "Env": {},
+  "DependsOn": [ "zlib", "ba-logger", "boost", "fleet-protocol-interface", "fleet-protocol-cpp", "cpprestsdk" ],
+  "Git": {
+    "URI": "https://github.com/bringauto/fleet-http-client.git",
+    "Revision": "v1.2.0"
+  },
+  "Build": {
+    "CMake": {
+      "Defines": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "BRINGAUTO_INSTALL": "ON",
+        "BRINGAUTO_PACKAGE": "ON",
+        "BRINGAUTO_SYSTEM_DEP": "ON",
+        "BRINGAUTO_SAMPLES" : "OFF",
+        "BRINGAUTO_TESTS" : "OFF"
+      }
+    }
+  },
+  "Package": {
+    "Name": "fleet-http-client-shared",
+    "VersionTag": "v1.2.0",
+    "PlatformString": {
+      "Mode": "auto"
+    },
+    "IsLibrary": true,
+    "IsDevLib": true,
+    "IsDebug": false
+  },
+  "DockerMatrix": {
+    "ImageNames": [
+      "ubuntu2004",
+      "ubuntu2204",
+      "debian12",
+      "debian11",
+      "ubuntu2304",
+      "ubuntu2310"
+    ]
+  }
+}
