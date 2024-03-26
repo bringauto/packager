@@ -1,20 +1,22 @@
 {
-  "Env": {},
-  "DependsOn": [],
+  "Env": { },
+  "DependsOn": [ "zlib", "boost" ],
   "Git": {
-    "URI": "git@github.com:microsoft/cpprestsdk.git",
-    "Revision": "v2.10.15"
+    "URI": "https://github.com/bringauto/cpprestsdk.git",
+    "Revision": "v2.10.20"
   },
   "Build": {
     "CMake": {
       "Defines": {
-        "CMAKE_BUILD_TYPE": "Release"
+        "CMAKE_BUILD_TYPE": "Release",
+        "BUILD_TESTS": "OFF",
+        "BUILD_SAMPLES": "OFF"
       }
     }
   },
   "Package": {
     "Name": "cpprestsdk",
-    "VersionTag": "v2.10.15",
+    "VersionTag": "v2.10.20",
     "PlatformString": {
       "Mode": "auto"
     },

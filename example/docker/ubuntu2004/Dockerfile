@@ -5,7 +5,7 @@ RUN echo root:1234 | chpasswd
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
-      build-essential cmake make libssl-dev coreutils lsb-release wget g++-10 gcc-10 && \
+      build-essential make libssl-dev coreutils lsb-release wget g++-10 gcc-10 patchelf && \
     rm -rf /var/lib/apt/lists/*
 
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 60 --slave /usr/bin/g++ g++ /usr/bin/g++-10
