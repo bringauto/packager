@@ -3,7 +3,7 @@
   "DependsOn": [ "zlib", "ba-logger", "boost", "fleet-protocol-interface", "fleet-protocol-cpp", "cpprestsdk" ],
   "Git": {
     "URI": "https://github.com/bringauto/fleet-http-client.git",
-    "Revision": "v1.2.0"
+    "Revision": "v1.2.1"
   },
   "Build": {
     "CMake": {
@@ -19,7 +19,7 @@
   },
   "Package": {
     "Name": "fleet-http-client-shared",
-    "VersionTag": "v1.2.0",
+    "VersionTag": "v1.2.1",
     "PlatformString": {
       "Mode": "auto"
     },
