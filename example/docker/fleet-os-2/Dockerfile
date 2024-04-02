@@ -8,7 +8,7 @@ RUN echo root:1234 | chpasswd
 #
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
-      build-essential xz-utils sed git libssl-dev openssh-server wget unzip python3 make&& \
+      build-essential xz-utils sed git libssl-dev openssh-server wget unzip python3 make patchelf && \
     rm -rf /var/lib/apt/lists/*
 
 RUN wget "https://github.com/Kitware/CMake/releases/download/v3.22.2/cmake-3.22.2-linux-x86_64.sh" -O cmake.sh && \
