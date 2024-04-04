@@ -1,0 +1,4 @@
+Distributor ID:	Ubuntu
+Description:	Ubuntu GNU/Linux 18.04 (Bionic Beaver)
+Release:	18.04
+Codename:	Bionic Beaver
