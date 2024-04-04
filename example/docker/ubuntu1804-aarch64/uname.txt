@@ -1,0 +1,1 @@
+Linux e25e113786d6 6.5.0-26-generic #26~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Tue Mar 12 10:22:43 UTC 2 aarch64 GNU/Linux

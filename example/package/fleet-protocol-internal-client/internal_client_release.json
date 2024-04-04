@@ -1,11 +1,13 @@
 {
   "Env": {},
   "DependsOn": [
-    "pahomqttc"
+    "protobuf",
+    "fleet-protocol-interface",
+    "zlib"
   ],
   "Git": {
     "URI": "https://github.com/bringauto/internal-client-cpp.git",
-    "Revision": "v1.0.0"
+    "Revision": "v1.1.0"
   },
   "Build": {
     "CMake": {
@@ -19,7 +21,7 @@
   },
   "Package": {
     "Name": "internal-client",
-    "VersionTag": "v1.0.0",
+    "VersionTag": "v1.1.0",
     "PlatformString": {
       "Mode": "auto"
     },
@@ -33,7 +35,8 @@
       "debian12",
       "debian11",
       "ubuntu2304",
-      "ubuntu2310"
+      "ubuntu2310",
+      "ubuntu1804-aarch64"
     ]
   }
 }
