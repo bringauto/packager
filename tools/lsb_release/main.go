@@ -85,28 +85,28 @@ func (data *DataStruct) ReadFromFile(filePath string, validate bool) {
 	scanner := bufio.NewScanner(file)
 	keys := reflect.ValueOf(parseStruct).MapKeys()
 
+	handled := 0
 	for scanner.Scan() {
 		line := scanner.Text()
-		handled := false
 		for _, key := range keys {
 			keyString := key.String()
 			data := parseLine(line, keyString)
 			if data != "" {
 				parseStruct[keyString](data)
-				handled = true
+				handled++
 				break
 			}
 		}
-		if validate && !handled {
-			log.Fatalf("Cannot parse line '%s'", line)
-		}
+	}
+	if validate && len(keys) != handled {
+		log.Panicf("Not all needed values were extracted!")
 	}
 }
 
 func parseLine(line string, regexpStr string) string {
 	regex, err := regexp.Compile(regexpStr)
 	if err != nil {
-		log.Fatalf("Cannot compile regex '%s'", regexpStr)
+		log.Panicf("Cannot compile regex '%s'", regexpStr)
 	}
 	subMatch := regex.FindStringSubmatch(line)
 	if subMatch == nil {
