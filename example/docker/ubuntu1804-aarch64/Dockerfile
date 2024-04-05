@@ -21,6 +21,9 @@ RUN echo "export CMLIB_DIR=/cmakelib" >> /root/.bashrc
 RUN sed -ri 's/#?PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
 RUN mkdir -p /run/sshd
 
+ENV CXX=aarch64-linux-gnu-g++-8
+ENV CC=aarch64-linux-gnu-gcc-8
+
 RUN sed -ri 's/#?PermitUserEnvironment no/PermitUserEnvironment yes/' /etc/ssh/sshd_config
 RUN mkdir /root/.ssh && \
     echo "CXX=${CXX}" > /root/.ssh/environment && \
@@ -31,9 +34,6 @@ RUN chmod +x /root/init_toolchain.sh && \
     /root/init_toolchain.sh /root/tools
 COPY lsb_release.txt /root/tools/
 COPY uname.txt /root/tools/
-
-ENV CXX=aarch64-linux-gnu-g++-8
-ENV CC=aarch64-linux-gnu-gcc-8
 
 ENTRYPOINT ["/usr/sbin/sshd", "-D", "-o", "ListenAddress=0.0.0.0"]
 
