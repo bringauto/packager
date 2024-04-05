@@ -2,29 +2,16 @@
 
 set -e
 
-INSTALL_DIR="$1"
-TOOLS_INSTALL_DIR="$2"
+TOOLS_INSTALL_DIR="$1"
 TMP_DIR="/tmp/toolchain-install"
 
-TOOLS_PACKAGE_URI="https://github.com/bringauto/packager/releases/download/v0.3.0/bringauto-packager-tools_v0.3.0_x86-64-linux.zip"
-
-if [[ ${INSTALL_DIR} = "" ]]
-then
-  echo "Specify toolchain absolute install dir path as a first argument!" >&2
-  exit 1
-fi
+TOOLS_PACKAGE_URI="https://github.com/bringauto/packager/releases/download/v0.3.2/bringauto-packager-tools_v0.3.2_x86-64-linux.zip"
 
 if [[ ${TOOLS_INSTALL_DIR} = "" ]]
 then
   echo "Specify tools install dir absolute path as a second argument!" >&2
   exit 1
 fi
-
-if ! [[ -d ${INSTALL_DIR} ]]
-then
-  echo "Install dir '${INSTALL_DIR}' does not exist"
-fi
-
 
 function install_tools() {
   if [[ -d ${TMP_DIR} ]]
@@ -47,7 +34,9 @@ function install_tools() {
 
   chmod +x "${TOOLS_INSTALL_DIR}/lsb_release"
   chmod +x "${TOOLS_INSTALL_DIR}/uname"
-  echo 'PATH='"${TOOLS_INSTALL_DIR}"'/:$PATH' >> /root/.bashrc
+  TMP_PATH=$PATH
+  echo 'PATH='"${TOOLS_INSTALL_DIR}"'/:'"${TMP_PATH}"'' >> /root/.ssh/environment
+
 }
 
 
