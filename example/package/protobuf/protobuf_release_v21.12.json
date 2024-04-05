@@ -33,7 +33,8 @@
       "debian12",
       "fleet-os-2",
       "ubuntu2304",
-      "ubuntu2310"
+      "ubuntu2310",
+      "ubuntu1804-aarch64"
     ]
   }
 }
