@@ -8,8 +8,8 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"reflect"
 	"regexp"
-	"strconv"
 )
 
 // CmdLineArgs
@@ -19,10 +19,11 @@ import (
 // - build package (package mode)
 // Exactly one of these modes can be active in a time.
 type CmdLineArgs struct {
-	FlagR  *bool
-	FlagS  *bool
-	FlagI  *bool
-	parser *argparse.Parser
+	FlagR        *bool
+	FlagS        *bool
+	FlagI        *bool
+	FlagValidate *bool
+	parser       *argparse.Parser
 }
 
 func (cmd *CmdLineArgs) InitFlags() {
@@ -45,6 +46,12 @@ func (cmd *CmdLineArgs) InitFlags() {
 			Help:     "i",
 		},
 	)
+	cmd.FlagValidate = cmd.parser.Flag("", "validate",
+		&argparse.Options{
+			Required: false,
+			Help:     "Validate the input file",
+		},
+	)
 }
 
 func (cmd *CmdLineArgs) ParseArgs(args []string) error {
@@ -57,11 +64,11 @@ func (cmd *CmdLineArgs) ParseArgs(args []string) error {
 }
 
 type DataStruct struct {
-	ReleaseNumber int
+	ReleaseNumber string
 	DistributorID string
 }
 
-func (data *DataStruct) ReadFromFile(filePath string) {
+func (data *DataStruct) ReadFromFile(filePath string, validate bool) {
 	var err error
 
 	file, err := os.Open(filePath)
@@ -72,27 +79,38 @@ func (data *DataStruct) ReadFromFile(filePath string) {
 
 	parseStruct := map[string]func(string){
 		"^Distributor ID:\t([^\t]+)$": func(s string) { data.DistributorID = s },
-		"^Release:\t([^\t]+)$":        func(s string) { data.ReleaseNumber, _ = strconv.Atoi(s) },
+		"^Release:\t([^\t]+)$":        func(s string) { data.ReleaseNumber = s },
 	}
 
 	scanner := bufio.NewScanner(file)
-	for k, callback := range parseStruct {
-		if !scanner.Scan() {
-			log.Fatal("cannot scan next line in the input file")
+	keys := reflect.ValueOf(parseStruct).MapKeys()
+
+	handled := 0
+	for scanner.Scan() {
+		line := scanner.Text()
+		for _, key := range keys {
+			keyString := key.String()
+			data := parseLine(line, keyString)
+			if data != "" {
+				parseStruct[keyString](data)
+				handled++
+				break
+			}
 		}
-		data := parseLine(scanner.Text(), k)
-		callback(data)
+	}
+	if validate && len(keys) != handled {
+		log.Panicf("Not all needed values were extracted!")
 	}
 }
 
 func parseLine(line string, regexpStr string) string {
 	regex, err := regexp.Compile(regexpStr)
 	if err != nil {
-		log.Fatalf("Cannot compile regex '%s'", regexpStr)
+		log.Panicf("Cannot compile regex '%s'", regexpStr)
 	}
 	subMatch := regex.FindStringSubmatch(line)
 	if subMatch == nil {
-		log.Fatalf("Cannot parse '%s' from '%s'", regexpStr, line)
+		return ""
 	}
 	return subMatch[1]
 }
@@ -115,7 +133,7 @@ func main() {
 	filePath := path.Join(exPath, "lsb_release.txt")
 
 	var lsbReleaseData DataStruct
-	lsbReleaseData.ReadFromFile(filePath)
+	lsbReleaseData.ReadFromFile(filePath, *args.FlagValidate)
 
 	if *args.FlagS == true {
 		if *args.FlagI {
@@ -129,7 +147,7 @@ func main() {
 			fmt.Printf("Distributor ID:\t%s\n", lsbReleaseData.DistributorID)
 		}
 		if *args.FlagR {
-			fmt.Printf("Release:\t%d\n", lsbReleaseData.ReleaseNumber)
+			fmt.Printf("Release:\t%s\n", lsbReleaseData.ReleaseNumber)
 		}
 	}
 }

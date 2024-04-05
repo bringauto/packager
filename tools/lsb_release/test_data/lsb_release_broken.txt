@@ -1,0 +1,2 @@
+Distributor ID :	Debian
+Release:	11
