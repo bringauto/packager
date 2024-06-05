@@ -7,7 +7,7 @@
   ],
   "Git": {
     "URI": "https://github.com/bringauto/internal-client-cpp.git",
-    "Revision": "v1.1.0"
+    "Revision": "v1.1.1"
   },
   "Build": {
     "CMake": {
@@ -21,7 +21,7 @@
   },
   "Package": {
     "Name": "internal-client",
-    "VersionTag": "v1.1.0",
+    "VersionTag": "v1.1.1",
     "PlatformString": {
       "Mode": "auto"
     },
@@ -31,6 +31,7 @@
   },
   "DockerMatrix": {
     "ImageNames": [
+      "ubuntu2004",
       "ubuntu2204",
       "debian12",
       "debian11",
