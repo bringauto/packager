@@ -17,7 +17,7 @@ Each package has a Config file in the JSON format. (Config file details in [Cont
 
 - the package configs are stored in linear list
 - package config are topological sorted by `Dependencies`,
-- the packages are build from first item of the list (head of the list) to the las package of the list.
+- the packages are build from first item of the list (head of the list) to the last package of the list.
 
 During the build the package files installed by installation feature of the CMake are copied
 to the `install_sysroot` directory located in the working directory of the builder.
@@ -36,7 +36,7 @@ Same as for All build except that only configs for given `package_group` are rea
 
 **Build phase**
 
-Same as fo All build except that the dependencies are ignored. (so If you have not initialized `install_sysroot`
+Same as for All build except that the dependencies are ignored. (so If you have not initialized `install_sysroot`
 then the package build fail)
 
 
