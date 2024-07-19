@@ -4,11 +4,18 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/pkg/sftp"
+	"github.com/mholt/archiver/v3"
 	"io"
 	"io/ioutil"
 	"os"
 	"path"
 	"regexp"
+	"time"
+)
+
+const (
+	archiveName string = "install_arch.tar"
+	archiveNameSep string = string(os.PathSeparator) + archiveName
 )
 
 type SFTP struct {
@@ -25,6 +32,20 @@ type SFTP struct {
 // Function returns error in case of problem or nil if succeeded.
 func (sftpd *SFTP) DownloadDirectory() error {
 	var err error
+
+	fmt.Println("Creating tar on remote")
+	tar := Tar{
+		ArchiveName: archiveName,
+		SourceDir: "/INSTALL",
+	}
+
+	shellEvaluator := ShellEvaluator{
+		Commands: tar.ConstructCMDLine(),
+		StdOut:   os.Stdout,
+	}
+
+	shellEvaluator.RunOverSSH(*sftpd.SSHCredentials)
+	fmt.Printf("%s Tar created\n", time.Now())
 
 	sshSession := SSHSession{}
 	err = sshSession.LoginMultipleAttempts(*sftpd.SSHCredentials)
@@ -53,14 +74,63 @@ func (sftpd *SFTP) DownloadDirectory() error {
 		return fmt.Errorf("local directory '%s' is not empty", sftpd.EmptyLocalDir)
 	}
 
-	err = sftpd.copyRecursive(sftpClient, sftpd.RemoteDir, sftpd.EmptyLocalDir)
+	localArchivePath := sftpd.EmptyLocalDir + archiveNameSep
+
+	fmt.Printf("%s Copying tar with sftp\n", time.Now())
+
+	err = sftpd.copyFile(sftpClient, sftpd.RemoteDir + archiveNameSep, localArchivePath)
 	if err != nil {
 		return fmt.Errorf("cannot copy recursive %s", err)
+	}
+
+	fmt.Printf("%s File copied. Unarchiving tar.\n", time.Now())
+
+	tarArchive := archiver.Tar{
+		OverwriteExisting: false,
+		MkdirAll: false,
+		ImplicitTopLevelFolder: false,
+		ContinueOnError: true,
+	}
+
+	tarArchive.Unarchive(localArchivePath, sftpd.EmptyLocalDir)
+
+	fmt.Printf("%s Tar unarchived.\n", time.Now())
+
+	err = os.Remove(localArchivePath)
+	if err != nil {
+		return fmt.Errorf("cannot remove local dir %s", err)
 	}
 
 	return nil
 }
 
+func (sftpd *SFTP) copyFile(sftpClient *sftp.Client, remoteFile string, localDir string) error {
+	var err error
+	_, err = sftpClient.Lstat(remoteFile)
+	if os.IsNotExist(err) {
+		return fmt.Errorf("requested remote file %s does not exist", remoteFile)
+	}
+	normalizedLocalDir, _ := normalizePath(localDir)
+
+	remotePathStat, err := sftpClient.Lstat(remoteFile)
+	if err != nil {
+		return fmt.Errorf("cannot get Lstat if remote %s", remoteFile)
+	}
+	sourceFile, err := sftpClient.Open(remoteFile)
+	if err != nil {
+		return fmt.Errorf("cannot open file for read - %s,%s", remoteFile, err)
+	}
+	destFile, err := os.OpenFile(normalizedLocalDir, os.O_RDWR|os.O_CREATE, remotePathStat.Mode().Perm())
+	if err != nil {
+		return err
+	}
+
+	copyIOFile(sourceFile, destFile)
+
+	return nil
+}
+
+// deprecated, reason: very slow with big trees, new approach: create tar and and copy single archive with copyFile()
 func (sftpd *SFTP) copyRecursive(sftpClient *sftp.Client, remoteDir string, localDir string) error {
 	var err error
 	_, err = sftpClient.Lstat(sftpd.RemoteDir)
@@ -114,24 +184,7 @@ func (sftpd *SFTP) copyRecursive(sftpClient *sftp.Client, remoteDir string, loca
 		go func() {
 			defer func() { allDone <- true }()
 
-			sourceFileBuff := bufio.NewReaderSize(sourceFile, 1024*1024)
-			destFileBuff := bufio.NewWriterSize(destFile, 1027*1024)
-
-			_, err = io.Copy(destFileBuff, sourceFileBuff)
-			if err != nil {
-				panic(fmt.Errorf("cannot copy remote file %s to dest file %s", remotePath, absoluteLocalPath))
-			}
-
-			_ = destFileBuff.Flush()
-
-			err = destFile.Close()
-			if err != nil {
-				panic(fmt.Errorf("cannot close destFile: %s", err))
-			}
-			err = sourceFile.Close()
-			if err != nil {
-				panic(fmt.Errorf("cannot close sourceFile: %s", err))
-			}
+			copyIOFile(sourceFile, destFile)
 		}()
 
 	}
@@ -142,6 +195,28 @@ func (sftpd *SFTP) copyRecursive(sftpClient *sftp.Client, remoteDir string, loca
 	}
 
 	return nil
+}
+
+func copyIOFile(sourceFile *sftp.File, destFile *os.File) {
+	sourceFileBuff := bufio.NewReaderSize(sourceFile, 1024*1024)
+	destFileBuff := bufio.NewWriterSize(destFile, 1027*1024)
+
+	var err error
+	_, err = io.Copy(destFileBuff, sourceFileBuff)
+	if err != nil {
+		panic(fmt.Errorf("cannot copy remote IO files"))
+	}
+
+	_ = destFileBuff.Flush()
+
+	err = destFile.Close()
+	if err != nil {
+		panic(fmt.Errorf("cannot close destFile: %s", err))
+	}
+	err = sourceFile.Close()
+	if err != nil {
+		panic(fmt.Errorf("cannot close sourceFile: %s", err))
+	}
 }
 
 // normalizePath
