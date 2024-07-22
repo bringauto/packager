@@ -43,7 +43,10 @@ func (sftpd *SFTP) DownloadDirectory() error {
 		StdOut:   os.Stdout,
 	}
 
-	shellEvaluator.RunOverSSH(*sftpd.SSHCredentials)
+	err = shellEvaluator.RunOverSSH(*sftpd.SSHCredentials)
+	if err != nil {
+		return fmt.Errorf("cannot archive /INSTALL dir in docker container - %s", err)
+	}
 
 	sshSession := SSHSession{}
 	err = sshSession.LoginMultipleAttempts(*sftpd.SSHCredentials)
@@ -90,7 +93,10 @@ func (sftpd *SFTP) DownloadDirectory() error {
 		ContinueOnError: true,
 	}
 
-	tarArchive.Unarchive(localArchivePath, sftpd.EmptyLocalDir)
+	err = tarArchive.Unarchive(localArchivePath, sftpd.EmptyLocalDir)
+	if err != nil {
+		return fmt.Errorf("cannot unarchive tar archive locally - %s", err)
+	}
 
 	err = os.Remove(localArchivePath)
 	if err != nil {
