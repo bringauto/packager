@@ -33,7 +33,6 @@ type SFTP struct {
 func (sftpd *SFTP) DownloadDirectory() error {
 	var err error
 
-	fmt.Println("Creating tar on remote")
 	tar := Tar{
 		ArchiveName: archiveName,
 		SourceDir: "/INSTALL",
@@ -45,7 +44,6 @@ func (sftpd *SFTP) DownloadDirectory() error {
 	}
 
 	shellEvaluator.RunOverSSH(*sftpd.SSHCredentials)
-	fmt.Printf("%s Tar created\n", time.Now())
 
 	sshSession := SSHSession{}
 	err = sshSession.LoginMultipleAttempts(*sftpd.SSHCredentials)
@@ -93,8 +91,6 @@ func (sftpd *SFTP) DownloadDirectory() error {
 	}
 
 	tarArchive.Unarchive(localArchivePath, sftpd.EmptyLocalDir)
-
-	fmt.Printf("%s Tar unarchived.\n", time.Now())
 
 	err = os.Remove(localArchivePath)
 	if err != nil {
