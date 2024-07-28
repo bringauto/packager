@@ -85,15 +85,10 @@ func (sftpd *SFTP) DownloadDirectory() error {
 
 	localArchivePath := sftpd.EmptyLocalDir + archiveNameSep
 
-	logger := bringauto_log.GetLogger()
-	logger.Info("Copying tar with sftp")
-
 	err = sftpd.copyFile(sftpClient, sftpd.RemoteDir + archiveNameSep, localArchivePath)
 	if err != nil {
 		return fmt.Errorf("cannot copy recursive %s", err)
 	}
-
-	logger.Info("File copied. Unarchiving tar.")
 
 	tarArchive := archiver.Tar{
 		OverwriteExisting: false,
