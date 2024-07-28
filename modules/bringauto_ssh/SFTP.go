@@ -7,7 +7,6 @@ import (
 	"github.com/pkg/sftp"
 	"github.com/mholt/archiver/v3"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"regexp"
@@ -78,7 +77,7 @@ func (sftpd *SFTP) DownloadDirectory() error {
 		return fmt.Errorf("EmptyLocalDir '%s' does not exist", sftpd.EmptyLocalDir)
 	}
 
-	localPathDirContent, _ := ioutil.ReadDir(sftpd.EmptyLocalDir)
+	localPathDirContent, _ := os.ReadDir(sftpd.EmptyLocalDir)
 	localPathDirIsNotEmpty := len(localPathDirContent) != 0
 	if localPathDirIsNotEmpty {
 		return fmt.Errorf("local directory '%s' is not empty", sftpd.EmptyLocalDir)
