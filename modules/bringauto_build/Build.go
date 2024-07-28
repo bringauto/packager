@@ -1,6 +1,7 @@
 package bringauto_build
 
 import (
+	"bringauto/modules/bringauto_log"
 	"bringauto/modules/bringauto_docker"
 	"bringauto/modules/bringauto_git"
 	"bringauto/modules/bringauto_package"
@@ -8,7 +9,6 @@ import (
 	"bringauto/modules/bringauto_ssh"
 	"bringauto/modules/bringauto_sysroot"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 )
@@ -70,6 +70,8 @@ func (build *Build) CheckPrerequisites(*bringauto_prerequisites.Args) error {
 // s
 func (build *Build) RunBuild() error {
 	var err error
+	logger := bringauto_log.GetLogger()
+	packLogger := logger.CreatePackageLogger(build.Package.CreatePackageName())
 
 	err = build.CheckPrerequisites(nil)
 	if err != nil {
@@ -109,9 +111,17 @@ func (build *Build) RunBuild() error {
 		},
 	}
 
+	buildChainLogger := packLogger.CreatePackageContextLogger(bringauto_log.BuildChainContext)
+	file, err := buildChainLogger.GetFile()
+
+	if err != nil {
+		logger.Error("Failed to open file - %s", err)
+		return err
+	}
+
 	shellEvaluator := bringauto_ssh.ShellEvaluator{
 		Commands: buildChain.GenerateCommands(),
-		StdOut:   os.Stdout,
+		StdOut:   file,
 	}
 
 	err = bringauto_prerequisites.Initialize(build.Docker)
@@ -130,11 +140,11 @@ func (build *Build) RunBuild() error {
 		var err error
 		err = dockerStop.Stop()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "cannot stop container: %s\n", err)
+			logger.Error("cannot stop container: %s\n", err)
 		}
 		err = dockerRm.RemoveContainer()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "cannot remove container: %s\n", err)
+			logger.Error("cannot remove container: %s\n", err)
 		}
 	}()
 
@@ -143,7 +153,9 @@ func (build *Build) RunBuild() error {
 		return err
 	}
 
-	err = build.downloadInstalledFiles()
+	file.Close()
+
+	err = build.downloadInstalledFiles(packLogger)
 	return err
 }
 
@@ -154,7 +166,8 @@ func (build *Build) SetSysroot(sysroot *bringauto_sysroot.Sysroot) {
 func (build *Build) GetLocalInstallDirPath() string {
 	workingDir, err := os.Getwd()
 	if err != nil {
-		log.Fatalf("cannot call Getwd - %s", err)
+		logger := bringauto_log.GetLogger()
+		logger.Fatal("cannot call Getwd - %s", err)
 	}
 	copyBaseDir := filepath.Join(workingDir, localInstallDirNameConst)
 	return copyBaseDir
@@ -173,7 +186,7 @@ func (build *Build) CleanUp() error {
 	return nil
 }
 
-func (build *Build) downloadInstalledFiles() error {
+func (build *Build) downloadInstalledFiles(packageLogger *bringauto_log.PackageLogger) error {
 	var err error
 
 	copyDir := build.GetLocalInstallDirPath()
@@ -188,6 +201,7 @@ func (build *Build) downloadInstalledFiles() error {
 		RemoteDir:      dockerInstallDirConst,
 		EmptyLocalDir:  copyDir,
 		SSHCredentials: build.SSHCredentials,
+		PackageLogger : packageLogger,
 	}
 	err = sftpClient.DownloadDirectory()
 	return err

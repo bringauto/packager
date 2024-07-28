@@ -1,13 +1,16 @@
 package main
 
 import (
-	"fmt"
+	"bringauto/modules/bringauto_log"
+	"bringauto/modules/bringauto_prerequisites"
 	"os"
+	"time"
 )
 
 func main() {
 	var err error
 	var args CmdLineArgs
+	logger := bringauto_prerequisites.CreateAndInitialize[bringauto_log.GlobalLogger](time.Now(), "./log")
 
 	args.InitFlags()
 	err = args.ParseArgs(os.Args)
@@ -18,7 +21,7 @@ func main() {
 	if args.BuildImage {
 		err = BuildDockerImage(&args.BuildImagesArgs, *args.Context)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			logger.Error(err.Error())
 			return
 		}
 		return
@@ -27,7 +30,7 @@ func main() {
 	if args.BuildPackage {
 		err = BuildPackage(&args.BuildPackageArgs, *args.Context)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			logger.Error(err.Error())
 			return
 		}
 		return

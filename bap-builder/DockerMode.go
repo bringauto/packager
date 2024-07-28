@@ -1,9 +1,9 @@
 package main
 
 import (
+	"bringauto/modules/bringauto_log"
 	"bringauto/modules/bringauto_docker"
 	"fmt"
-	"os"
 	"path"
 )
 
@@ -31,9 +31,11 @@ func buildAllDockerImages(contextPath string) error {
 		return err
 	}
 
+	logger := bringauto_log.GetLogger()
+
 	for imageName, dockerfilePathList := range dockerfileList {
 		if len(dockerfilePathList) != 1 {
-			fmt.Fprintf(os.Stderr, "Bug: multiple Dockerfile present for same image name %s", imageName)
+			logger.Warn("Bug: multiple Dockerfile present for same image name %s", imageName)
 			continue
 		}
 		dockerfileDir := path.Dir(dockerfilePathList[0])

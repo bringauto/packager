@@ -1,10 +1,10 @@
 package bringauto_docker
 
 import (
+	"bringauto/modules/bringauto_log"
 	"bringauto/modules/bringauto_process"
 	"bytes"
 	"fmt"
-	"log"
 	"regexp"
 	"strings"
 )
@@ -14,13 +14,15 @@ type DockerImage Docker
 func (dockerImage *DockerImage) ImageExists() bool {
 	var err error
 	output, err := dockerImage.runDockerImageCommand([]string{"ls"})
+
+	logger := bringauto_log.GetLogger()
 	if err != nil {
-		log.Printf("cannot start docker process: %s", err)
+		logger.Error("cannot start docker process: %s", err)
 		return false
 	}
 	reg, err := regexp.CompilePOSIX("^(?P<container_id>[0-9a-zA-Z]+)\\s+(?P<image_name>[^ ]+)")
 	if err != nil {
-		log.Printf("cannot compile regexp: %s", err)
+		logger.Error("cannot compile regexp: %s", err)
 	}
 
 	outputLines := strings.Split(output, "\n")
@@ -30,7 +32,7 @@ func (dockerImage *DockerImage) ImageExists() bool {
 	for _, line := range containersInfoLines {
 		dockerImageLine := reg.FindStringSubmatch(line)
 		if dockerImageLine == nil {
-			log.Fatalf("Bad imageLine from docker images connect - %s", line)
+			logger.Fatal("Bad imageLine from docker images connect - %s", line)
 		}
 		imageName := dockerImageLine[imageNameIndex]
 		if imageName == dockerImage.ImageName {
