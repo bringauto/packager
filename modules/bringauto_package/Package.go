@@ -113,6 +113,21 @@ func (packg *Package) CreatePackageName() string {
 	return strings.Join(packageName, "")
 }
 
+// Returns short package name without versions
+func (packg *Package) GetShortPackageName() string {
+	var packageName []string
+
+	packageName = append(packageName, packg.Name)
+	if packg.IsDebug {
+		packageName = append(packageName, "d")
+	}
+	if packg.IsDevLib {
+		packageName = append(packageName, "-dev")
+	}
+
+	return strings.Join(packageName, "")
+}
+
 func createZIPArchive(sourceDir string, archivePath string) error {
 	var files []string
 	var err error
