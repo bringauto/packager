@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -173,17 +172,17 @@ func getAllFilesInSubdirByRegexp(rootDir string, reg *regexp.Regexp) (map[string
 // get all files from given rootDir which matches given regexp
 func getAllFilesInDirByRegexp(rootDir string, reg *regexp.Regexp) ([]string, error) {
 	var acceptedFileList []string
-	fileList, err := ioutil.ReadDir(rootDir)
+	dirEntryList, err := os.ReadDir(rootDir)
 	if err != nil {
 		return []string{}, fmt.Errorf("cannot list dir %s", rootDir)
 	}
 
-	for _, packagesFileInfos := range fileList {
-		packageNameOk := reg.MatchString(packagesFileInfos.Name())
+	for _, dirEntry := range dirEntryList {
+		packageNameOk := reg.MatchString(dirEntry.Name())
 		if !packageNameOk {
 			continue
 		}
-		acceptedFileList = append(acceptedFileList, path.Join(rootDir, packagesFileInfos.Name()))
+		acceptedFileList = append(acceptedFileList, path.Join(rootDir, dirEntry.Name()))
 	}
 	return acceptedFileList, nil
 }
