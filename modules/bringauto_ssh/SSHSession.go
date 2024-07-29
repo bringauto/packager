@@ -1,6 +1,7 @@
 package bringauto_ssh
 
 import (
+	"bringauto/modules/bringauto_log"
 	"bringauto/modules/bringauto_prerequisites"
 	"fmt"
 	"golang.org/x/crypto/ssh"
@@ -69,7 +70,7 @@ func (session *SSHSession) LoginMultipleAttempts(credentials SSHCredentials) err
 		} else {
 			numberOfAttempts += 1
 			time.Sleep(waitingInSecondsBeforeRetryConst * time.Second)
-			fmt.Println("Cannot login over ssh. Again...")
+			bringauto_log.GetLogger().Info("Cannot login over ssh. Again...")
 		}
 	}
 	return nil

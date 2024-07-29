@@ -5,7 +5,6 @@ import (
 	"compress/flate"
 	"fmt"
 	"github.com/mholt/archiver/v3"
-	"io/ioutil"
 	"os"
 	"path"
 	"regexp"
@@ -113,13 +112,28 @@ func (packg *Package) CreatePackageName() string {
 	return strings.Join(packageName, "")
 }
 
+// Returns short package name without versions
+func (packg *Package) GetShortPackageName() string {
+	var packageName []string
+
+	packageName = append(packageName, packg.Name)
+	if packg.IsDebug {
+		packageName = append(packageName, "d")
+	}
+	if packg.IsDevLib {
+		packageName = append(packageName, "-dev")
+	}
+
+	return strings.Join(packageName, "")
+}
+
 func createZIPArchive(sourceDir string, archivePath string) error {
 	var files []string
 	var err error
 
-	fileInfoList, err := ioutil.ReadDir(sourceDir)
-	for _, fileInfo := range fileInfoList {
-		files = append(files, path.Join(sourceDir, fileInfo.Name()))
+	dirEntryList, err := os.ReadDir(sourceDir)
+	for _, dirEntry := range dirEntryList {
+		files = append(files, path.Join(sourceDir, dirEntry.Name()))
 	}
 
 	zipArchive := archiver.Zip{

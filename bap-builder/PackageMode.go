@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bringauto/modules/bringauto_log"
 	"bringauto/modules/bringauto_build"
 	"bringauto/modules/bringauto_config"
 	"bringauto/modules/bringauto_package"
@@ -8,8 +9,6 @@ import (
 	"bringauto/modules/bringauto_repository"
 	"bringauto/modules/bringauto_sysroot"
 	"fmt"
-	"log"
-	"os"
 	"strconv"
 )
 
@@ -159,6 +158,8 @@ func buildAllPackages(cmdLine *BuildPackageCmdLineArgs, contextPath string) erro
 	depsList := buildDepList{}
 	configList := depsList.TopologicalSort(defsList)
 
+	logger := bringauto_log.GetLogger()
+
 	count := int32(0)
 	for _, config := range configList {
 		buildConfigs := config.GetBuildStructure(*cmdLine.DockerImageName)
@@ -166,14 +167,14 @@ func buildAllPackages(cmdLine *BuildPackageCmdLineArgs, contextPath string) erro
 			continue
 		}
 		count++
-		log.Printf("Build %s\n", buildConfigs[0].Package.CreatePackageName())
+		logger.Info("Build %s", buildConfigs[0].Package.CreatePackageName())
 		err = buildAndCopyPackage(cmdLine, &buildConfigs)
 		if err != nil {
-			panic(fmt.Errorf("cannot build package '%s' - %s", config.Package.Name, err))
+			logger.Fatal("cannot build package '%s' - %s", config.Package.Name, err)
 		}
 	}
 	if count == 0 {
-		log.Printf("Nothing to build. Did you enter correct image name?")
+		logger.Warn("Nothing to build. Did you enter correct image name?")
 	}
 
 	return nil
@@ -192,18 +193,21 @@ func buildSinglePackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) er
 		return err
 	}
 
+	logger := bringauto_log.GetLogger()
+
 	for _, packageJsonDef := range packageJsonDefsList {
 		var config bringauto_config.Config
 		err = config.LoadJSONConfig(packageJsonDef)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "package '%s' JSON config def problem - %s\n", packageName, err)
+			logger.Warn("package '%s' JSON config def problem - %s\n", packageName, err)
 			continue
 		}
 
 		buildConfigs := config.GetBuildStructure(*cmdLine.DockerImageName)
+		logger.Info("Build %s", buildConfigs[0].Package.CreatePackageName())
 		err = buildAndCopyPackage(cmdLine, &buildConfigs)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "cannot build package '%s' - %s\n", packageName, err)
+			logger.Error("cannot build package '%s' - %s\n", packageName, err)
 			continue
 		}
 	}

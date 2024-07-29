@@ -3,12 +3,12 @@ package bringauto_build
 import (
 	"bringauto/modules/bringauto_docker"
 	"bringauto/modules/bringauto_git"
+	"bringauto/modules/bringauto_log"
 	"bringauto/modules/bringauto_package"
 	"bringauto/modules/bringauto_prerequisites"
 	"bringauto/modules/bringauto_ssh"
 	"bringauto/modules/bringauto_sysroot"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 )
@@ -109,9 +109,20 @@ func (build *Build) RunBuild() error {
 		},
 	}
 
+	logger := bringauto_log.GetLogger()
+	packBuildChainLogger := logger.CreatePackageContextLogger(build.Package.GetShortPackageName(), bringauto_log.BuildChainContext)
+	file, err := packBuildChainLogger.GetFile()
+
+	if err != nil {
+		logger.Error("Failed to open file - %s", err)
+		return err
+	}
+
+	defer file.Close()
+
 	shellEvaluator := bringauto_ssh.ShellEvaluator{
 		Commands: buildChain.GenerateCommands(),
-		StdOut:   os.Stdout,
+		StdOut:   file,
 	}
 
 	err = bringauto_prerequisites.Initialize(build.Docker)
@@ -130,11 +141,11 @@ func (build *Build) RunBuild() error {
 		var err error
 		err = dockerStop.Stop()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "cannot stop container: %s\n", err)
+			logger.Error("cannot stop container: %s\n", err)
 		}
 		err = dockerRm.RemoveContainer()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "cannot remove container: %s\n", err)
+			logger.Error("cannot remove container: %s\n", err)
 		}
 	}()
 
@@ -154,7 +165,8 @@ func (build *Build) SetSysroot(sysroot *bringauto_sysroot.Sysroot) {
 func (build *Build) GetLocalInstallDirPath() string {
 	workingDir, err := os.Getwd()
 	if err != nil {
-		log.Fatalf("cannot call Getwd - %s", err)
+		logger := bringauto_log.GetLogger()
+		logger.Fatal("cannot call Getwd - %s", err)
 	}
 	copyBaseDir := filepath.Join(workingDir, localInstallDirNameConst)
 	return copyBaseDir
@@ -184,10 +196,20 @@ func (build *Build) downloadInstalledFiles() error {
 		}
 	}
 
+	packTarLogger := bringauto_log.GetLogger().CreatePackageContextLogger(build.Package.GetShortPackageName(), bringauto_log.TarContext)
+	logFile, err := packTarLogger.GetFile()
+
+	if err != nil {
+		return fmt.Errorf("failed to open file - %s", err)
+	}
+
+	defer logFile.Close()
+
 	sftpClient := bringauto_ssh.SFTP{
 		RemoteDir:      dockerInstallDirConst,
 		EmptyLocalDir:  copyDir,
 		SSHCredentials: build.SSHCredentials,
+		LogWriter:      logFile,
 	}
 	err = sftpClient.DownloadDirectory()
 	return err

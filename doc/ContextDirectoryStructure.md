@@ -27,7 +27,7 @@ The image name is recognized by a name of a directory in the `docker/` directory
 
 Docker image built by Dockerfile in <docker_name> directory must be tagged by <docker_name>.
 
-You can use `bam-builder build-image` feature to build docker images instead of directly invoke `docker` command.
+You can use `bap-builder build-image` feature to build docker images instead of directly invoke `docker` command.
 
 ## package_group_name
 

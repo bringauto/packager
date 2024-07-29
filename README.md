@@ -79,7 +79,7 @@ Standalone binaries are built for Linux kernel >= 5.10.0-amd64
 
 ## Build
 
-The project requires go >= 1.18.
+The project requires go >= 1.22.
 
 ```
 go get bringauto/bap-builder
