@@ -1,7 +1,6 @@
 package bringauto_ssh
 
 import (
-	"bringauto/modules/bringauto_log"
 	"bufio"
 	"fmt"
 	"github.com/pkg/sftp"
@@ -23,7 +22,7 @@ type SFTP struct {
 	// Empty, existing local directory where the RemoteDir will be copy
 	EmptyLocalDir  string
 	SSHCredentials *SSHCredentials
-	PackageLogger *bringauto_log.PackageLogger
+	LogWriter io.Writer
 }
 
 // DownloadDirectory
@@ -38,20 +37,13 @@ func (sftpd *SFTP) DownloadDirectory() error {
 		SourceDir: "/INSTALL",
 	}
 
-	tarLogger := sftpd.PackageLogger.CreatePackageContextLogger(bringauto_log.TarContext)
-	file, err := tarLogger.GetFile()
-
-	if err != nil {
-		return err
-	}
-
 	shellEvaluator := ShellEvaluator{
 		Commands: tar.ConstructCMDLine(),
-		StdOut:   file,
+		StdOut:   sftpd.LogWriter,
 	}
 
 	err = shellEvaluator.RunOverSSH(*sftpd.SSHCredentials)
-	file.Close()
+
 	if err != nil {
 		return fmt.Errorf("cannot archive /INSTALL dir in docker container - %s", err)
 	}

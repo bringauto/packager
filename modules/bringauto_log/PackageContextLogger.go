@@ -19,6 +19,7 @@ type PackageContextLogger struct {
 type packageContextLoggerInitArgs struct {
 	Timestamp time.Time
 	LogDirPath string
+	PackageName string
 	LogContext string
 }
 
@@ -35,7 +36,7 @@ func (logger *PackageContextLogger) FillDynamic(args *bringauto_prerequisites.Ar
 		var argsStruct packageContextLoggerInitArgs
 		bringauto_prerequisites.GetArgs(args, &argsStruct)
 		logger.timestamp = argsStruct.Timestamp
-		logger.logDirPath = argsStruct.LogDirPath
+		logger.logDirPath = argsStruct.LogDirPath + "/" + argsStruct.PackageName
 		logger.logFileName = argsStruct.LogContext + ".txt"
 	}
 	return nil

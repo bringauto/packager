@@ -1,9 +1,9 @@
 package bringauto_build
 
 import (
-	"bringauto/modules/bringauto_log"
 	"bringauto/modules/bringauto_docker"
 	"bringauto/modules/bringauto_git"
+	"bringauto/modules/bringauto_log"
 	"bringauto/modules/bringauto_package"
 	"bringauto/modules/bringauto_prerequisites"
 	"bringauto/modules/bringauto_ssh"
@@ -70,8 +70,6 @@ func (build *Build) CheckPrerequisites(*bringauto_prerequisites.Args) error {
 // s
 func (build *Build) RunBuild() error {
 	var err error
-	logger := bringauto_log.GetLogger()
-	packLogger := logger.CreatePackageLogger(build.Package.CreatePackageName())
 
 	err = build.CheckPrerequisites(nil)
 	if err != nil {
@@ -111,13 +109,16 @@ func (build *Build) RunBuild() error {
 		},
 	}
 
-	buildChainLogger := packLogger.CreatePackageContextLogger(bringauto_log.BuildChainContext)
-	file, err := buildChainLogger.GetFile()
+	logger := bringauto_log.GetLogger()
+	packBuildChainLogger := logger.CreatePackageContextLogger(build.Package.Name, bringauto_log.BuildChainContext)
+	file, err := packBuildChainLogger.GetFile()
 
 	if err != nil {
 		logger.Error("Failed to open file - %s", err)
 		return err
 	}
+
+	defer file.Close()
 
 	shellEvaluator := bringauto_ssh.ShellEvaluator{
 		Commands: buildChain.GenerateCommands(),
@@ -153,9 +154,7 @@ func (build *Build) RunBuild() error {
 		return err
 	}
 
-	file.Close()
-
-	err = build.downloadInstalledFiles(packLogger)
+	err = build.downloadInstalledFiles()
 	return err
 }
 
@@ -186,7 +185,7 @@ func (build *Build) CleanUp() error {
 	return nil
 }
 
-func (build *Build) downloadInstalledFiles(packageLogger *bringauto_log.PackageLogger) error {
+func (build *Build) downloadInstalledFiles() error {
 	var err error
 
 	copyDir := build.GetLocalInstallDirPath()
@@ -197,11 +196,20 @@ func (build *Build) downloadInstalledFiles(packageLogger *bringauto_log.PackageL
 		}
 	}
 
+	packTarLogger := bringauto_log.GetLogger().CreatePackageContextLogger(build.Package.Name, bringauto_log.TarContext)
+	logFile, err := packTarLogger.GetFile()
+
+	if err != nil {
+		return fmt.Errorf("failed to open file - %s", err)
+	}
+
+	defer logFile.Close()
+
 	sftpClient := bringauto_ssh.SFTP{
 		RemoteDir:      dockerInstallDirConst,
 		EmptyLocalDir:  copyDir,
 		SSHCredentials: build.SSHCredentials,
-		PackageLogger : packageLogger,
+		LogWriter:      logFile,
 	}
 	err = sftpClient.DownloadDirectory()
 	return err
