@@ -25,7 +25,6 @@
     "IsDebug": true
   },
   "DockerMatrix": {
-    "ImageNames": [
-    ]
+    "ImageNames": []
   }
 }

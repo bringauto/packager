@@ -12,7 +12,7 @@
         "BRINGAUTO_INSTALL": "ON",
         "BRINGAUTO_PACKAGE": "ON",
         "BRINGAUTO_SYSTEM_DEP": "ON",
-        "BRINGAUTO_SAMPLES" : "OFF"
+        "BRINGAUTO_SAMPLES": "OFF"
       }
     }
   },
