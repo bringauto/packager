@@ -134,6 +134,10 @@ func createZIPArchive(sourceDir string, archivePath string) error {
 	var err error
 
 	dirEntryList, err := os.ReadDir(sourceDir)
+	if err != nil {
+		return fmt.Errorf("cannot read %s directory: %s", sourceDir, err)
+	}
+
 	for _, dirEntry := range dirEntryList {
 		files = append(files, path.Join(sourceDir, dirEntry.Name()))
 	}
