@@ -1,6 +1,9 @@
 {
-  "Env": { },
-  "DependsOn": [ "zlib", "boost" ],
+  "Env": {},
+  "DependsOn": [
+    "zlib",
+    "boost"
+  ],
   "Git": {
     "URI": "https://github.com/bringauto/cpprestsdk.git",
     "Revision": "v2.10.20"
