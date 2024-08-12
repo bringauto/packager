@@ -80,7 +80,7 @@ func (packg *Package) CreatePackage(sourceDir string, outputDir string) error {
 		return err
 	}
 
-	packageName := packg.CreatePackageName() + ".zip"
+	packageName := packg.CreatePackageName(false) + ".zip"
 
 	err = createZIPArchive(sourceDir, outputDir+"/"+packageName)
 	if err != nil {
@@ -91,9 +91,9 @@ func (packg *Package) CreatePackage(sourceDir string, outputDir string) error {
 }
 
 // CreatePackageName
-// construct only a package name.
+// Construct only a package name. If short is true, returns shortened package name string.
 // Function returns nonempty string.
-func (packg *Package) CreatePackageName() string {
+func (packg *Package) CreatePackageName(short bool) string {
 	var packageName []string
 	if packg.IsLibrary {
 		packageName = append([]string{"lib"}, packageName...)
@@ -105,10 +105,12 @@ func (packg *Package) CreatePackageName() string {
 	if packg.IsDevLib {
 		packageName = append(packageName, "-dev")
 	}
-	packageName = append(packageName, "_")
-	packageName = append(packageName, packg.VersionTag)
-	packageName = append(packageName, "_")
-	packageName = append(packageName, packg.PlatformString.Serialize())
+	if !short {
+		packageName = append(packageName, "_")
+		packageName = append(packageName, packg.VersionTag)
+		packageName = append(packageName, "_")
+		packageName = append(packageName, packg.PlatformString.Serialize())
+	}
 	return strings.Join(packageName, "")
 }
 

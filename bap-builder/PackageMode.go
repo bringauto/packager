@@ -167,7 +167,7 @@ func buildAllPackages(cmdLine *BuildPackageCmdLineArgs, contextPath string) erro
 			continue
 		}
 		count++
-		logger.Info("Build %s", buildConfigs[0].Package.CreatePackageName())
+		logger.Info("Build %s", buildConfigs[0].Package.CreatePackageName(false))
 		err = buildAndCopyPackage(cmdLine, &buildConfigs)
 		if err != nil {
 			logger.Fatal("cannot build package '%s' - %s", config.Package.Name, err)
@@ -204,7 +204,7 @@ func buildSinglePackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) er
 		}
 
 		buildConfigs := config.GetBuildStructure(*cmdLine.DockerImageName)
-		logger.Info("Build %s", buildConfigs[0].Package.CreatePackageName())
+		logger.Info("Build %s", buildConfigs[0].Package.CreatePackageName(false))
 		err = buildAndCopyPackage(cmdLine, &buildConfigs)
 		if err != nil {
 			logger.Error("cannot build package '%s' - %s\n", packageName, err)
