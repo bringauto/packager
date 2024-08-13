@@ -1,6 +1,6 @@
-### package_config
+# package_config
 
-```
+``` json
 {
   "Env": {
     "ENV_A": "Value A",
@@ -15,7 +15,7 @@
   },
   "Build": {
     "CMake": {
-      "CMakeListDir": "<path_to_cmake_list_dir>",
+      "CMakeListDir": <path_to_cmake_list_dir>,
       "Defines": { // CMake variables passed to CMake -D switch
         "CMAKE_BUILD_TYPE": "Debug",
         "MY_NICE_VAR": "VarValue"
@@ -38,25 +38,25 @@
 }
 ```
 
-### uri
+## uri
 
 valid Git URi that can be used by `git clone` command
 
-### GitRevision_HashTagBranch
+## GitRevision_HashTagBranch
 
 Valid git Hash, Tag or branch
 
-### path_to_cmake_list_dir
+## path_to_cmake_list_dir
 
 Directory where the CMakeLists.txt is located. Default value is "./"
 
 Path is relative against project git root.
 
-### version_tag
+## version_tag
 
 `version_tag` represents a version in normalized form.
 
-```
+``` plaintext
 version_tag = 'v'x'.'y'.'z
 where x, y, z are from { 0, 1, 2, ... }
 ```
@@ -67,11 +67,11 @@ Examples:
 - v0.0.5
 - v5.98.0
 
-### platform_string_mode
+## platform_string_mode
 
 Platform String mode determine how the PlatformString is constructed
 
-```
+``` plaintext
 platform_string_mode = "auto" | "any_machine" | "explicit"
 ```
 
@@ -83,7 +83,7 @@ as a machine part of the PlatformString "any". Debian 11 (x86_64) generated exam
 
 **explicit** - user must fill all three parts manually:
 
-```
+``` json
 ...
     "PlatformString": {
       "Mode": "Explicit",
