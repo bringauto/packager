@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"github.com/otiai10/copy"
 	"os"
+	"io/fs"
 	"path/filepath"
+	"strings"
 )
 
 const (
-	sysrootDirectoryName = "install_sysroot"
+	SysrootDirectoryName = "install_sysroot"
 )
 
 // Sysroot represents a standard Linux sysroot with all needed libraries installed.
@@ -39,6 +41,9 @@ func (sysroot *Sysroot) CheckPrerequisites(args *bringauto_prerequisites.Args) e
 
 // CopyToSysroot copy source to a sysroot
 func (sysroot *Sysroot) CopyToSysroot(source string) error {
+	if sysroot.anyFileAlreadyExistsInSysroot(source) {
+		return fmt.Errorf("trying to ovewrite files in sysroot - sysroot consistency interrupted")
+	}
 	var err error
 	copyOptions := copy.Options{
 		OnSymlink:     onSymlink,
@@ -50,6 +55,24 @@ func (sysroot *Sysroot) CopyToSysroot(source string) error {
 		return err
 	}
 	return nil
+}
+
+func (sysroot *Sysroot) anyFileAlreadyExistsInSysroot(source string) bool {
+	sysrootPath := sysroot.GetSysrootPath()
+
+	err := filepath.WalkDir(source, func(path string, d fs.DirEntry, err error) error {
+		if !d.IsDir() {
+			filePath := strings.TrimPrefix(path, source)
+			_, err := os.Stat(sysrootPath + filePath)
+			if err == nil {
+				return fmt.Errorf("file already exists in sysroot")
+			}
+		}
+		
+		return nil
+	})
+
+	return err != nil
 }
 
 // GetSysrootPath returns absolute path ot the sysroot
@@ -65,7 +88,7 @@ func (sysroot *Sysroot) GetSysrootPath() string {
 		sysrootDirName += "_debug"
 	}
 
-	sysrootDir := filepath.Join(workingDir, sysrootDirectoryName, sysrootDirName)
+	sysrootDir := filepath.Join(workingDir, SysrootDirectoryName, sysrootDirName)
 	return sysrootDir
 }
 

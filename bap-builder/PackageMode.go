@@ -10,6 +10,8 @@ import (
 	"bringauto/modules/bringauto_sysroot"
 	"fmt"
 	"strconv"
+	"os"
+	"io"
 )
 
 type (
@@ -119,9 +121,39 @@ func (list *buildDepList) sortDependencies(rootName string, dependsMap *map[stri
 	return &sorted
 }
 
+// isDirEmpty
+// Returns true if specified dir do not exists or exists but is empty, otherwise returns false
+func isDirEmpty(dirPath string) (bool, error) {
+	f, err := os.Open(dirPath)
+	if err != nil { // The directory do not exists
+		return true, nil
+	}
+	defer f.Close()
+
+	_, err = f.Readdirnames(1)
+
+	if err == io.EOF { // The directory exists, but is empty
+		return true, nil
+	}
+	return false, err
+}
+
+func checkSysrootDirectory() {
+	isDirEmpty, err := isDirEmpty(bringauto_sysroot.SysrootDirectoryName)
+	if !isDirEmpty {
+		logger := bringauto_log.GetLogger()
+		if err != nil {
+			logger.Warn("Cannot read in sysroot directory: %s", err)
+		} else {
+			logger.Warn("Sysroot directory is not empty - the package build may fail")
+		}
+	}
+}
+
 // BuildPackage
 // process Package mode of the program
 func BuildPackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) error {
+	checkSysrootDirectory()
 	buildAll := cmdLine.All
 	if *buildAll {
 		return buildAllPackages(cmdLine, contextPath)
