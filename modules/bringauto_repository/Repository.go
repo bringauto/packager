@@ -8,6 +8,6 @@ type RepositoryInterface interface {
 	// CopyToRepository copy package files represented by sourceDir to the repository.
 	// Each repository has a different semantics for managing structure of th repository.
 	//
-	// Repository must not change the package name represented by pack.CreatePackageName()
+	// Repository must not change the package name represented by pack.GetFullPackageName()
 	CopyToRepository(pack bringauto_package.Package, sourceDir string) error
 }
