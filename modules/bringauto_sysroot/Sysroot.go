@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	SysrootDirectoryName = "install_sysroot"
+	sysrootDirectoryName = "install_sysroot"
 )
 
 // Sysroot represents a standard Linux sysroot with all needed libraries installed.
@@ -88,7 +88,7 @@ func (sysroot *Sysroot) GetSysrootPath() string {
 		sysrootDirName += "_debug"
 	}
 
-	sysrootDir := filepath.Join(workingDir, SysrootDirectoryName, sysrootDirName)
+	sysrootDir := filepath.Join(workingDir, sysrootDirectoryName, sysrootDirName)
 	return sysrootDir
 }
 
