@@ -36,7 +36,9 @@ Same as for All build except that only configs for given `package_group` are rea
 
 ### Build phase for single package
 
-Same as for All build except that the dependencies are ignored. (so If you have not initialized `install_sysroot`
-then the package build fail)
+Same as for All build except that the dependencies are ignored. (so if you have not initialized
+`install_sysroot` then the package build may fail)
+
+If you want to build package with all dependencies, you can add `--build-deps` flag to script call.
 
 [Context Directory Structure]: ./ContextDirectoryStructure.md
