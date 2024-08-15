@@ -1,5 +1,5 @@
 
-# Reliable Package Source rules
+# Reliable Package Source Rules
 
 ## Problem
 

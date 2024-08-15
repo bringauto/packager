@@ -63,6 +63,10 @@ The `bap-builder` builds and stores all dependencies in the git repository (LFS 
 
 *Note: If you do not have `bap-builder` in your system path, you need to use `./bap-builder/bap-builder` instead of `bap-builder`.*
 
+## Documentation
+
+The detailed documentation is available in the `doc` directory.
+
 ## Example
 
 In the `example` directory, there is a simple example of how to track dependencies for the `example` project.

@@ -6,20 +6,19 @@ configurations needed for BAM to work.
 
 In the Content Directory the definitions of packages, Docker images, ... are stored.
 
-```
+``` plaintext
 <context_directory>/
-	docker/
-		<docker_name>/
-			Dockerfile
-		...
-	package/
-		<package_group_name>/
-			<package_config_a>.json
-			<package_config_b>.json
-			...
-		...
+ docker/
+  <docker_name>/
+   Dockerfile
+  ...
+ package/
+  <package_group_name>/
+   <package_config_a>.json
+   <package_config_b>.json
+   ...
+  ...
 ```
-
 
 ## Docker Name
 
@@ -40,6 +39,5 @@ Each package config is a JSON TXT file.
 Each package config mas have '.json' extension.
 
 The Package JSON format is described by [PackageJSONStructure]
-
 
 [PackageJSONStructure]: ./PackageJSONStructure.md
