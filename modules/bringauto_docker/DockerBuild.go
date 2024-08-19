@@ -2,7 +2,6 @@ package bringauto_docker
 
 import (
 	"bringauto/modules/bringauto_log"
-	"bytes"
 	"fmt"
 	"os/exec"
 )
@@ -24,30 +23,33 @@ func (dockerBuild *DockerBuild) Build() error {
 	logger := bringauto_log.GetLogger()
 	logger.Info("Build Docker Image: %s", dockerBuild.Tag)
 
-	var ok, _, err = dockerBuild.prepareAndRun(prepareBuildArgs)
+	var ok = dockerBuild.prepareAndRun(prepareBuildArgs)
 	if !ok {
-		return fmt.Errorf("DockerBuild build error - %s", err)
+		return fmt.Errorf("DockerBuild build error")
 	}
 	return nil
 }
 
-func (dockerBuild *DockerBuild) prepareAndRun(f func(build *DockerBuild) []string) (bool, *bytes.Buffer, *bytes.Buffer) {
+func (dockerBuild *DockerBuild) prepareAndRun(f func(build *DockerBuild) []string) bool {
+	logger := bringauto_log.GetLogger()
+	contextLogger := logger.CreateContextLogger(dockerBuild.Tag, "", bringauto_log.ImageBuildContext)
+	file, _ := contextLogger.GetFile()
+
 	var cmd exec.Cmd
-	var outBuffer, errBuffer bytes.Buffer
 	cmdArgs := f(dockerBuild)
 	cmdArgs = append([]string{DockerExecutablePathConst}, cmdArgs...)
 	cmd.Args = cmdArgs
 	cmd.Path = DockerExecutablePathConst
-	cmd.Stderr = &errBuffer
-	cmd.Stdout = &outBuffer
+	cmd.Stderr = file
+	cmd.Stdout = file
 	err := cmd.Run()
 	if err != nil {
-		return false, &outBuffer, &errBuffer
+		return false
 	}
 	if cmd.ProcessState.ExitCode() > 0 {
-		return false, &outBuffer, &errBuffer
+		return false
 	}
-	return true, &outBuffer, &errBuffer
+	return true
 }
 
 func prepareBuildArgs(dockerBuild *DockerBuild) []string {

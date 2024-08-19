@@ -52,9 +52,9 @@ func (logger *GlobalLogger) CheckPrerequisites(*bringauto_prerequisites.Args) er
 	return nil
 }
 
-func (logger *GlobalLogger) CreatePackageContextLogger(packageName string, logContext string) *PackageContextLogger {
-	packageContextLogger := bringauto_prerequisites.CreateAndInitialize[PackageContextLogger](
-		logger.timestamp, logger.logDirPath, packageName, logContext,
+func (logger *GlobalLogger) CreateContextLogger(imageName string, packageName string, logContext string) *ContextLogger {
+	packageContextLogger := bringauto_prerequisites.CreateAndInitialize[ContextLogger](
+		logger.timestamp, logger.logDirPath, imageName, packageName, logContext,
 	)
 	return packageContextLogger
 }

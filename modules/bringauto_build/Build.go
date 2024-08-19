@@ -110,7 +110,7 @@ func (build *Build) RunBuild() error {
 	}
 
 	logger := bringauto_log.GetLogger()
-	packBuildChainLogger := logger.CreatePackageContextLogger(build.Package.GetShortPackageName(), bringauto_log.BuildChainContext)
+	packBuildChainLogger := logger.CreateContextLogger(build.Docker.ImageName, build.Package.GetShortPackageName(), bringauto_log.BuildChainContext)
 	file, err := packBuildChainLogger.GetFile()
 
 	if err != nil {
@@ -201,7 +201,7 @@ func (build *Build) downloadInstalledFiles() error {
 		}
 	}
 
-	packTarLogger := bringauto_log.GetLogger().CreatePackageContextLogger(build.Package.GetShortPackageName(), bringauto_log.TarContext)
+	packTarLogger := bringauto_log.GetLogger().CreateContextLogger(build.Docker.ImageName, build.Package.GetShortPackageName(), bringauto_log.TarContext)
 	logFile, err := packTarLogger.GetFile()
 
 	if err != nil {

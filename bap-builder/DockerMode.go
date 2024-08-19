@@ -43,9 +43,9 @@ func buildAllDockerImages(contextPath string) error {
 			DockerfileDir: dockerfileDir,
 			Tag:           imageName,
 		}
-		buildOk := dockerBuild.Build()
-		if buildOk != nil {
-			return fmt.Errorf("build failed for '%s'", imageName)
+		err = dockerBuild.Build()
+		if err != nil {
+			return fmt.Errorf("Build failed for %s image", imageName)
 		}
 	}
 	return nil
@@ -54,11 +54,11 @@ func buildAllDockerImages(contextPath string) error {
 // buildSingleDockerImage
 // builds a single docker image specified by a name.
 //
-func buildSingleDockerImage(contextPath string, name string) error {
+func buildSingleDockerImage(contextPath string, imageName string) error {
 	contextManager := ContextManager{
 		ContextPath: contextPath,
 	}
-	dockerfilePath, err := contextManager.GetImageDockerfilePath(name)
+	dockerfilePath, err := contextManager.GetImageDockerfilePath(imageName)
 	if err != nil {
 		return err
 	}
@@ -66,11 +66,11 @@ func buildSingleDockerImage(contextPath string, name string) error {
 	dockerfileDir := path.Dir(dockerfilePath)
 	dockerBuild := bringauto_docker.DockerBuild{
 		DockerfileDir: dockerfileDir,
-		Tag:           name,
+		Tag:           imageName,
 	}
 	buildOk := dockerBuild.Build()
 	if buildOk != nil {
-		return fmt.Errorf("cannot build Docker image - %s", name)
+		return fmt.Errorf("Build failed for %s image", imageName)
 	}
 	return nil
 }
