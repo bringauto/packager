@@ -159,7 +159,7 @@ func (build *Build) RunBuild() error {
 		return err
 	}
 
-	logger.Info("Copying install files from container to local directory")
+	logger.InfoIndent("Copying install files from container to local directory")
 
 	err = build.downloadInstalledFiles()
 	return err

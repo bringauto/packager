@@ -8,6 +8,10 @@ import (
 	"fmt"
 )
 
+const (
+	indent = "    "
+)
+
 type Logger struct {
 	slogger *slog.Logger
 	timestamp time.Time
@@ -23,6 +27,14 @@ func (logger *Logger) Info(msg string, args ...any)  {
 		logger.slogger.Info(msg)
 	} else {
 		logger.slogger.Info(fmt.Sprintf(msg, args))
+	}
+}
+
+func (logger *Logger) InfoIndent(msg string, args ...any)  {
+	if len(args) == 0 {
+		logger.slogger.Info(indent + msg)
+	} else {
+		logger.slogger.Info(indent + fmt.Sprintf(msg, args))
 	}
 }
 

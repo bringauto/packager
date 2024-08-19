@@ -272,18 +272,20 @@ func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_bu
 		err = bringauto_prerequisites.Initialize(&sysroot)
 
 		buildConfig.SetSysroot(&sysroot)
+
+		logger.InfoIndent("Run build inside container")
 		err = buildConfig.RunBuild()
 		if err != nil {
 			return err
 		}
 
-		logger.Info("Copy to Git repository")
+		logger.InfoIndent("Copy to Git repository")
 		err = repo.CopyToRepository(*buildConfig.Package, buildConfig.GetLocalInstallDirPath())
 		if err != nil {
 			return err
 		}
 
-		logger.Info("Copy to local sysroot directory")
+		logger.InfoIndent("Copy to local sysroot directory")
 		err = sysroot.CopyToSysroot(buildConfig.GetLocalInstallDirPath())
 		if err != nil {
 			return err
@@ -293,7 +295,7 @@ func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_bu
 		if err != nil {
 			return err
 		}
-		logger.Info("Build OK")
+		logger.InfoIndent("Build OK")
 	}
 	return nil
 }
