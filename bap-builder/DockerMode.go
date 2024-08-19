@@ -43,10 +43,12 @@ func buildAllDockerImages(contextPath string) error {
 			DockerfileDir: dockerfileDir,
 			Tag:           imageName,
 		}
+		logger.Info("Build Docker Image: %s", imageName)
 		err = dockerBuild.Build()
 		if err != nil {
 			return fmt.Errorf("Build failed for %s image", imageName)
 		}
+		logger.Info("Build OK")
 	}
 	return nil
 }

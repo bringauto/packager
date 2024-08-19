@@ -20,8 +20,6 @@ func (dockerBuild *DockerBuild) Build() error {
 	if dockerBuild.DockerfileDir == "" {
 		return fmt.Errorf("DockerBuild - DockerfileDir is empty")
 	}
-	logger := bringauto_log.GetLogger()
-	logger.Info("Build Docker Image: %s", dockerBuild.Tag)
 
 	var ok = dockerBuild.prepareAndRun(prepareBuildArgs)
 	if !ok {

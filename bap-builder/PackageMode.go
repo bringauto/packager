@@ -214,7 +214,6 @@ func buildSinglePackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) er
 
 	for _, config := range configList {
 		buildConfigs := config.GetBuildStructure(*cmdLine.DockerImageName)
-		logger.Info("Build %s", buildConfigs[0].Package.GetFullPackageName())
 		err = buildAndCopyPackage(cmdLine, &buildConfigs)
 		if err != nil {
 			logger.Error("cannot build package '%s' - %s\n", packageName, err)
@@ -256,12 +255,15 @@ func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_bu
 	if err != nil {
 		return err
 	}
+	logger := bringauto_log.GetLogger()
 
 	for _, buildConfig := range *build {
 		platformString, err := determinePlatformString(&buildConfig)
 		if err != nil {
 			return err
 		}
+
+		logger.Info("Build %s", buildConfig.Package.GetFullPackageName())
 
 		sysroot := bringauto_sysroot.Sysroot{
 			IsDebug:        buildConfig.Package.IsDebug,
@@ -275,11 +277,13 @@ func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_bu
 			return err
 		}
 
+		logger.Info("Copy to Git repository")
 		err = repo.CopyToRepository(*buildConfig.Package, buildConfig.GetLocalInstallDirPath())
 		if err != nil {
 			return err
 		}
 
+		logger.Info("Copy to local sysroot directory")
 		err = sysroot.CopyToSysroot(buildConfig.GetLocalInstallDirPath())
 		if err != nil {
 			return err
@@ -289,6 +293,7 @@ func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_bu
 		if err != nil {
 			return err
 		}
+		logger.Info("Build OK")
 	}
 	return nil
 }
