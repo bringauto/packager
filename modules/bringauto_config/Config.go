@@ -81,6 +81,8 @@ func (config *Config) SaveToJSONConfig(configPath string) error {
 	return nil
 }
 
+// Returns array of builds structs for specific image name. The returned array will contain max one build.
+// It is an array for simple handling of result using for loop.
 func (config *Config) GetBuildStructure(imageName string) []bringauto_build.Build {
 	var buildConfigs []bringauto_build.Build
 	for _, value := range config.DockerMatrix.ImageNames {
