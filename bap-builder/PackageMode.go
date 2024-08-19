@@ -182,24 +182,25 @@ func buildSinglePackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) er
 		ContextPath: contextPath,
 	}
 	packageName := *cmdLine.Name
-	packageJsonPathList, err := contextManager.GetPackageJsonDefPaths(packageName)
-	if err != nil {
-		return err
-	}
-
+	var err error
 	logger := bringauto_log.GetLogger()
 
 	var configList []*bringauto_config.Config
 
 	if *cmdLine.BuildDeps {
-		for _, packageJsonPath := range packageJsonPathList {
-			packageJsonPathList = append(packageJsonPathList, getAllDepsJsonPaths(packageJsonPath, contextManager)...)
+		packageJsonPathList, err := contextManager.GetPackageWithDepsJsonDefPaths(packageName)
+		if err != nil {
+			return err
 		}
 		defsMap := make(ConfigMapType)
 		addConfigsToDefsMap(&defsMap, packageJsonPathList)
 		depList := buildDepList{}
 		configList = depList.TopologicalSort(defsMap)
 	} else {
+		packageJsonPathList, err := contextManager.GetPackageJsonDefPaths(packageName)
+		if err != nil {
+			return err
+		}
 		for _, packageJsonPath := range packageJsonPathList {
 			var config bringauto_config.Config
 			err = config.LoadJSONConfig(packageJsonPath)
@@ -239,38 +240,6 @@ func addConfigsToDefsMap(defsMap *ConfigMapType, packageJsonPathList []string) {
 		}
 		(*defsMap)[packageName] = append((*defsMap)[packageName], &config)
 	}
-}
-
-func getAllDepsJsonPaths(packageJsonPath string, contextManager ContextManager) []string  {
-	var jsonPathListWithDeps []string
-	var config bringauto_config.Config
-	logger := bringauto_log.GetLogger()
-	err := config.LoadJSONConfig(packageJsonPath)
-	if err != nil {
-		logger.Warn("Couldn't load JSON config from %s path - %s", packageJsonPath, err)
-		return jsonPathListWithDeps
-	}
-	for _, packageDep := range config.DependsOn {
-		packageDepsJsonPaths, err := contextManager.GetPackageJsonDefPaths(packageDep)
-		if err != nil {
-			logger.Warn("Couldn't get Json Path of %s package", packageDep)
-			continue
-		}
-		var depConfig bringauto_config.Config
-		for _, packageDepJsonPath := range packageDepsJsonPaths {
-			err := depConfig.LoadJSONConfig(packageDepJsonPath)
-			if err != nil {
-				logger.Warn("Couldn't load JSON config from %s path - %s", packageJsonPath, err)
-				continue
-			}
-			if depConfig.Package.IsDebug == config.Package.IsDebug {
-				jsonPathListWithDeps = append(jsonPathListWithDeps, packageDepJsonPath)
-				jsonPathListWithDeps = append(jsonPathListWithDeps, getAllDepsJsonPaths(packageDepJsonPath, contextManager)...)
-			}
-		}
-	}
-
-	return jsonPathListWithDeps
 }
 
 func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_build.Build) error {

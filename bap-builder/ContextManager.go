@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bringauto/modules/bringauto_config"
+	"bringauto/modules/bringauto_log"
 	"fmt"
 	"io/fs"
 	"os"
@@ -83,6 +85,55 @@ func (context *ContextManager) GetPackageJsonDefPaths(packageName string) ([]str
 	if err != nil {
 		return []string{}, fmt.Errorf("cannot get definitions for package '%s'", packageName)
 	}
+
+	return packageDefs, nil
+}
+
+func (context *ContextManager) getAllDepsJsonPaths(packageJsonPath string) []string {
+	var config bringauto_config.Config
+	logger := bringauto_log.GetLogger()
+	err := config.LoadJSONConfig(packageJsonPath)
+	if err != nil {
+		logger.Warn("Couldn't load JSON config from %s path - %s", packageJsonPath, err)
+		return []string{}
+	}
+	var jsonPathListWithDeps []string
+	for _, packageDep := range config.DependsOn {
+		packageDepsJsonPaths, err := context.GetPackageJsonDefPaths(packageDep)
+		if err != nil {
+			logger.Warn("Couldn't get Json Path of %s package", packageDep)
+			continue
+		}
+		var depConfig bringauto_config.Config
+		for _, packageDepJsonPath := range packageDepsJsonPaths {
+			err := depConfig.LoadJSONConfig(packageDepJsonPath)
+			if err != nil {
+				logger.Warn("Couldn't load JSON config from %s path - %s", packageJsonPath, err)
+				continue
+			}
+			if depConfig.Package.IsDebug == config.Package.IsDebug {
+				jsonPathListWithDeps = append(jsonPathListWithDeps, packageDepJsonPath)
+				jsonPathListWithDeps = append(jsonPathListWithDeps, context.getAllDepsJsonPaths(packageDepJsonPath)...)
+			}
+		}
+	}
+
+	return jsonPathListWithDeps
+}
+
+// GetPackageWithDepsJsonDefPaths
+// returns all json definitions for given package and all its dependencies json definitions recursively
+func (context *ContextManager) GetPackageWithDepsJsonDefPaths(packageName string) ([]string, error) {
+	packageDefs, err := context.GetPackageJsonDefPaths(packageName)
+	if err != nil {
+		return []string{}, fmt.Errorf("cannot get config paths for package '%s'", packageName)
+	}
+	var packageDeps []string
+	for _, packageDef := range packageDefs {
+		packageDeps = append(packageDeps, context.getAllDepsJsonPaths(packageDef)...)
+	}
+
+	packageDefs = append(packageDefs, packageDeps...)
 
 	return packageDefs, nil
 }
