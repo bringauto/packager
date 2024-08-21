@@ -4,7 +4,6 @@ import (
 	"bringauto/modules/bringauto_prerequisites"
 	"os"
 	"time"
-	"strconv"
 )
 
 var globalLoggerSingleton *GlobalLogger
@@ -22,7 +21,7 @@ type GlobalLogger struct {
 }
 
 type globalLoggerInitArgs struct {
-	Timestamp time.Time
+	Timestamp  time.Time
 	LogDirPath string
 }
 
@@ -44,7 +43,7 @@ func (logger *GlobalLogger) FillDynamic(args *bringauto_prerequisites.Args) erro
 }
 
 func (logger *GlobalLogger) getTimestampString() string {
-	return strconv.FormatInt(logger.timestamp.Unix(), 10)
+	return logger.timestamp.Format("2006-01-02_15:04:05")
 }
 
 func (logger *GlobalLogger) CheckPrerequisites(*bringauto_prerequisites.Args) error {
