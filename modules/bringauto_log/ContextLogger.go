@@ -3,7 +3,6 @@ package bringauto_log
 import (
 	"bringauto/modules/bringauto_prerequisites"
 	"os"
-	"time"
 )
 
 const (
@@ -18,7 +17,6 @@ type ContextLogger struct {
 }
 
 type contextLoggerInitArgs struct {
-	Timestamp time.Time
 	LogDirPath string
 	ImageName string
 	PackageName string // If is empty, then it is considered as non-package log
@@ -27,7 +25,6 @@ type contextLoggerInitArgs struct {
 
 func (logger *ContextLogger) FillDefault(*bringauto_prerequisites.Args) error {
 	logger.slogger = getDefaultLogger(os.Stdout)
-	logger.timestamp = time.Time{}
 	logger.logDirPath = ""
 	logger.logFileName = ""
 	return nil
@@ -37,8 +34,7 @@ func (logger *ContextLogger) FillDynamic(args *bringauto_prerequisites.Args) err
 	if !bringauto_prerequisites.IsEmpty(args) {
 		var argsStruct contextLoggerInitArgs
 		bringauto_prerequisites.GetArgs(args, &argsStruct)
-		logger.timestamp = argsStruct.Timestamp
-		logger.logDirPath = argsStruct.LogDirPath + "/" + argsStruct.ImageName + "/" + argsStruct.PackageName	
+		logger.logDirPath = argsStruct.LogDirPath + "/" + argsStruct.ImageName + "/" + argsStruct.PackageName
 		logger.logFileName = argsStruct.LogContext + ".txt"
 	}
 	return nil
