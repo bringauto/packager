@@ -212,8 +212,7 @@ func buildSinglePackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) er
 		buildConfigs := config.GetBuildStructure(*cmdLine.DockerImageName)
 		err = buildAndCopyPackage(cmdLine, &buildConfigs)
 		if err != nil {
-			logger.Error("cannot build package '%s' - %s\n", packageName, err)
-			continue
+			logger.Fatal("cannot build package '%s' - %s", packageName, err)
 		}
 	}
 	return nil
