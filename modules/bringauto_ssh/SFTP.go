@@ -3,16 +3,16 @@ package bringauto_ssh
 import (
 	"bufio"
 	"fmt"
-	"github.com/pkg/sftp"
-	"github.com/mholt/archiver/v3"
 	"io"
 	"os"
-	"path"
 	"regexp"
+
+	"github.com/mholt/archiver/v3"
+	"github.com/pkg/sftp"
 )
 
 const (
-	archiveName string = "install_arch.tar"
+	archiveName    string = "install_arch.tar"
 	archiveNameSep string = string(os.PathSeparator) + archiveName
 )
 
@@ -22,7 +22,7 @@ type SFTP struct {
 	// Empty, existing local directory where the RemoteDir will be copy
 	EmptyLocalDir  string
 	SSHCredentials *SSHCredentials
-	LogWriter io.Writer
+	LogWriter      io.Writer
 }
 
 // DownloadDirectory
@@ -34,7 +34,7 @@ func (sftpd *SFTP) DownloadDirectory() error {
 
 	tar := Tar{
 		ArchiveName: archiveName,
-		SourceDir: "/INSTALL",
+		SourceDir:   "/INSTALL",
 	}
 
 	shellEvaluator := ShellEvaluator{
@@ -77,16 +77,16 @@ func (sftpd *SFTP) DownloadDirectory() error {
 
 	localArchivePath := sftpd.EmptyLocalDir + archiveNameSep
 
-	err = sftpd.copyFile(sftpClient, sftpd.RemoteDir + archiveNameSep, localArchivePath)
+	err = sftpd.copyFile(sftpClient, sftpd.RemoteDir+archiveNameSep, localArchivePath)
 	if err != nil {
 		return fmt.Errorf("cannot copy recursive %s", err)
 	}
 
 	tarArchive := archiver.Tar{
-		OverwriteExisting: false,
-		MkdirAll: false,
+		OverwriteExisting:      false,
+		MkdirAll:               false,
 		ImplicitTopLevelFolder: false,
-		ContinueOnError: true,
+		ContinueOnError:        true,
 	}
 
 	err = tarArchive.Unarchive(localArchivePath, sftpd.EmptyLocalDir)
@@ -124,73 +124,6 @@ func (sftpd *SFTP) copyFile(sftpClient *sftp.Client, remoteFile string, localDir
 	}
 
 	copyIOFile(sourceFile, destFile)
-
-	return nil
-}
-
-// deprecated, reason: very slow with big trees, new approach: create tar and and copy single archive with copyFile()
-func (sftpd *SFTP) copyRecursive(sftpClient *sftp.Client, remoteDir string, localDir string) error {
-	var err error
-	_, err = sftpClient.Lstat(sftpd.RemoteDir)
-	if os.IsNotExist(err) {
-		return fmt.Errorf("requested remote file %s does not exist", sftpd.RemoteDir)
-	}
-	normalizedRemoteDir, _ := normalizePath(remoteDir)
-	normalizedLocalDir, _ := normalizePath(localDir)
-
-	allDone := make(chan bool, 2000)
-	fileCount := 0
-
-	walk := sftpClient.Walk(normalizedRemoteDir)
-	for walk.Step() {
-		if walk.Err() != nil {
-			continue
-		}
-		remotePath, _ := normalizePath(walk.Path())
-		if normalizedRemoteDir == remotePath {
-			continue
-		}
-		relativeRemotePath := remotePath[len(normalizedRemoteDir):]
-		absoluteLocalPath := path.Join(normalizedLocalDir, relativeRemotePath)
-		remotePathStat, err := sftpClient.Lstat(remotePath)
-		if err != nil {
-			return fmt.Errorf("cannot get Lstat if remote %s", normalizedRemoteDir)
-		}
-
-		if remotePathStat.IsDir() {
-			err = os.MkdirAll(absoluteLocalPath, remotePathStat.Mode().Perm())
-			if err != nil {
-				return fmt.Errorf("cannot create local directory - %s", err)
-			}
-			err = sftpd.copyRecursive(sftpClient, remotePath, absoluteLocalPath)
-			if err != nil {
-				return fmt.Errorf("sftp copy - %s", err)
-			}
-			continue
-		}
-
-		sourceFile, err := sftpClient.Open(remotePath)
-		if err != nil {
-			return fmt.Errorf("cannot open file for read - %s,%s", remotePath, err)
-		}
-		destFile, err := os.OpenFile(absoluteLocalPath, os.O_RDWR|os.O_CREATE, remotePathStat.Mode().Perm())
-		if err != nil {
-			return err
-		}
-
-		fileCount += 1
-		go func() {
-			defer func() { allDone <- true }()
-
-			copyIOFile(sourceFile, destFile)
-		}()
-
-	}
-	//Problem: this system copy files directory by directory in linear manner
-	// just stupid wait mechanism
-	for i := 0; i < fileCount; i++ {
-		<-allDone
-	}
 
 	return nil
 }
