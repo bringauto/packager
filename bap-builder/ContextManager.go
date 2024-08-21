@@ -2,7 +2,6 @@ package main
 
 import (
 	"bringauto/modules/bringauto_config"
-	"bringauto/modules/bringauto_log"
 	"fmt"
 	"io/fs"
 	"os"
@@ -89,36 +88,36 @@ func (context *ContextManager) GetPackageJsonDefPaths(packageName string) ([]str
 	return packageDefs, nil
 }
 
-func (context *ContextManager) getAllDepsJsonPaths(packageJsonPath string) []string {
+func (context *ContextManager) getAllDepsJsonPaths(packageJsonPath string) ([]string, error) {
 	var config bringauto_config.Config
-	logger := bringauto_log.GetLogger()
 	err := config.LoadJSONConfig(packageJsonPath)
 	if err != nil {
-		logger.Warn("Couldn't load JSON config from %s path - %s", packageJsonPath, err)
-		return []string{}
+		return []string{}, fmt.Errorf("couldn't load JSON config from %s path - %s", packageJsonPath, err)
 	}
 	var jsonPathListWithDeps []string
 	for _, packageDep := range config.DependsOn {
 		packageDepsJsonPaths, err := context.GetPackageJsonDefPaths(packageDep)
 		if err != nil {
-			logger.Warn("Couldn't get Json Path of %s package", packageDep)
-			continue
+			return []string{}, fmt.Errorf("couldn't get Json Path of %s package", packageDep)
 		}
 		var depConfig bringauto_config.Config
 		for _, packageDepJsonPath := range packageDepsJsonPaths {
 			err := depConfig.LoadJSONConfig(packageDepJsonPath)
 			if err != nil {
-				logger.Warn("Couldn't load JSON config from %s path - %s", packageJsonPath, err)
-				continue
+				return []string{}, fmt.Errorf("couldn't load JSON config from %s path - %s", packageJsonPath, err)
 			}
 			if depConfig.Package.IsDebug == config.Package.IsDebug {
 				jsonPathListWithDeps = append(jsonPathListWithDeps, packageDepJsonPath)
-				jsonPathListWithDeps = append(jsonPathListWithDeps, context.getAllDepsJsonPaths(packageDepJsonPath)...)
+				jsonPathListWithDepsTmp, err := context.getAllDepsJsonPaths(packageDepJsonPath)
+				if err != nil {
+					return []string{}, err
+				}
+				jsonPathListWithDeps = append(jsonPathListWithDeps, jsonPathListWithDepsTmp...)
 			}
 		}
 	}
 
-	return jsonPathListWithDeps
+	return jsonPathListWithDeps, nil
 }
 
 // GetPackageWithDepsJsonDefPaths
@@ -126,11 +125,15 @@ func (context *ContextManager) getAllDepsJsonPaths(packageJsonPath string) []str
 func (context *ContextManager) GetPackageWithDepsJsonDefPaths(packageName string) ([]string, error) {
 	packageDefs, err := context.GetPackageJsonDefPaths(packageName)
 	if err != nil {
-		return []string{}, fmt.Errorf("cannot get config paths for package '%s'", packageName)
+		return []string{}, fmt.Errorf("cannot get config paths for package '%s' - %s", packageName, err)
 	}
 	var packageDeps []string
 	for _, packageDef := range packageDefs {
-		packageDeps = append(packageDeps, context.getAllDepsJsonPaths(packageDef)...)
+		packageDepsTmp, err := context.getAllDepsJsonPaths(packageDef)
+		if err != nil {
+			return []string{}, err
+		}
+		packageDeps = append(packageDeps, packageDepsTmp...)
 	}
 
 	packageDefs = append(packageDefs, packageDeps...)
