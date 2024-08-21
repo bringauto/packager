@@ -122,10 +122,6 @@ func (list *buildDepList) sortDependencies(rootName string, dependsMap *map[stri
 // BuildPackage
 // process Package mode of the program
 func BuildPackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) error {
-	if !bringauto_sysroot.IsSysrootDirectoryEmpty() {
-		logger := bringauto_log.GetLogger()
-		logger.Warn("Sysroot directory is not empty - the package build may fail")
-	}
 	buildAll := cmdLine.All
 	if *buildAll {
 		return buildAllPackages(cmdLine, contextPath)
@@ -270,6 +266,9 @@ func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_bu
 			PlatformString: platformString,
 		}
 		err = bringauto_prerequisites.Initialize(&sysroot)
+		if !sysroot.IsSysrootDirectoryEmpty() {
+			logger.WarnIndent("Sysroot directory is not empty - the package build may fail")
+		}
 
 		buildConfig.SetSysroot(&sysroot)
 

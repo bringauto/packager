@@ -1,11 +1,13 @@
 package bringauto_sysroot
 
 import (
+	"bringauto/modules/bringauto_log"
 	"bringauto/modules/bringauto_package"
 	"bringauto/modules/bringauto_prerequisites"
 	"fmt"
 	"github.com/otiai10/copy"
 	"os"
+	"io"
 	"io/fs"
 	"path/filepath"
 	"strings"
@@ -103,6 +105,26 @@ func (sysroot *Sysroot) CreateSysrootDir() {
 			panic(fmt.Errorf("cannot create sysroot dir: '%s'", sysPath))
 		}
 	}
+}
+
+// IsSysrootDirectoryEmpty
+// Returns true if specified dir do not exists or exists but is empty, otherwise returns false
+func (sysroot *Sysroot) IsSysrootDirectoryEmpty() bool {
+	f, err := os.Open(sysroot.GetSysrootPath())
+	if err != nil { // The directory do not exists
+		return true
+	}
+	defer f.Close()
+
+	_, err = f.Readdirnames(1)
+
+	if err == io.EOF { // The directory exists, but is empty
+		return true
+	} else if err != nil {
+		bringauto_log.GetLogger().Warn("Cannot read in sysroot directory: %s", err)
+	}
+
+	return false
 }
 
 func onSymlink(src string) copy.SymlinkAction {
