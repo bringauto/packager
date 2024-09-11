@@ -8,6 +8,7 @@ import (
 	"bringauto/modules/bringauto_prerequisites"
 	"bringauto/modules/bringauto_ssh"
 	"bringauto/modules/bringauto_sysroot"
+	"bringauto/modules/bringauto_process"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -136,23 +137,14 @@ func (build *Build) RunBuild() error {
 	}
 
 	dockerRun := (*bringauto_docker.DockerRun)(build.Docker)
+	removeHandler := bringauto_process.AddHandler(build.stopAndRemoveContainer)
+	defer removeHandler()
+
 	err = dockerRun.Run()
 	if err != nil {
 		return err
 	}
-	defer func() {
-		dockerStop := (*bringauto_docker.DockerStop)(build.Docker)
-		dockerRm := (*bringauto_docker.DockerRm)(build.Docker)
-		var err error
-		err = dockerStop.Stop()
-		if err != nil {
-			logger.Error("cannot stop container: %s\n", err)
-		}
-		err = dockerRm.RemoveContainer()
-		if err != nil {
-			logger.Error("cannot remove container: %s\n", err)
-		}
-	}()
+	defer build.stopAndRemoveContainer()
 
 	err = shellEvaluator.RunOverSSH(*build.SSHCredentials)
 	if err != nil {
@@ -177,6 +169,23 @@ func (build *Build) GetLocalInstallDirPath() string {
 	}
 	copyBaseDir := filepath.Join(workingDir, localInstallDirNameConst)
 	return copyBaseDir
+}
+
+func (build *Build) stopAndRemoveContainer() error {
+	var err error
+
+	dockerStop := (*bringauto_docker.DockerStop)(build.Docker)
+	dockerRm := (*bringauto_docker.DockerRm)(build.Docker)
+	logger := bringauto_log.GetLogger()
+	err = dockerStop.Stop()
+	if err != nil {
+		logger.Error("Can't stop container - %s", err)
+	}
+	err = dockerRm.RemoveContainer()
+	if err != nil {
+		logger.Error("Can't remove container - %s", err)
+	}
+	return nil
 }
 
 func (build *Build) CleanUp() error {

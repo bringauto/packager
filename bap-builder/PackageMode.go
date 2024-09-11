@@ -8,6 +8,7 @@ import (
 	"bringauto/modules/bringauto_prerequisites"
 	"bringauto/modules/bringauto_repository"
 	"bringauto/modules/bringauto_sysroot"
+	"bringauto/modules/bringauto_process"
 	"fmt"
 	"strconv"
 )
@@ -278,6 +279,10 @@ func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_bu
 		}
 
 		logger.InfoIndent("Copy to Git repository")
+
+		removeHandler := bringauto_process.AddHandler(buildConfig.CleanUp)
+		defer removeHandler()
+
 		err = repo.CopyToRepository(*buildConfig.Package, buildConfig.GetLocalInstallDirPath())
 		if err != nil {
 			return err

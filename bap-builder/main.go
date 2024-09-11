@@ -3,8 +3,10 @@ package main
 import (
 	"bringauto/modules/bringauto_log"
 	"bringauto/modules/bringauto_prerequisites"
+	"bringauto/modules/bringauto_process"
 	"os"
 	"time"
+	"syscall"
 )
 
 func main() {
@@ -17,6 +19,7 @@ func main() {
 	if err != nil {
 		return
 	}
+	bringauto_process.RegisterSignal(syscall.SIGINT)
 
 	if args.BuildImage {
 		err = BuildDockerImage(&args.BuildImagesArgs, *args.Context)
