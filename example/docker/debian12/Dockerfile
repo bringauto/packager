@@ -8,9 +8,8 @@ RUN apt-get update && \
       build-essential binutils lsb-release make git libssl-dev openssh-server wget patchelf software-properties-common flex && \
     rm -rf /var/lib/apt/lists/*
 
-RUN git clone git://gcc.gnu.org/git/gcc.git /gcc && \
+RUN git clone --depth=1 --single-branch --branch=releases/gcc-13.3.0 git://gcc.gnu.org/git/gcc.git /gcc && \
     cd /gcc && \
-    git checkout releases/gcc-13 && \
     contrib/download_prerequisites && \
     mkdir objdir
 
