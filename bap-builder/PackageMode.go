@@ -281,7 +281,6 @@ func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_bu
 		logger.InfoIndent("Copy to Git repository")
 
 		removeHandler := bringauto_process.AddHandler(buildConfig.CleanUp)
-		defer removeHandler()
 
 		err = repo.CopyToRepository(*buildConfig.Package, buildConfig.GetLocalInstallDirPath())
 		if err != nil {
@@ -295,6 +294,7 @@ func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_bu
 		}
 
 		err = buildConfig.CleanUp()
+		removeHandler()
 		if err != nil {
 			return err
 		}
