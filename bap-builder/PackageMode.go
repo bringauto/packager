@@ -278,7 +278,7 @@ func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_bu
 			return err
 		}
 
-		logger.InfoIndent("Copy to Git repository")
+		logger.InfoIndent("Copying to Git repository")
 
 		removeHandler := bringauto_process.AddHandler(buildConfig.CleanUp)
 
@@ -287,7 +287,7 @@ func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_bu
 			return err
 		}
 
-		logger.InfoIndent("Copy to local sysroot directory")
+		logger.InfoIndent("Copying to local sysroot directory")
 		err = sysroot.CopyToSysroot(buildConfig.GetLocalInstallDirPath())
 		if err != nil {
 			return err
