@@ -52,7 +52,6 @@ func AddHandler(handler func() error) func() {
 }
 
 func removeLastHandler() error {
-	bringauto_log.GetLogger().Info("Removing last handler, new size: %d", len(handlers) - 1)
 	if len(handlers) == 0 {
 		return fmt.Errorf("no handler to remove")
 	}

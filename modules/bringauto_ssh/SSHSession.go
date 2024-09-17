@@ -70,7 +70,6 @@ func (session *SSHSession) LoginMultipleAttempts(credentials SSHCredentials) err
 		} else {
 			numberOfAttempts += 1
 			time.Sleep(waitingInSecondsBeforeRetryConst * time.Second)
-			bringauto_log.GetLogger().Info("Cannot login over ssh. Again...")
 		}
 	}
 	return nil
