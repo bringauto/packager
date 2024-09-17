@@ -1,7 +1,6 @@
 package bringauto_ssh
 
 import (
-	"bringauto/modules/bringauto_log"
 	"bringauto/modules/bringauto_prerequisites"
 	"fmt"
 	"golang.org/x/crypto/ssh"
