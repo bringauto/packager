@@ -143,6 +143,9 @@ func (cmd *CmdLineArgs) ParseArgs(args []string) error {
 
 	cmd.BuildImage = cmd.buildImageParser.Happened()
 	cmd.BuildPackage = cmd.buildPackageParser.Happened()
+	if *cmd.BuildPackageArgs.All && *cmd.BuildPackageArgs.BuildDeps {
+		return fmt.Errorf("all and build-deps flags at the same time")
+	}
 
 	return nil
 }
