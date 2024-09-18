@@ -64,15 +64,17 @@ func buildSingleDockerImage(contextPath string, imageName string) error {
 	if err != nil {
 		return err
 	}
-
+	logger := bringauto_log.GetLogger()
 	dockerfileDir := path.Dir(dockerfilePath)
 	dockerBuild := bringauto_docker.DockerBuild{
 		DockerfileDir: dockerfileDir,
 		Tag:           imageName,
 	}
+	logger.Info("Build Docker Image: %s", imageName)
 	buildOk := dockerBuild.Build()
 	if buildOk != nil {
 		return fmt.Errorf("Build failed for %s image", imageName)
 	}
+	logger.InfoIndent("Build OK")
 	return nil
 }
