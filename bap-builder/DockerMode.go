@@ -58,6 +58,9 @@ func buildSingleDockerImage(imageName string, dockerfilePath string) error {
 		Tag:           imageName,
 	}
 	logger.Info("Build Docker Image: %s", imageName)
+
+	// Building image does not require any handler when SIGINT is received. 'docker build' creates
+	// image after all steps from Dockerfile are successfully executed.
 	err := dockerBuild.Build()
 	if err != nil {
 		logger.ErrorIndent("Can't build image - %s", err)
