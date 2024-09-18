@@ -62,6 +62,14 @@ func (logger *Logger) Error(msg string, args ...any) {
 	}
 }
 
+func (logger *Logger) ErrorIndent(msg string, args ...any) {
+	if len(args) == 0 {
+		logger.slogger.Error(indent + msg)
+	} else {
+		logger.slogger.Error(indent + fmt.Sprintf(msg, args...))
+	}
+}
+
 func (logger *Logger) Fatal(msg string, args ...any) {
 	if len(args) == 0 {
 		logger.slogger.Error(msg)
