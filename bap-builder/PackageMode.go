@@ -131,8 +131,8 @@ func BuildPackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) error {
 }
 
 // buildAllPackages
-// builds all docker images in the given contextPath.
-// It returns nil if everything is ok, or not nil in case of error
+// Builds all packages specified in contextPath. Also takes care of building all deps for all
+// packages in correct order. It returns nil if everything is ok, or not nil in case of error.
 func buildAllPackages(cmdLine *BuildPackageCmdLineArgs, contextPath string) error {
 	contextManager := ContextManager{
 		ContextPath: contextPath,
@@ -171,8 +171,8 @@ func buildAllPackages(cmdLine *BuildPackageCmdLineArgs, contextPath string) erro
 }
 
 // buildSinglePackage
-// build single package specified by a name
-// It returns nil if everything is ok, or not nil in case of error
+// Builds single package specified by name in cmdLine. Also takes care of building all deps for
+// given package in correct order. It returns nil if everything is ok, or not nil in case of error.
 func buildSinglePackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) error {
 	contextManager := ContextManager{
 		ContextPath: contextPath,
@@ -218,6 +218,8 @@ func buildSinglePackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) er
 	return nil
 }
 
+// addConfigsToDefsMap
+// Adds all configs in packageJsonPathList to defsMap.
 func addConfigsToDefsMap(defsMap *ConfigMapType, packageJsonPathList []string) {
 	for _, packageJsonPath := range packageJsonPathList {
 		var config bringauto_config.Config
@@ -236,6 +238,8 @@ func addConfigsToDefsMap(defsMap *ConfigMapType, packageJsonPathList []string) {
 	}
 }
 
+// buildAndCopyPackage
+// Builds single package, takes care of every step of build for single package.
 func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_build.Build) error {
 	if *cmdLine.OutputDirMode != OutputDirModeGitLFS {
 		return fmt.Errorf("invalid OutputDirmode. Only GitLFS is supported")
