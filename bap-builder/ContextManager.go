@@ -88,6 +88,8 @@ func (context *ContextManager) GetPackageJsonDefPaths(packageName string) ([]str
 	return packageDefs, nil
 }
 
+// getAllDepsJsonPaths
+// returns all json defintions paths recursively for given package specified by its json definition path
 func (context *ContextManager) getAllDepsJsonPaths(packageJsonPath string) ([]string, error) {
 	var config bringauto_config.Config
 	err := config.LoadJSONConfig(packageJsonPath)
@@ -121,7 +123,7 @@ func (context *ContextManager) getAllDepsJsonPaths(packageJsonPath string) ([]st
 }
 
 // GetPackageWithDepsJsonDefPaths
-// returns all json definitions for given package and all its dependencies json definitions recursively
+// returns all json definitions paths for given package and all its dependencies json definitions paths recursively
 func (context *ContextManager) GetPackageWithDepsJsonDefPaths(packageName string) ([]string, error) {
 	packageDefs, err := context.GetPackageJsonDefPaths(packageName)
 	if err != nil {
