@@ -6,8 +6,11 @@ import (
 	"time"
 )
 
+// globalLoggerSingleton Singleton module global variable for GlobalLogger.
 var globalLoggerSingleton *GlobalLogger
 
+// GetLogger
+// Returns GlobalLogger singleton to use for logging.
 func GetLogger() *GlobalLogger {
 	if globalLoggerSingleton == nil {
 		globalLoggerSingleton = bringauto_prerequisites.CreateAndInitialize[GlobalLogger]()
@@ -16,12 +19,16 @@ func GetLogger() *GlobalLogger {
 	return globalLoggerSingleton
 }
 
+// GlobalLogger
+// Struct used for logging on program level.
 type GlobalLogger struct {
 	Logger
 }
 
 type globalLoggerInitArgs struct {
+	// Timestamp Current timestamp used for creating ContextLoggers.
 	Timestamp  time.Time
+	// LogDirPath Directory path, where created ContextLoggers will save logs.
 	LogDirPath string
 }
 
@@ -42,6 +49,8 @@ func (logger *GlobalLogger) FillDynamic(args *bringauto_prerequisites.Args) erro
 	return nil
 }
 
+// getTimestampString
+// Return timestamp formatted string for use in path.
 func (logger *GlobalLogger) getTimestampString() string {
 	return logger.timestamp.Format("2006-01-02_15:04:05")
 }
@@ -51,6 +60,8 @@ func (logger *GlobalLogger) CheckPrerequisites(*bringauto_prerequisites.Args) er
 	return nil
 }
 
+// CreateContextLogger
+// Creates ContextLogger for specified imageName, packageName and logContext.
 func (logger *GlobalLogger) CreateContextLogger(imageName string, packageName string, logContext string) *ContextLogger {
 	packageContextLogger := bringauto_prerequisites.CreateAndInitialize[ContextLogger](
 		logger.logDirPath, imageName, packageName, logContext,
