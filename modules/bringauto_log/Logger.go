@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	indent = "    "
+	indent = "\x20\x20\x20\x20" // four spaces
 )
 
 // loggerSingleton Singleton module global variable for Logger.
