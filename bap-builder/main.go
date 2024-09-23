@@ -12,7 +12,7 @@ import (
 func main() {
 	var err error
 	var args CmdLineArgs
-	logger := bringauto_prerequisites.CreateAndInitialize[bringauto_log.GlobalLogger](time.Now(), "./log")
+	logger := bringauto_prerequisites.CreateAndInitialize[bringauto_log.Logger](time.Now(), "./log")
 
 	args.InitFlags()
 	err = args.ParseArgs(os.Args)

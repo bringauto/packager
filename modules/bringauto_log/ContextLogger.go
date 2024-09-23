@@ -14,7 +14,7 @@ const (
 // ContextLogger
 // Is used for getting writable file for context logs of a package.
 type ContextLogger struct {
-	Logger
+	logDirPath string
 	// logFileName Whole log file name with context and extrnsion
 	logFileName string
 }
@@ -32,7 +32,6 @@ type contextLoggerInitArgs struct {
 }
 
 func (logger *ContextLogger) FillDefault(*bringauto_prerequisites.Args) error {
-	logger.slogger = getDefaultLogger(os.Stdout)
 	logger.logDirPath = ""
 	logger.logFileName = ""
 	return nil
@@ -55,7 +54,7 @@ func (logger *ContextLogger) initLogDir() error {
 	if os.IsNotExist(err) {
 		err = os.MkdirAll(logger.logDirPath, 0700)
 		if err != nil {
-			logger.Error("Failed to create log directory - %s", err)
+			GetLogger().Error("Failed to create log directory - %s", err)
 			return err
 		}
 	}
