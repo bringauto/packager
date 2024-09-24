@@ -63,7 +63,7 @@ func (logger *ContextLogger) initLogDir() error {
 
 func (logger *ContextLogger) CheckPrerequisites(*bringauto_prerequisites.Args) error {
 	if logger.logDirPath != "" {
-		logger.initLogDir()
+		return logger.initLogDir()
 	}
 	return nil
 }
