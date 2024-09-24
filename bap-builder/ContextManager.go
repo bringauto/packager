@@ -108,14 +108,15 @@ func (context *ContextManager) getAllDepsJsonPaths(packageJsonPath string) ([]st
 			if err != nil {
 				return []string{}, fmt.Errorf("couldn't load JSON config from %s path - %s", packageJsonPath, err)
 			}
-			if depConfig.Package.IsDebug == config.Package.IsDebug {
-				jsonPathListWithDeps = append(jsonPathListWithDeps, packageDepJsonPath)
-				jsonPathListWithDepsTmp, err := context.getAllDepsJsonPaths(packageDepJsonPath)
-				if err != nil {
-					return []string{}, err
-				}
-				jsonPathListWithDeps = append(jsonPathListWithDeps, jsonPathListWithDepsTmp...)
+			if depConfig.Package.IsDebug != config.Package.IsDebug {
+				continue
 			}
+			jsonPathListWithDeps = append(jsonPathListWithDeps, packageDepJsonPath)
+			jsonPathListWithDepsTmp, err := context.getAllDepsJsonPaths(packageDepJsonPath)
+			if err != nil {
+				return []string{}, err
+			}
+			jsonPathListWithDeps = append(jsonPathListWithDeps, jsonPathListWithDepsTmp...)
 		}
 	}
 
