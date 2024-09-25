@@ -5,10 +5,10 @@ RUN echo root:1234 | chpasswd
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
-      build-essential binutils lsb-release make git libssl-dev openssh-server wget patchelf software-properties-common flex && \
+    binutils build-essential flex git libssl-dev lsb-release make openssh-server patchelf software-properties-common wget && \
     rm -rf /var/lib/apt/lists/*
 
-RUN git clone --depth=1 --single-branch --branch=releases/gcc-13.2.0 git://gcc.gnu.org/git/gcc.git /gcc && \
+RUN git clone --depth=1 --single-branch --branch=releases/gcc-13.2.0 https://gcc.gnu.org/git/gcc.git /gcc && \
     cd /gcc && \
     contrib/download_prerequisites && \
     mkdir objdir
