@@ -5,13 +5,13 @@ RUN echo root:1234 | chpasswd
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    build-essential coreutils g++-8 g++-8-aarch64-linux-gnu gcc-8 gcc-8-aarch64-linux-gnu git libssl-dev lsb-release make openssh-server patchelf unzip && \
+      build-essential make libssl-dev coreutils lsb-release wget g++-8 gcc-8 gcc-8-aarch64-linux-gnu g++-8-aarch64-linux-gnu patchelf unzip openssh-server git && \
     rm -rf /var/lib/apt/lists/*
 
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++ g++ /usr/bin/g++-8
 
-ADD "https://github.com/Kitware/CMake/releases/download/v3.28.0/cmake-3.28.0-linux-x86_64.sh" cmake.sh
-RUN chmod +x cmake.sh && \
+RUN wget "https://github.com/Kitware/CMake/releases/download/v3.28.0/cmake-3.28.0-linux-x86_64.sh" -O cmake.sh && \
+    chmod +x cmake.sh && \
     ./cmake.sh --skip-license --prefix=/usr/local && \
     rm ./cmake.sh
 

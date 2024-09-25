@@ -8,11 +8,11 @@ RUN echo root:1234 | chpasswd
 #
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
-      build-essential xz-utils sed git libssl-dev openssh-server unzip python3 make patchelf && \
+      build-essential xz-utils sed git libssl-dev openssh-server wget unzip python3 make patchelf && \
     rm -rf /var/lib/apt/lists/*
 
-ADD "https://github.com/Kitware/CMake/releases/download/v3.22.2/cmake-3.22.2-linux-x86_64.sh" cmake.sh
-RUN chmod +x cmake.sh && \
+RUN wget "https://github.com/Kitware/CMake/releases/download/v3.22.2/cmake-3.22.2-linux-x86_64.sh" -O cmake.sh && \
+    chmod +x cmake.sh && \
     ./cmake.sh --skip-license --prefix=/usr/local && \
     rm ./cmake.sh
 
@@ -33,7 +33,7 @@ COPY uname.txt /root/tools/
 
 RUN apt-get update && \
     apt-get purge -y \
-      unzip && \
+      wget unzip && \
       rm -rf /var/lib/apt/lists/*
 
 ENTRYPOINT ["/usr/sbin/sshd", "-D", "-o", "ListenAddress=0.0.0.0"]
