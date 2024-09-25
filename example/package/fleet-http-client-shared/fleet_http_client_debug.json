@@ -1,6 +1,13 @@
 {
   "Env": {},
-  "DependsOn": [ "zlib", "ba-logger", "boost", "fleet-protocol-interface", "fleet-protocol-cxx-helpers-static", "cpprestsdk" ],
+  "DependsOn": [
+    "zlib",
+    "ba-logger",
+    "boost",
+    "fleet-protocol-interface",
+    "fleet-protocol-cxx-helpers-static",
+    "cpprestsdk"
+  ],
   "Git": {
     "URI": "https://github.com/bringauto/fleet-protocol-http-client-cxx.git",
     "Revision": "v1.3.0"
@@ -12,8 +19,8 @@
         "BRINGAUTO_INSTALL": "ON",
         "BRINGAUTO_PACKAGE": "ON",
         "BRINGAUTO_SYSTEM_DEP": "ON",
-        "BRINGAUTO_SAMPLES" : "OFF",
-        "BRINGAUTO_TESTS" : "OFF"
+        "BRINGAUTO_SAMPLES": "OFF",
+        "BRINGAUTO_TESTS": "OFF"
       }
     }
   },
@@ -34,7 +41,8 @@
       "debian12",
       "debian11",
       "ubuntu2304",
-      "ubuntu2310"
+      "ubuntu2310",
+      "fedora40"
     ]
   }
 }

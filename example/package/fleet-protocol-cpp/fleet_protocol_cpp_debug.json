@@ -14,7 +14,7 @@
         "BRINGAUTO_INSTALL": "ON",
         "BRINGAUTO_PACKAGE": "ON",
         "BRINGAUTO_SYSTEM_DEP": "ON",
-        "BRINGAUTO_TESTS" : "OFF"
+        "BRINGAUTO_TESTS": "OFF"
       }
     }
   },
@@ -35,7 +35,8 @@
       "debian12",
       "debian11",
       "ubuntu2304",
-      "ubuntu2310"
+      "ubuntu2310",
+      "fedora40"
     ]
   }
 }

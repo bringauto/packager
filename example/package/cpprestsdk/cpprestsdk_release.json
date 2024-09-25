@@ -1,6 +1,9 @@
 {
-  "Env": { },
-  "DependsOn": [ "zlib", "boost" ],
+  "Env": {},
+  "DependsOn": [
+    "zlib",
+    "boost"
+  ],
   "Git": {
     "URI": "https://github.com/bringauto/cpprestsdk.git",
     "Revision": "v2.10.20"
@@ -31,7 +34,8 @@
       "debian12",
       "debian11",
       "ubuntu2304",
-      "ubuntu2310"
+      "ubuntu2310",
+      "fedora40"
     ]
   }
 }

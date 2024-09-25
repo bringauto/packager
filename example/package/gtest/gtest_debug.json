@@ -29,7 +29,8 @@
       "fleet-os-2",
       "debian12",
       "ubuntu2304",
-      "ubuntu2310"
+      "ubuntu2310",
+      "fedora40"
     ]
   }
 }
