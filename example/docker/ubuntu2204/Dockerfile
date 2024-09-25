@@ -7,7 +7,7 @@ RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common && \
     add-apt-repository ppa:ubuntu-toolchain-r/test
 
-    RUN apt-get update && \
+RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
       	coreutils lsb-release build-essential  openssh-server git libssl-dev wget gcc-13 g++-13 patchelf && \
     rm -rf /var/lib/apt/lists/* && \
