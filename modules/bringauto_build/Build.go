@@ -4,6 +4,7 @@ import (
 	"bringauto/modules/bringauto_docker"
 	"bringauto/modules/bringauto_git"
 	"bringauto/modules/bringauto_log"
+	"bringauto/modules/bringauto_const"
 	"bringauto/modules/bringauto_package"
 	"bringauto/modules/bringauto_prerequisites"
 	"bringauto/modules/bringauto_ssh"
@@ -84,7 +85,7 @@ func (build *Build) RunBuild() error {
 	if found {
 		return fmt.Errorf("do not specify CMAKE_INSTALL_PREFIX")
 	}
-	build.CMake.Defines["CMAKE_INSTALL_PREFIX"] = dockerInstallDirConst
+	build.CMake.Defines["CMAKE_INSTALL_PREFIX"] = bringauto_const.DockerInstallDirConst
 
 	if build.sysroot != nil {
 		build.sysroot.CreateSysrootDir()
@@ -222,7 +223,7 @@ func (build *Build) downloadInstalledFiles() error {
 	defer logFile.Close()
 
 	sftpClient := bringauto_ssh.SFTP{
-		RemoteDir:      dockerInstallDirConst,
+		RemoteDir:      bringauto_const.DockerInstallDirConst,
 		EmptyLocalDir:  copyDir,
 		SSHCredentials: build.SSHCredentials,
 		LogWriter:      logFile,

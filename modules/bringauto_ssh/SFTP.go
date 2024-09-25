@@ -1,6 +1,7 @@
 package bringauto_ssh
 
 import (
+	"bringauto/modules/bringauto_const"
 	"bufio"
 	"fmt"
 	"io"
@@ -34,7 +35,7 @@ func (sftpd *SFTP) DownloadDirectory() error {
 
 	tar := Tar{
 		ArchiveName: archiveName,
-		SourceDir:   "/INSTALL",
+		SourceDir:   bringauto_const.DockerInstallDirConst,
 	}
 
 	shellEvaluator := ShellEvaluator{
@@ -45,7 +46,7 @@ func (sftpd *SFTP) DownloadDirectory() error {
 	err = shellEvaluator.RunOverSSH(*sftpd.SSHCredentials)
 
 	if err != nil {
-		return fmt.Errorf("cannot archive /INSTALL dir in docker container - %s", err)
+		return fmt.Errorf("cannot archive %s dir in docker container - %s", bringauto_const.DockerInstallDirConst, err)
 	}
 
 	sshSession := SSHSession{}

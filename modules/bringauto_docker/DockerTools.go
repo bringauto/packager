@@ -2,7 +2,9 @@ package bringauto_docker
 
 import (
 	"bringauto/modules/bringauto_process"
+	"bringauto/modules/bringauto_const"
 	"bytes"
+	"strconv"
 )
 
 func IsDefaultPortAvailable() bool {
@@ -15,7 +17,7 @@ func IsDefaultPortAvailable() bool {
 				"container",
 				"ls",
 				"--filter",
-				"publish=1122",
+				"publish=" + strconv.Itoa(bringauto_const.DefaultSSHPort),
 				"--format",
 				"{{.ID}}{{.Ports}}",
 			},

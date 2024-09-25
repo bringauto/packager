@@ -3,6 +3,7 @@ package bringauto_docker
 import (
 	"bringauto/modules/bringauto_prerequisites"
 	"bringauto/modules/bringauto_process"
+	"bringauto/modules/bringauto_const"
 	"fmt"
 	"os"
 )
@@ -33,7 +34,7 @@ func (docker *Docker) FillDefault(*bringauto_prerequisites.Args) error {
 		RunAsDaemon: true,
 		ImageName:   defaultImageNameConst,
 		Ports: map[int]int{
-			1122: 22,
+			bringauto_const.DefaultSSHPort: 22,
 		},
 	}
 	return nil

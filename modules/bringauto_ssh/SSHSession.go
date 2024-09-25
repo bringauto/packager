@@ -2,6 +2,7 @@ package bringauto_ssh
 
 import (
 	"bringauto/modules/bringauto_prerequisites"
+	"bringauto/modules/bringauto_const"
 	"fmt"
 	"golang.org/x/crypto/ssh"
 	"io"
@@ -32,7 +33,7 @@ type SSHSession struct {
 func (cred *SSHCredentials) FillDefault(*bringauto_prerequisites.Args) error {
 	*cred = SSHCredentials{
 		IPAddress: "127.0.0.1",
-		Port:      1122,
+		Port:      bringauto_const.DefaultSSHPort,
 		Username:  "root",
 		Password:  "1234",
 	}
