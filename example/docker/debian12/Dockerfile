@@ -5,7 +5,7 @@ RUN echo root:1234 | chpasswd
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
-      build-essential binutils lsb-release make git libssl-dev openssh-server wget patchelf software-properties-common flex && \
+      binutils build-essential flex git libssl-dev lsb-release make openssh-server patchelf software-properties-common && \
     rm -rf /var/lib/apt/lists/*
 
 RUN git clone --depth=1 --single-branch --branch=releases/gcc-13.2.0 git://gcc.gnu.org/git/gcc.git /gcc && \
@@ -18,15 +18,10 @@ RUN cd /gcc/objdir && \
     make -j$(nproc) && \
     make install
 
-RUN wget "https://github.com/Kitware/CMake/releases/download/v3.25.2/cmake-3.25.2-linux-x86_64.sh" -O cmake.sh && \
-    chmod +x cmake.sh && \
+ADD "https://github.com/Kitware/CMake/releases/download/v3.25.2/cmake-3.25.2-linux-x86_64.sh" cmake.sh
+RUN chmod +x cmake.sh && \
     ./cmake.sh --skip-license --prefix=/usr/local && \
     rm ./cmake.sh
-
-RUN apt-get update && \
-    apt-get purge -y \
-      wget && \
-      rm -rf /var/lib/apt/lists/*
 
 RUN git clone https://github.com/cmakelib/cmakelib.git /cmakelib
 RUN echo "export CMLIB_DIR=/cmakelib" >> /root/.bashrc && \
