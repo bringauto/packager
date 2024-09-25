@@ -31,14 +31,10 @@
   },
   "DockerMatrix": {
     "ImageNames": [
-      "ubuntu2004",
       "ubuntu2204",
       "debian12",
-      "debian11",
-      "ubuntu2304",
-      "ubuntu2310",
       "ubuntu1804-aarch64",
-      "fedora40"
+      "ubuntu2404"
     ]
   }
 }

@@ -24,14 +24,10 @@
   "DockerMatrix": {
     "ImageNames": [
       "ubuntu2204",
-      "ubuntu2004",
-      "debian11",
       "fleet-os-2",
       "debian12",
-      "ubuntu2304",
-      "ubuntu2310",
       "ubuntu1804-aarch64",
-      "fedora40"
+      "ubuntu2404"
     ]
   }
 }

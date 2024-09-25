@@ -5,8 +5,8 @@
     "cxxopts"
   ],
   "Git": {
-    "URI": "https://github.com/Melky-Phoe/StateSmurf.git",
-    "Revision": "v2.0.1"
+    "URI": "https://github.com/bringauto/StateSmurf.git",
+    "Revision": "v2.2.0"
   },
   "Build": {
     "CMake": {
@@ -20,7 +20,7 @@
   },
   "Package": {
     "Name": "statesmurf",
-    "VersionTag": "v2.0.1",
+    "VersionTag": "v2.2.0",
     "PlatformString": {
       "Mode": "auto"
     },
@@ -30,13 +30,9 @@
   },
   "DockerMatrix": {
     "ImageNames": [
-      "ubuntu2004",
-      "debian11",
       "ubuntu2204",
       "debian12",
-      "ubuntu2304",
-      "ubuntu2310",
-      "fedora40"
+      "ubuntu2404"
     ]
   }
 }

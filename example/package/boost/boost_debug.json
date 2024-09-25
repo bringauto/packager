@@ -9,13 +9,13 @@
     "CMake": {
       "Defines": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "BOOST_VERSION": "1.78.0"
+        "BOOST_VERSION": "1.86.0"
       }
     }
   },
   "Package": {
     "Name": "boost",
-    "VersionTag": "v1.78.0",
+    "VersionTag": "v1.86.0",
     "PlatformString": {
       "Mode": "auto"
     },
@@ -25,13 +25,10 @@
   },
   "DockerMatrix": {
     "ImageNames": [
-      "ubuntu2004",
       "ubuntu2204",
       "fleet-os-2",
-      "debian11",
       "debian12",
-      "ubuntu2304",
-      "ubuntu2310",
+      "ubuntu2404",
       "fedora40"
     ]
   }

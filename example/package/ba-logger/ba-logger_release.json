@@ -5,7 +5,7 @@
   ],
   "Git": {
     "URI": "https://github.com/bringauto/ba-logger.git",
-    "Revision": "v1.2.0"
+    "Revision": "v2.0.0"
   },
   "Build": {
     "CMake": {
@@ -19,7 +19,7 @@
   },
   "Package": {
     "Name": "ba-logger",
-    "VersionTag": "v1.2.0",
+    "VersionTag": "v2.0.0",
     "PlatformString": {
       "Mode": "auto"
     },
@@ -29,12 +29,9 @@
   },
   "DockerMatrix": {
     "ImageNames": [
-      "ubuntu2004",
-      "debian11",
       "ubuntu2204",
       "debian12",
-      "ubuntu2304",
-      "ubuntu2310",
+      "ubuntu2404",
       "fedora40"
     ]
   }

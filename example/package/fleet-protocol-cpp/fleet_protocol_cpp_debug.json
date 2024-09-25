@@ -14,7 +14,7 @@
         "BRINGAUTO_INSTALL": "ON",
         "BRINGAUTO_PACKAGE": "ON",
         "BRINGAUTO_SYSTEM_DEP": "ON",
-        "BRINGAUTO_TESTS": "OFF"
+        "BRINGAUTO_TESTS" : "OFF"
       }
     }
   },
@@ -30,13 +30,9 @@
   },
   "DockerMatrix": {
     "ImageNames": [
-      "ubuntu2004",
       "ubuntu2204",
       "debian12",
-      "debian11",
-      "ubuntu2304",
-      "ubuntu2310",
-      "fedora40"
+      "ubuntu2404"
     ]
   }
 }

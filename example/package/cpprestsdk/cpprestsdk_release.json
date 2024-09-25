@@ -1,9 +1,6 @@
 {
-  "Env": {},
-  "DependsOn": [
-    "zlib",
-    "boost"
-  ],
+  "Env": { },
+  "DependsOn": [ "zlib", "boost" ],
   "Git": {
     "URI": "https://github.com/bringauto/cpprestsdk.git",
     "Revision": "v2.10.20"
@@ -13,7 +10,8 @@
       "Defines": {
         "CMAKE_BUILD_TYPE": "Release",
         "BUILD_TESTS": "OFF",
-        "BUILD_SAMPLES": "OFF"
+        "BUILD_SAMPLES": "OFF",
+        "CPPREST_EXCLUDE_WEBSOCKETS": "ON"
       }
     }
   },
@@ -29,13 +27,9 @@
   },
   "DockerMatrix": {
     "ImageNames": [
-      "ubuntu2004",
       "ubuntu2204",
       "debian12",
-      "debian11",
-      "ubuntu2304",
-      "ubuntu2310",
-      "fedora40"
+      "ubuntu2404"
     ]
   }
 }
