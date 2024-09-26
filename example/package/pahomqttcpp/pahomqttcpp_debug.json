@@ -15,7 +15,9 @@
         "PAHO_BUILD_SHARED": "ON",
         "PAHO_BUILD_DOCUMENTATION": "OFF",
         "PAHO_BUILD_SAMPLES": "OFF",
-        "PAHO_WITH_SSL": "ON"
+        "PAHO_WITH_SSL": "ON",
+        "CMAKE_CXX_STANDARD": "20",
+        "CMAKE_CXX_STANDARD_REQUIRED": "OFF"
       }
     }
   },
@@ -32,12 +34,10 @@
   "DockerMatrix": {
     "ImageNames": [
       "ubuntu2204",
-      "ubuntu2004",
-      "debian11",
       "fleet-os-2",
       "debian12",
-      "ubuntu2304",
-      "ubuntu2310"
+      "ubuntu2404",
+      "fedora40"
     ]
   }
 }
