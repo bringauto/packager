@@ -27,7 +27,7 @@ type BuildPackageCmdLineArgs struct {
 	All *bool
 	// Name of the package to build (name of the directory in packages/ dir)
 	Name *string
-	// Build all dependencies of package when building single package
+	// BuildDeps Build all dependencies of package when building single package
 	BuildDeps *bool
 	// DockerImageName is a name of docker image to which packages will be build.
 	// If empty all docker images from DockerMatrix in config file are used for a given package.
@@ -36,7 +36,7 @@ type BuildPackageCmdLineArgs struct {
 	DockerImageName *string
 	// OutputDir relative (to program working dir) ot absolute path where the package will be stored
 	OutputDir *string
-	// Output dir mode
+	// OutputDirMode Output dir mode
 	OutputDirMode *OutputDirMode
 }
 
