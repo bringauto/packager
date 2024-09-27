@@ -129,6 +129,7 @@ func BuildPackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) error {
 	if err != nil {
 		return err
 	}
+	checkSysrootDirs(platformString)
 	buildAll := cmdLine.All
 	if *buildAll {
 		return buildAllPackages(cmdLine, contextPath, platformString)
@@ -270,10 +271,6 @@ func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_bu
 			PlatformString: platformString,
 		}
 		err = bringauto_prerequisites.Initialize(&sysroot)
-		if !sysroot.IsSysrootDirectoryEmpty() {
-			logger.WarnIndent("Sysroot directory is not empty - the package build may fail")
-		}
-
 		buildConfig.SetSysroot(&sysroot)
 
 		logger.InfoIndent("Run build inside container")
@@ -321,4 +318,27 @@ func determinePlatformString(dockerImageName string) (*bringauto_package.Platfor
 
 	err := bringauto_prerequisites.Initialize[bringauto_package.PlatformString](&platformString, sshCreds, defaultDocker)
 	return &platformString, err
+}
+
+// checkSysrootDirs
+// Checks if sysroot release and debug directories are empty. If not, prints a warning.
+func checkSysrootDirs(platformString *bringauto_package.PlatformString) (error) {
+	sysroot := bringauto_sysroot.Sysroot{
+		IsDebug:        false,
+		PlatformString: platformString,
+	}
+	err := bringauto_prerequisites.Initialize(&sysroot)
+	if err != nil {
+		return err
+	}
+
+	logger := bringauto_log.GetLogger()
+	if !sysroot.IsSysrootDirectoryEmpty() {
+		logger.WarnIndent("Sysroot release directory is not empty - the package build may fail")
+	}
+	sysroot.IsDebug = true
+	if !sysroot.IsSysrootDirectoryEmpty() {
+		logger.WarnIndent("Sysroot debug directory is not empty - the package build may fail")
+	}
+	return nil
 }
