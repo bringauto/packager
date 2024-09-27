@@ -15,6 +15,8 @@ import (
 const (
 	archiveName    string = "install_arch.tar"
 	archiveNameSep string = string(os.PathSeparator) + archiveName
+	// Size of the buffer used by bufio module
+	bufferSize = 1024*1024
 )
 
 type SFTP struct {
@@ -130,8 +132,8 @@ func (sftpd *SFTP) copyFile(sftpClient *sftp.Client, remoteFile string, localDir
 }
 
 func copyIOFile(sourceFile *sftp.File, destFile *os.File) {
-	sourceFileBuff := bufio.NewReaderSize(sourceFile, 1024*1024)
-	destFileBuff := bufio.NewWriterSize(destFile, 1027*1024)
+	sourceFileBuff := bufio.NewReaderSize(sourceFile, bufferSize)
+	destFileBuff := bufio.NewWriterSize(destFile, bufferSize)
 
 	var err error
 	_, err = io.Copy(destFileBuff, sourceFileBuff)
