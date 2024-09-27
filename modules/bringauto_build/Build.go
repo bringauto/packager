@@ -138,7 +138,7 @@ func (build *Build) RunBuild() error {
 	}
 
 	dockerRun := (*bringauto_docker.DockerRun)(build.Docker)
-	removeHandler := bringauto_process.AddHandler(build.stopAndRemoveContainer)
+	removeHandler := bringauto_process.SignalHandlerAddHandler(build.stopAndRemoveContainer)
 	defer removeHandler()
 
 	err = dockerRun.Run()

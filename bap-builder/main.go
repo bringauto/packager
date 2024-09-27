@@ -20,7 +20,7 @@ func main() {
 		logger.Error("Can't parse cmd line arguments - %s", err)
 		return
 	}
-	bringauto_process.RegisterSignal(syscall.SIGINT)
+	bringauto_process.SignalHandlerRegisterSignal(syscall.SIGINT)
 
 	if args.BuildImage {
 		err = BuildDockerImage(&args.BuildImagesArgs, *args.Context)
