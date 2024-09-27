@@ -70,7 +70,7 @@ func (sysroot *Sysroot) anyFileAlreadyExistsInSysroot(source string) bool {
 				return fmt.Errorf("file already exists in sysroot")
 			}
 		}
-		
+
 		return nil
 	})
 
@@ -121,7 +121,7 @@ func (sysroot *Sysroot) IsSysrootDirectoryEmpty() bool {
 	if err == io.EOF { // The directory exists, but is empty
 		return true
 	} else if err != nil {
-		bringauto_log.GetLogger().Warn("Cannot read in sysroot directory: %s", err)
+		bringauto_log.GetLogger().Warn("Sysroot directory is not readable: %s", err)
 	}
 
 	return false
