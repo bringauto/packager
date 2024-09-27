@@ -5,6 +5,8 @@ import (
 	"bringauto/modules/bringauto_build"
 	"bringauto/modules/bringauto_config"
 	"bringauto/modules/bringauto_package"
+	"bringauto/modules/bringauto_docker"
+	"bringauto/modules/bringauto_ssh"
 	"bringauto/modules/bringauto_prerequisites"
 	"bringauto/modules/bringauto_repository"
 	"bringauto/modules/bringauto_sysroot"
@@ -123,17 +125,21 @@ func (list *buildDepList) sortDependencies(rootName string, dependsMap *map[stri
 // BuildPackage
 // process Package mode of the program
 func BuildPackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) error {
+	platformString, err := determinePlatformString(*cmdLine.DockerImageName)
+	if err != nil {
+		return err
+	}
 	buildAll := cmdLine.All
 	if *buildAll {
-		return buildAllPackages(cmdLine, contextPath)
+		return buildAllPackages(cmdLine, contextPath, platformString)
 	}
-	return buildSinglePackage(cmdLine, contextPath)
+	return buildSinglePackage(cmdLine, contextPath, platformString)
 }
 
 // buildAllPackages
 // Builds all packages specified in contextPath. Also takes care of building all deps for all
 // packages in correct order. It returns nil if everything is ok, or not nil in case of error.
-func buildAllPackages(cmdLine *BuildPackageCmdLineArgs, contextPath string) error {
+func buildAllPackages(cmdLine *BuildPackageCmdLineArgs, contextPath string, platformString *bringauto_package.PlatformString) error {
 	contextManager := ContextManager{
 		ContextPath: contextPath,
 	}
@@ -153,12 +159,12 @@ func buildAllPackages(cmdLine *BuildPackageCmdLineArgs, contextPath string) erro
 
 	count := int32(0)
 	for _, config := range configList {
-		buildConfigs := config.GetBuildStructure(*cmdLine.DockerImageName)
+		buildConfigs := config.GetBuildStructure(*cmdLine.DockerImageName, platformString)
 		if len(buildConfigs) == 0 {
 			continue
 		}
 		count++
-		err = buildAndCopyPackage(cmdLine, &buildConfigs)
+		err = buildAndCopyPackage(cmdLine, &buildConfigs, platformString)
 		if err != nil {
 			logger.Fatal("cannot build package '%s' - %s", config.Package.Name, err)
 		}
@@ -173,7 +179,7 @@ func buildAllPackages(cmdLine *BuildPackageCmdLineArgs, contextPath string) erro
 // buildSinglePackage
 // Builds single package specified by name in cmdLine. Also takes care of building all deps for
 // given package in correct order. It returns nil if everything is ok, or not nil in case of error.
-func buildSinglePackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) error {
+func buildSinglePackage(cmdLine *BuildPackageCmdLineArgs, contextPath string, platformString *bringauto_package.PlatformString) error {
 	contextManager := ContextManager{
 		ContextPath: contextPath,
 	}
@@ -209,8 +215,8 @@ func buildSinglePackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) er
 	}
 
 	for _, config := range configList {
-		buildConfigs := config.GetBuildStructure(*cmdLine.DockerImageName)
-		err = buildAndCopyPackage(cmdLine, &buildConfigs)
+		buildConfigs := config.GetBuildStructure(*cmdLine.DockerImageName, platformString)
+		err = buildAndCopyPackage(cmdLine, &buildConfigs, platformString)
 		if err != nil {
 			logger.Fatal("cannot build package '%s' - %s", packageName, err)
 		}
@@ -240,7 +246,7 @@ func addConfigsToDefsMap(defsMap *ConfigMapType, packageJsonPathList []string) {
 
 // buildAndCopyPackage
 // Builds single package, takes care of every step of build for single package.
-func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_build.Build) error {
+func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_build.Build, platformString *bringauto_package.PlatformString) error {
 	if *cmdLine.OutputDirMode != OutputDirModeGitLFS {
 		return fmt.Errorf("invalid OutputDirmode. Only GitLFS is supported")
 	}
@@ -257,11 +263,6 @@ func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_bu
 	logger := bringauto_log.GetLogger()
 
 	for _, buildConfig := range *build {
-		platformString, err := determinePlatformString(&buildConfig)
-		if err != nil {
-			return err
-		}
-
 		logger.Info("Build %s", buildConfig.Package.GetFullPackageName())
 
 		sysroot := bringauto_sysroot.Sysroot{
@@ -306,24 +307,18 @@ func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_bu
 	return nil
 }
 
-// determinePlatformString will construct platform string suitable
-// for sysroot.
-// For example: the any_machine platformString must be copied to all machine-specific sysroot for
-// a given image.
-func determinePlatformString(build *bringauto_build.Build) (*bringauto_package.PlatformString, error) {
-	platformStringSpecialized := build.Package.PlatformString
-	if build.Package.PlatformString.Mode == bringauto_package.ModeAnyMachine {
-		platformStringStruct := bringauto_package.PlatformString{
-			Mode: bringauto_package.ModeAuto,
-		}
-		platformStringStruct.Mode = bringauto_package.ModeAuto
-		err := bringauto_prerequisites.Initialize[bringauto_package.PlatformString](&platformStringStruct,
-			build.SSHCredentials, build.Docker,
-		)
-		if err != nil {
-			return nil, err
-		}
-		platformStringSpecialized.String.Machine = platformStringStruct.String.Machine
+// determinePlatformString
+// Will construct platform string suitable for sysroot.
+func determinePlatformString(dockerImageName string) (*bringauto_package.PlatformString, error) {
+	defaultDocker := bringauto_prerequisites.CreateAndInitialize[bringauto_docker.Docker]()
+	defaultDocker.ImageName = dockerImageName
+
+	sshCreds := bringauto_prerequisites.CreateAndInitialize[bringauto_ssh.SSHCredentials]()
+
+	platformString := bringauto_package.PlatformString{
+		Mode: bringauto_package.ModeAuto,
 	}
-	return &platformStringSpecialized, nil
+
+	err := bringauto_prerequisites.Initialize[bringauto_package.PlatformString](&platformString, sshCreds, defaultDocker)
+	return &platformString, err
 }

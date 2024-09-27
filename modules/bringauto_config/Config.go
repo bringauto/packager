@@ -6,7 +6,6 @@ import (
 	"bringauto/modules/bringauto_git"
 	"bringauto/modules/bringauto_package"
 	"bringauto/modules/bringauto_prerequisites"
-	"bringauto/modules/bringauto_ssh"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -83,13 +82,13 @@ func (config *Config) SaveToJSONConfig(configPath string) error {
 
 // Returns array of builds structs for specific image name. The returned array will contain max one build.
 // It is an array for simple handling of result using for loop.
-func (config *Config) GetBuildStructure(imageName string) []bringauto_build.Build {
+func (config *Config) GetBuildStructure(imageName string, platformString *bringauto_package.PlatformString) []bringauto_build.Build {
 	var buildConfigs []bringauto_build.Build
 	for _, value := range config.DockerMatrix.ImageNames {
 		if imageName != "" && imageName != value {
 			continue
 		}
-		build := config.fillBuildStructure(value)
+		build := config.fillBuildStructure(imageName, platformString)
 		defaultBuild := bringauto_prerequisites.CreateAndInitialize[bringauto_build.Build]()
 		err := copier.CopyWithOption(defaultBuild, build, copier.Option{DeepCopy: true, IgnoreEmpty: true})
 		if err != nil {
@@ -101,7 +100,7 @@ func (config *Config) GetBuildStructure(imageName string) []bringauto_build.Buil
 	return buildConfigs
 }
 
-func (config *Config) fillBuildStructure(dockerImageName string) bringauto_build.Build {
+func (config *Config) fillBuildStructure(dockerImageName string, platformString *bringauto_package.PlatformString) bringauto_build.Build {
 	var err error
 	defaultDocker := bringauto_prerequisites.CreateAndInitialize[bringauto_docker.Docker]()
 	defaultDocker.ImageName = dockerImageName
@@ -122,9 +121,9 @@ func (config *Config) fillBuildStructure(dockerImageName string) bringauto_build
 		panic(err)
 	}
 
-	sshCreds := bringauto_prerequisites.CreateAndInitialize[bringauto_ssh.SSHCredentials]()
 	tmpPackage := config.Package
-	err = bringauto_prerequisites.Initialize(&tmpPackage, sshCreds, defaultDocker)
+	err = bringauto_prerequisites.Initialize(&tmpPackage)
+	tmpPackage.PlatformString = *platformString
 	if err != nil {
 		panic(err)
 	}
