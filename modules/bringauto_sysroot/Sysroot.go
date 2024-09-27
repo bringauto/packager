@@ -46,12 +46,10 @@ func (sysroot *Sysroot) CheckPrerequisites(args *bringauto_prerequisites.Args) e
 
 // CopyToSysroot copy source to a sysroot
 func (sysroot *Sysroot) CopyToSysroot(source string) error {
-	existingFiles := sysroot.getExistingFilesInSysroot(source)
-	if len(existingFiles) > 0 {
-		printOverwriteFilesError(existingFiles, listFilesCount)
-		return fmt.Errorf("trying to overwrite files in sysroot")
+	err := sysroot.checkForOverwritingFiles(source)
+	if err != nil {
+		return err
 	}
-	var err error
 	copyOptions := copy.Options{
 		OnSymlink:     onSymlink,
 		PreserveOwner: true,
@@ -64,38 +62,40 @@ func (sysroot *Sysroot) CopyToSysroot(source string) error {
 	return nil
 }
 
+// checkForOverwritingFiles
+// Checks if in dirPath directory are not files which are also in sysroot directory. If there are
+// some, then prints Error with listing problematic files and returns non nil error. Else returns
+// nil error without printing anything.
+func (sysroot *Sysroot) checkForOverwritingFiles(dirPath string) error {
+	filesToCopy := getExistingFilesInDir(dirPath)
+	filesInSysroot := getExistingFilesInDir(sysroot.GetSysrootPath())
+	var intersection []string
+	for _, fileToCopy := range filesToCopy {
+		for _, fileInSysroot := range filesInSysroot {
+			if fileToCopy == fileInSysroot {
+				intersection = append(intersection, fileToCopy)
+			}
+		}
+	}
+	if len(intersection) > 0 {
+		sysroot.printOverwriteFilesError(intersection, listFilesCount)
+		return fmt.Errorf("trying to overwrite files in sysroot")
+	}
+	return nil
+}
+
 // printOverwriteFilesError
 // Prints error for overwriting files in sysroot. Lists first n files in problematic_files.
-func printOverwriteFilesError(problematicFiles []string, n int) {
+func (sysroot *Sysroot) printOverwriteFilesError(problematicFiles []string, n int) {
 	logger := bringauto_log.GetLogger()
 	logger.Error("Trying to overwrite files in sysroot - sysroot consistency interrupted.")
-	logger.Error("Listing first %d of problematic files:", n)
+	logger.Error("Listing first %d problematic files:", n)
 	for i, filePath := range problematicFiles {
-		logger.ErrorIndent(filePath)
+		logger.ErrorIndent(sysrootDirectoryName + "/" + sysroot.PlatformString.Serialize() + filePath)
 		if i == n - 1 {
 			break
 		}
 	}
-}
-
-func (sysroot *Sysroot) getExistingFilesInSysroot(source string) []string {
-	sysrootPath := sysroot.GetSysrootPath()
-
-	var existingFiles []string
-
-	filepath.WalkDir(source, func(path string, d fs.DirEntry, err error) error {
-		if !d.IsDir() {
-			filePath := strings.TrimPrefix(path, source)
-			_, err := os.Stat(sysrootPath + filePath)
-			if err == nil {
-				existingFiles = append(existingFiles, sysrootPath + filePath)
-			}
-		}
-
-		return nil
-	})
-
-	return existingFiles
 }
 
 // GetSysrootPath returns absolute path ot the sysroot
@@ -150,4 +150,25 @@ func (sysroot *Sysroot) IsSysrootDirectoryEmpty() bool {
 
 func onSymlink(src string) copy.SymlinkAction {
 	return copy.Shallow
+}
+
+// getExistingFilesInDir
+// Returns array of string which contains all file paths existing in dirPath directory. The
+// returned paths are without dirPath prefix.
+func getExistingFilesInDir(dirPath string) []string {
+	var existingFiles []string
+
+	filepath.WalkDir(dirPath, func(path string, d fs.DirEntry, err error) error {
+		if !d.IsDir() {
+			filePath := strings.TrimPrefix(path, dirPath)
+			_, err := os.Stat(path)
+			if err == nil {
+				existingFiles = append(existingFiles, filePath)
+			}
+		}
+
+		return nil
+	})
+
+	return existingFiles
 }
