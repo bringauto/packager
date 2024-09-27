@@ -23,6 +23,7 @@ import (
 var lock sync.Mutex
 var handlers []func() error
 
+// SignalHandlerRegisterSignal
 // Registers handling of specified signals to bringauto_process package
 func SignalHandlerRegisterSignal(sig ...os.Signal) {
 	sigs := make(chan os.Signal, 1)
@@ -38,8 +39,11 @@ func SignalHandlerRegisterSignal(sig ...os.Signal) {
 	}()
 }
 
+// SignalHandlerAddHandler
 // Adds handler for execution after signal is received by bringauto_process package. Returns handler
-// remover which should be deferred by caller.
+// remover which should be deferred by caller. So it should be used as this:
+// handlerRemover := SignalHandlerAddHandler(my_handler)
+// defer handlerRemover()
 func SignalHandlerAddHandler(handler func() error) func() {
 	lock.Lock()
 	defer lock.Unlock()
