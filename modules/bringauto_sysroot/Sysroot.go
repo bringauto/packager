@@ -15,6 +15,9 @@ import (
 
 const (
 	sysrootDirectoryName = "install_sysroot"
+	// Constant for number of problematic files which will be printed when trying to ovewrite files
+	// in sysroot
+	listFilesCount = 10
 )
 
 // Sysroot represents a standard Linux sysroot with all needed libraries installed.
@@ -43,8 +46,10 @@ func (sysroot *Sysroot) CheckPrerequisites(args *bringauto_prerequisites.Args) e
 
 // CopyToSysroot copy source to a sysroot
 func (sysroot *Sysroot) CopyToSysroot(source string) error {
-	if sysroot.anyFileAlreadyExistsInSysroot(source) {
-		return fmt.Errorf("trying to ovewrite files in sysroot - sysroot consistency interrupted")
+	existingFiles := sysroot.getExistingFilesInSysroot(source)
+	if len(existingFiles) > 0 {
+		printOverwriteFilesError(existingFiles, listFilesCount)
+		return fmt.Errorf("trying to overwrite files in sysroot")
 	}
 	var err error
 	copyOptions := copy.Options{
@@ -59,22 +64,38 @@ func (sysroot *Sysroot) CopyToSysroot(source string) error {
 	return nil
 }
 
-func (sysroot *Sysroot) anyFileAlreadyExistsInSysroot(source string) bool {
+// printOverwriteFilesError
+// Prints error for overwriting files in sysroot. Lists first n files in problematic_files.
+func printOverwriteFilesError(problematicFiles []string, n int) {
+	logger := bringauto_log.GetLogger()
+	logger.Error("Trying to overwrite files in sysroot - sysroot consistency interrupted.")
+	logger.Error("Listing first %d of problematic files:", n)
+	for i, filePath := range problematicFiles {
+		logger.ErrorIndent(filePath)
+		if i == n - 1 {
+			break
+		}
+	}
+}
+
+func (sysroot *Sysroot) getExistingFilesInSysroot(source string) []string {
 	sysrootPath := sysroot.GetSysrootPath()
 
-	err := filepath.WalkDir(source, func(path string, d fs.DirEntry, err error) error {
+	var existingFiles []string
+
+	filepath.WalkDir(source, func(path string, d fs.DirEntry, err error) error {
 		if !d.IsDir() {
 			filePath := strings.TrimPrefix(path, source)
 			_, err := os.Stat(sysrootPath + filePath)
 			if err == nil {
-				return fmt.Errorf("file already exists in sysroot")
+				existingFiles = append(existingFiles, sysrootPath + filePath)
 			}
 		}
 
 		return nil
 	})
 
-	return err != nil
+	return existingFiles
 }
 
 // GetSysrootPath returns absolute path ot the sysroot
