@@ -6,6 +6,7 @@ import (
 	"io"
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 // Color codes constants
@@ -56,17 +57,21 @@ func colorizeLevel(level slog.Level) string {
 // Handle
 // Mandatory function which sets style as specified by slog module.
 func (handler *Handler) Handle(_ context.Context, r slog.Record) error {
-	buf := make([]byte, 0, 1024)
-	formated := r.Time.Format("2006-01-02 15:04:05")
+	var stringBuilder strings.Builder
+
+	// Append timestamp
 	if !r.Time.IsZero() {
-		buf = fmt.Append(buf, formated)
+		stringBuilder.WriteString(r.Time.Format("2006-01-02 15:04:05"))
+		stringBuilder.WriteByte(' ')
 	}
 
-	buf = fmt.Appendf(buf, " %s", colorizeLevel(r.Level))
+	// Append colored level
+	stringBuilder.WriteString(colorizeLevel(r.Level))
 
-	buf = fmt.Appendf(buf, " %s\n", r.Message)
+	// Append message with attributes
+	stringBuilder.WriteString(fmt.Sprintf(" %s\n", r.Message))
 
-	_, err := handler.writer.Write(buf)
+	_, err := io.WriteString(handler.writer, stringBuilder.String())
 	return err
 }
 
