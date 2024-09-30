@@ -1,13 +1,14 @@
 package bringauto_docker
 
 import (
-	"bringauto/modules/bringauto_process"
 	"bringauto/modules/bringauto_const"
+	"bringauto/modules/bringauto_process"
 	"bytes"
+	"fmt"
 	"strconv"
 )
 
-func IsDefaultPortAvailable() bool {
+func IsDefaultPortAvailable() (bool, error) {
 	var outBuff, errBuff bytes.Buffer
 
 	process := bringauto_process.Process{
@@ -26,7 +27,10 @@ func IsDefaultPortAvailable() bool {
 		StdErr: &errBuff,
 	}
 
-	process.Run()
+	err := process.Run()
+	if err != nil {
+		return false, fmt.Errorf(errBuff.String())
+	}
 
-	return outBuff.Len() == 0
+	return outBuff.Len() == 0, nil
 }

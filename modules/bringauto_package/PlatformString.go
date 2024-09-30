@@ -118,11 +118,6 @@ func (pstr *PlatformString) determinePlatformString(credentials bringauto_ssh.SS
 		panic(fmt.Errorf("cannot determine PlatformString for explicit mode"))
 	}
 
-	availablePort := bringauto_docker.IsDefaultPortAvailable()
-	if !availablePort {
-		return fmt.Errorf("default port not available")
-	}
-
 	dockerRun := (*bringauto_docker.DockerRun)(docker)
 	err := dockerRun.Run()
 	if err != nil {

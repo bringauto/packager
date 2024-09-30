@@ -127,11 +127,6 @@ func (build *Build) RunBuild() error {
 		StdOut:   file,
 	}
 
-	availablePort := bringauto_docker.IsDefaultPortAvailable()
-	if !availablePort {
-		return fmt.Errorf("default port not available")
-	}
-
 	err = bringauto_prerequisites.Initialize(build.Docker)
 	if err != nil {
 		return err

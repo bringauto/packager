@@ -48,6 +48,12 @@ func (docker *Docker) FillDynamic(*bringauto_prerequisites.Args) error {
 // It checks if the docker is installed and can be run by given user.
 // Function returns nil if Docker installation is ok, not nil of the problem is recognized
 func (docker *Docker) CheckPrerequisites(*bringauto_prerequisites.Args) error {
+	portAvailable, err := IsDefaultPortAvailable()
+	if err != nil {
+		return err
+	} else if !portAvailable {
+		return fmt.Errorf("default port not available")
+	}
 	process := bringauto_process.Process{
 		CommandAbsolutePath: DockerExecutablePathConst,
 		Args: bringauto_process.ProcessArgs{
@@ -56,7 +62,7 @@ func (docker *Docker) CheckPrerequisites(*bringauto_prerequisites.Args) error {
 			},
 		},
 	}
-	err := process.Run()
+	err = process.Run()
 	if err != nil {
 		return err
 	}
