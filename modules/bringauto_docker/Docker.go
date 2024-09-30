@@ -52,7 +52,7 @@ func (docker *Docker) CheckPrerequisites(*bringauto_prerequisites.Args) error {
 	if err != nil {
 		return err
 	} else if !portAvailable {
-		return fmt.Errorf("default port not available")
+		return fmt.Errorf("default port %d not available", bringauto_const.DefaultSSHPort)
 	}
 	process := bringauto_process.Process{
 		CommandAbsolutePath: DockerExecutablePathConst,
