@@ -1,11 +1,12 @@
 // Functions for global signal handling
 //
-// The SignalHandlerRegisterSignal() must be called to start handling signal by this module. Then
-// SignalHandlerAddHandler() can be called to add handlers to execute when the registered signal is
-// received. The method returns function which should be deferred after SignalHandlerAddHandler()
-// call by caller. This returned function basically removes handler from execution after signal is
-// received. When registered signal is received, all added handlers (and not removed yet) will be
-// executed in reverse order and then the program exits with status code 1.
+// The SignalHandlerRegisterSignal() function must be called to start handling signals with this
+// module. Afterward, SignalHandlerAddHandler() can be used to add handlers that will execute when
+// a registered signal is received. The method returns a function which should be deferred
+// immediately after the SignalHandlerAddHandler() call by the caller. This returned function
+// removes the handler from execution if called before the signal is received. When a registered
+// signal is received, all added (and not yet removed) handlers will be executed in reverse order,
+// and then the program exits with status code 1.
 //
 // Note: Do not use with concurrent programming. Can behave unexpectedly!
 
