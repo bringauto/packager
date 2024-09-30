@@ -121,8 +121,3 @@ In this case:
 
 - Check if there are no running Docker containers that are instances of one of the Docker images in the context directory.
 - Check if there are no other containers using port `1122`.
-
-## TODO
-
-- Improve SFTP copy and package creation speed (~20 minutes for Boost).
-- Refactor error handling (use a logging library, etc.) and error messages.
