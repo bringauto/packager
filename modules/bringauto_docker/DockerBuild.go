@@ -23,11 +23,14 @@ func (dockerBuild *DockerBuild) Build() error {
 
 	var ok = dockerBuild.prepareAndRun(prepareBuildArgs)
 	if !ok {
-		return fmt.Errorf("DockerBuild build error")
+		return fmt.Errorf("DockerBuild build error for %s image", dockerBuild.Tag)
 	}
 	return nil
 }
 
+// prepareAndRun
+// Runs docker build command. Returns bool value which indicates if the command was succesfull or
+// not.
 func (dockerBuild *DockerBuild) prepareAndRun(f func(build *DockerBuild) []string) bool {
 	logger := bringauto_log.GetLogger()
 	contextLogger := logger.CreateContextLogger(dockerBuild.Tag, "", bringauto_log.ImageBuildContext)
