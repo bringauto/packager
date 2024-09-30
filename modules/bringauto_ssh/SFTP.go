@@ -2,6 +2,7 @@ package bringauto_ssh
 
 import (
 	"bringauto/modules/bringauto_const"
+	"bringauto/modules/bringauto_prerequisites"
 	"bufio"
 	"fmt"
 	"io"
@@ -35,10 +36,7 @@ type SFTP struct {
 func (sftpd *SFTP) DownloadDirectory() error {
 	var err error
 
-	tar := Tar{
-		ArchiveName: archiveName,
-		SourceDir:   bringauto_const.DockerInstallDirConst,
-	}
+	tar := bringauto_prerequisites.CreateAndInitialize[Tar](archiveName, bringauto_const.DockerInstallDirConst)
 
 	shellEvaluator := ShellEvaluator{
 		Commands: tar.ConstructCMDLine(),

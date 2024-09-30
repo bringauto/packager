@@ -2,6 +2,7 @@ package bringauto_ssh
 
 import (
 	"bringauto/modules/bringauto_prerequisites"
+	"fmt"
 	"path/filepath"
 	"strings"
 )
@@ -15,17 +16,32 @@ type Tar struct {
 	SourceDir string
 }
 
+type tarInitArgs struct {
+	ArchiveName string
+	SourceDir string
+}
+
 func (tar *Tar) FillDefault(*bringauto_prerequisites.Args) error {
 	tar.ArchiveName = ""
 	tar.SourceDir = ""
 	return nil
 }
 
-func (tar *Tar) FillDynamic(*bringauto_prerequisites.Args) error {
+func (tar *Tar) FillDynamic(args *bringauto_prerequisites.Args) error {
+	var argsStruct tarInitArgs
+	bringauto_prerequisites.GetArgs(args, &argsStruct)
+	tar.ArchiveName = argsStruct.ArchiveName
+	tar.SourceDir = argsStruct.SourceDir
 	return nil
 }
 
 func (tar *Tar) CheckPrerequisites(*bringauto_prerequisites.Args) error {
+	if tar.ArchiveName == "" {
+		return fmt.Errorf("empty archive name")
+	}
+	if tar.SourceDir == "" {
+		return fmt.Errorf("empty source directory name")
+	}
 	return nil
 }
 
