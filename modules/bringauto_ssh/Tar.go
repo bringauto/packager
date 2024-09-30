@@ -2,8 +2,8 @@ package bringauto_ssh
 
 import (
 	"bringauto/modules/bringauto_prerequisites"
+	"path/filepath"
 	"strings"
-	"os"
 )
 
 // Tar
@@ -32,13 +32,12 @@ func (tar *Tar) CheckPrerequisites(*bringauto_prerequisites.Args) error {
 // ConstructCMDLine
 // Constructs command for tar tool.
 func (tar *Tar) ConstructCMDLine() []string {
-	var cmdLine []string
-	cmdLine = append(cmdLine, "tar")
-	cmdLine = append(cmdLine, "cvf")
-	cmdLine = append(cmdLine, tar.SourceDir + string(os.PathSeparator) + tar.ArchiveName)
-	cmdLine = append(cmdLine, "-C")
-	cmdLine = append(cmdLine, tar.SourceDir)
-	cmdLine = append(cmdLine, ".")
+	var cmdBuilder strings.Builder
+	cmdBuilder.WriteString("tar cvf ")
+	cmdBuilder.WriteString(filepath.Join(tar.SourceDir, tar.ArchiveName))
+	cmdBuilder.WriteString(" -C ")
+	cmdBuilder.WriteString(tar.SourceDir)
+	cmdBuilder.WriteString(" .")
 
-	return []string{strings.Join(cmdLine, " ")}
+	return []string{cmdBuilder.String()}
 }
