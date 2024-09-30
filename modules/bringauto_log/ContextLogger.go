@@ -3,6 +3,7 @@ package bringauto_log
 import (
 	"bringauto/modules/bringauto_prerequisites"
 	"os"
+	"path/filepath"
 )
 
 const (
@@ -72,5 +73,6 @@ func (logger *ContextLogger) CheckPrerequisites(*bringauto_prerequisites.Args) e
 // Returns writable file for writing logs for specified context of a package. The file must be
 // closed by the caller.
 func (logger *ContextLogger) GetFile() (*os.File, error) {
-	return os.OpenFile(logger.logDirPath + "/" + logger.logFileName, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	filepath := filepath.Join(logger.logDirPath, logger.logFileName)
+	return os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 }
