@@ -25,7 +25,7 @@ func main() {
 	if args.BuildImage {
 		err = BuildDockerImage(&args.BuildImagesArgs, *args.Context)
 		if err != nil {
-			logger.Error(err.Error())
+			logger.Error("Failed to build Docker image: %s", err)
 			return
 		}
 		return
@@ -34,7 +34,7 @@ func main() {
 	if args.BuildPackage {
 		err = BuildPackage(&args.BuildPackageArgs, *args.Context)
 		if err != nil {
-			logger.Error(err.Error())
+			logger.Error("Failed to build package: %s", err)
 			return
 		}
 		return
