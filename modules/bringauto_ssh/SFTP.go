@@ -97,7 +97,7 @@ func (sftpd *SFTP) DownloadDirectory() error {
 
 	err = os.Remove(localArchivePath)
 	if err != nil {
-		return fmt.Errorf("cannot remove local dir %s", err)
+		return fmt.Errorf("cannot remove local archive %s: %s", localArchivePath, err)
 	}
 
 	return nil
@@ -105,16 +105,14 @@ func (sftpd *SFTP) DownloadDirectory() error {
 
 func (sftpd *SFTP) copyFile(sftpClient *sftp.Client, remoteFile string, localDir string) error {
 	var err error
-	_, err = sftpClient.Lstat(remoteFile)
+	remotePathStat, err := sftpClient.Lstat(remoteFile)
 	if os.IsNotExist(err) {
 		return fmt.Errorf("requested remote file %s does not exist", remoteFile)
+	} else if err != nil {
+		return fmt.Errorf("error retrieving %s remote file info: %s", remoteFile, err)
 	}
-	normalizedLocalDir, _ := normalizePath(localDir)
 
-	remotePathStat, err := sftpClient.Lstat(remoteFile)
-	if err != nil {
-		return fmt.Errorf("cannot get Lstat if remote %s", remoteFile)
-	}
+	normalizedLocalDir, _ := normalizePath(localDir)
 	sourceFile, err := sftpClient.Open(remoteFile)
 	if err != nil {
 		return fmt.Errorf("cannot open file for read - %s,%s", remoteFile, err)
