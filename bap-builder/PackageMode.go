@@ -129,7 +129,10 @@ func BuildPackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) error {
 	if err != nil {
 		return err
 	}
-	checkSysrootDirs(platformString)
+	err = checkSysrootDirs(platformString)
+	if err != nil {
+		return err
+	}
 	buildAll := cmdLine.All
 	if *buildAll {
 		return buildAllPackages(cmdLine, contextPath, platformString)
@@ -228,11 +231,11 @@ func buildSinglePackage(cmdLine *BuildPackageCmdLineArgs, contextPath string, pl
 // addConfigsToDefsMap
 // Adds all configs in packageJsonPathList to defsMap.
 func addConfigsToDefsMap(defsMap *ConfigMapType, packageJsonPathList []string) {
+	logger := bringauto_log.GetLogger()
 	for _, packageJsonPath := range packageJsonPathList {
 		var config bringauto_config.Config
 		err := config.LoadJSONConfig(packageJsonPath)
 		if err != nil {
-			logger := bringauto_log.GetLogger()
 			logger.Error("Couldn't load JSON config from %s path - %s", packageJsonPath, err)
 			continue
 		}
