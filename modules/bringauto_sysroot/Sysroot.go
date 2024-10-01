@@ -161,6 +161,9 @@ func getExistingFilesInDir(dirPath string) []string {
 	var existingFiles []string
 
 	filepath.WalkDir(dirPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
 		if !d.IsDir() {
 			filePath := strings.TrimPrefix(path, dirPath)
 			_, err := os.Stat(path)
