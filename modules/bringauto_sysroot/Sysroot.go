@@ -15,7 +15,7 @@ import (
 
 const (
 	sysrootDirectoryName = "install_sysroot"
-	// Constant for number of problematic files which will be printed when trying to ovewrite files
+	// Constant for number of problematic files which will be printed when trying to overwrite files
 	// in sysroot
 	listFilesCount = 10
 )
@@ -68,13 +68,15 @@ func (sysroot *Sysroot) CopyToSysroot(source string) error {
 // nil error without printing anything.
 func (sysroot *Sysroot) checkForOverwritingFiles(dirPath string) error {
 	filesToCopy := getExistingFilesInDir(dirPath)
-	filesInSysroot := getExistingFilesInDir(sysroot.GetSysrootPath())
+	filesInSysrootMap := make(map[string]struct{})
+	for _, file := range getExistingFilesInDir(sysroot.GetSysrootPath()) {
+		filesInSysrootMap[file] = struct{}{}
+	}
 	var intersection []string
 	for _, fileToCopy := range filesToCopy {
-		for _, fileInSysroot := range filesInSysroot {
-			if fileToCopy == fileInSysroot {
-				intersection = append(intersection, fileToCopy)
-			}
+		_, exists := filesInSysrootMap[fileToCopy]
+		if exists {
+			intersection = append(intersection, fileToCopy)
 		}
 	}
 	if len(intersection) > 0 {
