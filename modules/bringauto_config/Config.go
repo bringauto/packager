@@ -123,7 +123,9 @@ func (config *Config) fillBuildStructure(dockerImageName string, platformString 
 
 	tmpPackage := config.Package
 	err = bringauto_prerequisites.Initialize(&tmpPackage)
-	tmpPackage.PlatformString = *platformString
+	if platformString != nil {
+		tmpPackage.PlatformString = *platformString
+	}
 	if err != nil {
 		panic(err)
 	}
