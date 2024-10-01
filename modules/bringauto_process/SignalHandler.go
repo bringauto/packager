@@ -14,7 +14,6 @@ package bringauto_process
 
 import (
 	"bringauto/modules/bringauto_log"
-	"fmt"
 	"os"
 	"sync"
 	"os/signal"
@@ -56,12 +55,11 @@ func SignalHandlerAddHandler(handler func() error) func() {
 	}
 }
 
-func removeLastHandler() error {
+func removeLastHandler() {
 	if len(handlers) == 0 {
-		return fmt.Errorf("no handler to remove")
+		return
 	}
 	handlers = handlers[:len(handlers) - 1]
-	return nil
 }
 
 func executeAllHandlers() {
