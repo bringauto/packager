@@ -106,7 +106,7 @@ func (context *ContextManager) getAllDepsJsonPaths(packageJsonPath string) ([]st
 		for _, packageDepJsonPath := range packageDepsJsonPaths {
 			err := depConfig.LoadJSONConfig(packageDepJsonPath)
 			if err != nil {
-				return []string{}, fmt.Errorf("couldn't load JSON config from %s path - %s", packageJsonPath, err)
+				return []string{}, fmt.Errorf("couldn't load JSON config from %s path - %s", packageDepJsonPath, err)
 			}
 			if depConfig.Package.IsDebug != config.Package.IsDebug {
 				continue
