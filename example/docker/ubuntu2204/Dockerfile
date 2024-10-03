@@ -4,9 +4,14 @@ USER root
 RUN echo root:1234 | chpasswd
 
 RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common && \
+    add-apt-repository ppa:ubuntu-toolchain-r/test
+
+RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
-      	coreutils lsb-release build-essential  openssh-server git libssl-dev wget patchelf && \
-    rm -rf /var/lib/apt/lists/*
+      	coreutils lsb-release build-essential  openssh-server git libssl-dev wget gcc-13 g++-13 patchelf && \
+    rm -rf /var/lib/apt/lists/* && \
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 100 --slave /usr/bin/g++ g++ /usr/bin/g++-13
 
 RUN wget "https://github.com/Kitware/CMake/releases/download/v3.28.0/cmake-3.28.0-linux-x86_64.sh" -O cmake.sh && \
     chmod +x cmake.sh && \

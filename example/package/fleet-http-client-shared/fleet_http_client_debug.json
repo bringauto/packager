@@ -2,7 +2,6 @@
   "Env": {},
   "DependsOn": [
     "zlib",
-    "ba-logger",
     "boost",
     "fleet-protocol-interface",
     "fleet-protocol-cxx-helpers-static",
@@ -10,7 +9,7 @@
   ],
   "Git": {
     "URI": "https://github.com/bringauto/fleet-protocol-http-client-cxx.git",
-    "Revision": "v1.3.0"
+    "Revision": "v1.5.0"
   },
   "Build": {
     "CMake": {
@@ -26,7 +25,7 @@
   },
   "Package": {
     "Name": "fleet-http-client-shared",
-    "VersionTag": "v1.3.0",
+    "VersionTag": "v1.5.0",
     "PlatformString": {
       "Mode": "auto"
     },
@@ -36,12 +35,10 @@
   },
   "DockerMatrix": {
     "ImageNames": [
-      "ubuntu2004",
       "ubuntu2204",
       "debian12",
-      "debian11",
-      "ubuntu2304",
-      "ubuntu2310"
+      "ubuntu2404",
+      "fedora40"
     ]
   }
 }

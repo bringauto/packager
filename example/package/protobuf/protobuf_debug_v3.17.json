@@ -25,6 +25,8 @@
     "IsDebug": true
   },
   "DockerMatrix": {
-    "ImageNames": []
+    "ImageNames": [
+      "fedora40"
+    ]
   }
 }
