@@ -9,7 +9,6 @@ BringAuto Packager uses docker as a build environment and Git LFS as a storage b
 Both of these technologies (Git, Docker) are well known and do not need any
 special training for programmers whose want to use them.
 
-
 ## Basics
 
 Package is a set of "data" mainly represented by files stored on the computer disk.
@@ -59,8 +58,7 @@ Each package name consist from three parts
 
 `base_package_name` should contain only [a-zA-Z0-9-] chars.
 
-
-**Library package name creation**
+### Library package name creation
 
 - `prefix` = "lib"
 - `debug_suffix` = "d" if the package is built as "Debug"
@@ -68,7 +66,7 @@ Each package name consist from three parts
 - `library_type` = "-dev" if the package is development package (contains headers, ...)
 - `library_type` = "" if the package is a package contains only runtime lib
 
-**Executable package name creation**
+### Executable package name creation
 
 - `prefix` = ""
 - `debug_suffix` = "d" if the package is built as "Debug"
@@ -84,8 +82,6 @@ Each package name consist from three parts
 - [CMake Project Requirements]
 - [Build Process]
 - [Package Dependencies]
-
-
 
 [Context Directory Structure]:     ./ContextDirectoryStructure.md
 [Package JSON Structure]:          ./PackageJSONStructure.md

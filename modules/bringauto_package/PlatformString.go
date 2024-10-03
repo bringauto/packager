@@ -4,9 +4,11 @@ import (
 	"bringauto/modules/bringauto_docker"
 	"bringauto/modules/bringauto_prerequisites"
 	"bringauto/modules/bringauto_ssh"
+	"bringauto/modules/bringauto_process"
 	"fmt"
 	"regexp"
 	"strings"
+	"time"
 )
 
 // PlatformStringMode is a fill-up mode of the platform-string.
@@ -119,16 +121,20 @@ func (pstr *PlatformString) determinePlatformString(credentials bringauto_ssh.SS
 	}
 
 	dockerRun := (*bringauto_docker.DockerRun)(docker)
+	removeHandler := bringauto_process.SignalHandlerAddHandler(func() error {
+		dockerStop := (*bringauto_docker.DockerStop)(docker)
+		dockerRm := (*bringauto_docker.DockerRm)(docker)
+		// Waiting for docker run command to get container id
+		time.Sleep(200 * time.Millisecond)
+		dockerStop.Stop()
+		return dockerRm.RemoveContainer()
+	})
+	defer removeHandler()
+
 	err := dockerRun.Run()
 	if err != nil {
 		return err
 	}
-	defer func() {
-		dockerStop := (*bringauto_docker.DockerStop)(docker)
-		dockerRm := (*bringauto_docker.DockerRm)(docker)
-		dockerStop.Stop()
-		dockerRm.RemoveContainer()
-	}()
 
 	pstr.String.DistroName = getDistributionName(credentials)
 	pstr.String.DistroRelease = getReleaseVersion(credentials)

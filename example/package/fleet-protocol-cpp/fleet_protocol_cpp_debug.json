@@ -19,7 +19,7 @@
     }
   },
   "Package": {
-    "Name": "fleet-protocol-cxx-helpers-static",
+    "Name": "fleet-protocol-cpp",
     "VersionTag": "v1.1.1",
     "PlatformString": {
       "Mode": "auto"

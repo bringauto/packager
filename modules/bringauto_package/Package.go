@@ -5,7 +5,6 @@ import (
 	"compress/flate"
 	"fmt"
 	"github.com/mholt/archiver/v3"
-	"io/ioutil"
 	"os"
 	"path"
 	"regexp"
@@ -81,7 +80,7 @@ func (packg *Package) CreatePackage(sourceDir string, outputDir string) error {
 		return err
 	}
 
-	packageName := packg.CreatePackageName() + ".zip"
+	packageName := packg.GetFullPackageName() + ".zip"
 
 	err = createZIPArchive(sourceDir, outputDir+"/"+packageName)
 	if err != nil {
@@ -91,10 +90,9 @@ func (packg *Package) CreatePackage(sourceDir string, outputDir string) error {
 	return nil
 }
 
-// CreatePackageName
-// construct only a package name.
-// Function returns nonempty string.
-func (packg *Package) CreatePackageName() string {
+// GetShortPackageName
+// Returns short package name without version and platform string.
+func (packg *Package) GetShortPackageName() string {
 	var packageName []string
 	if packg.IsLibrary {
 		packageName = append([]string{"lib"}, packageName...)
@@ -106,6 +104,14 @@ func (packg *Package) CreatePackageName() string {
 	if packg.IsDevLib {
 		packageName = append(packageName, "-dev")
 	}
+	return strings.Join(packageName, "")
+}
+
+// GetFullPackageName
+// Returns full package name with version and platform string.
+func (packg *Package) GetFullPackageName() string {
+	var packageName []string
+	packageName = append(packageName, packg.GetShortPackageName())
 	packageName = append(packageName, "_")
 	packageName = append(packageName, packg.VersionTag)
 	packageName = append(packageName, "_")
@@ -117,9 +123,13 @@ func createZIPArchive(sourceDir string, archivePath string) error {
 	var files []string
 	var err error
 
-	fileInfoList, err := ioutil.ReadDir(sourceDir)
-	for _, fileInfo := range fileInfoList {
-		files = append(files, path.Join(sourceDir, fileInfo.Name()))
+	dirEntryList, err := os.ReadDir(sourceDir)
+	if err != nil {
+		return fmt.Errorf("cannot read %s directory: %s", sourceDir, err)
+	}
+
+	for _, dirEntry := range dirEntryList {
+		files = append(files, path.Join(sourceDir, dirEntry.Name()))
 	}
 
 	zipArchive := archiver.Zip{

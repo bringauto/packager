@@ -3,14 +3,17 @@ package bringauto_build
 import (
 	"bringauto/modules/bringauto_docker"
 	"bringauto/modules/bringauto_git"
+	"bringauto/modules/bringauto_log"
+	"bringauto/modules/bringauto_const"
 	"bringauto/modules/bringauto_package"
 	"bringauto/modules/bringauto_prerequisites"
 	"bringauto/modules/bringauto_ssh"
 	"bringauto/modules/bringauto_sysroot"
+	"bringauto/modules/bringauto_process"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 type Build struct {
@@ -83,7 +86,7 @@ func (build *Build) RunBuild() error {
 	if found {
 		return fmt.Errorf("do not specify CMAKE_INSTALL_PREFIX")
 	}
-	build.CMake.Defines["CMAKE_INSTALL_PREFIX"] = dockerInstallDirConst
+	build.CMake.Defines["CMAKE_INSTALL_PREFIX"] = bringauto_const.DockerInstallDirConst
 
 	if build.sysroot != nil {
 		build.sysroot.CreateSysrootDir()
@@ -109,9 +112,20 @@ func (build *Build) RunBuild() error {
 		},
 	}
 
+	logger := bringauto_log.GetLogger()
+	packBuildChainLogger := logger.CreateContextLogger(build.Docker.ImageName, build.Package.GetShortPackageName(), bringauto_log.BuildChainContext)
+	file, err := packBuildChainLogger.GetFile()
+
+	if err != nil {
+		logger.Error("Failed to open file - %s", err)
+		return err
+	}
+
+	defer file.Close()
+
 	shellEvaluator := bringauto_ssh.ShellEvaluator{
 		Commands: buildChain.GenerateCommands(),
-		StdOut:   os.Stdout,
+		StdOut:   file,
 	}
 
 	err = bringauto_prerequisites.Initialize(build.Docker)
@@ -120,28 +134,24 @@ func (build *Build) RunBuild() error {
 	}
 
 	dockerRun := (*bringauto_docker.DockerRun)(build.Docker)
+	removeHandler := bringauto_process.SignalHandlerAddHandler(func() error {
+		// Waiting for docker run command to get container id
+		time.Sleep(300 * time.Millisecond)
+		return build.stopAndRemoveContainer()
+	})
+	defer removeHandler()
+
 	err = dockerRun.Run()
 	if err != nil {
 		return err
 	}
-	defer func() {
-		dockerStop := (*bringauto_docker.DockerStop)(build.Docker)
-		dockerRm := (*bringauto_docker.DockerRm)(build.Docker)
-		var err error
-		err = dockerStop.Stop()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "cannot stop container: %s\n", err)
-		}
-		err = dockerRm.RemoveContainer()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "cannot remove container: %s\n", err)
-		}
-	}()
 
 	err = shellEvaluator.RunOverSSH(*build.SSHCredentials)
 	if err != nil {
 		return err
 	}
+
+	logger.InfoIndent("Copying install files from container to local directory")
 
 	err = build.downloadInstalledFiles()
 	return err
@@ -154,10 +164,28 @@ func (build *Build) SetSysroot(sysroot *bringauto_sysroot.Sysroot) {
 func (build *Build) GetLocalInstallDirPath() string {
 	workingDir, err := os.Getwd()
 	if err != nil {
-		log.Fatalf("cannot call Getwd - %s", err)
+		logger := bringauto_log.GetLogger()
+		logger.Fatal("cannot call Getwd - %s", err)
 	}
 	copyBaseDir := filepath.Join(workingDir, localInstallDirNameConst)
 	return copyBaseDir
+}
+
+func (build *Build) stopAndRemoveContainer() error {
+	var err error
+
+	dockerStop := (*bringauto_docker.DockerStop)(build.Docker)
+	dockerRm := (*bringauto_docker.DockerRm)(build.Docker)
+	logger := bringauto_log.GetLogger()
+	err = dockerStop.Stop()
+	if err != nil {
+		logger.Error("Can't stop container - %s", err)
+	}
+	err = dockerRm.RemoveContainer()
+	if err != nil {
+		logger.Error("Can't remove container - %s", err)
+	}
+	return nil
 }
 
 func (build *Build) CleanUp() error {
@@ -184,10 +212,20 @@ func (build *Build) downloadInstalledFiles() error {
 		}
 	}
 
+	packTarLogger := bringauto_log.GetLogger().CreateContextLogger(build.Docker.ImageName, build.Package.GetShortPackageName(), bringauto_log.TarContext)
+	logFile, err := packTarLogger.GetFile()
+
+	if err != nil {
+		return fmt.Errorf("failed to open file - %s", err)
+	}
+
+	defer logFile.Close()
+
 	sftpClient := bringauto_ssh.SFTP{
-		RemoteDir:      dockerInstallDirConst,
+		RemoteDir:      bringauto_const.DockerInstallDirConst,
 		EmptyLocalDir:  copyDir,
 		SSHCredentials: build.SSHCredentials,
+		LogWriter:      logFile,
 	}
 	err = sftpClient.DownloadDirectory()
 	return err

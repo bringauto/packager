@@ -1,5 +1,5 @@
 
-# Docker container requirements
+# Docker Container Requirements
 
 Each image that we can use for build our dependencies
 
@@ -21,7 +21,7 @@ Each image that we can use for build our dependencies
 
 `lsb_release` and `uname` are used to construct platform string.
 
-`lsb_release` must support 
+`lsb_release` must support
 
 - `-s` - short print that is easily parsable by machine
 - `-r` - release version (for Debian 11 it prints "11" if used with `-s` switch)

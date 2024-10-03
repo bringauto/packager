@@ -4,7 +4,7 @@
     "zlib",
     "boost",
     "fleet-protocol-interface",
-    "fleet-protocol-cxx-helpers-static",
+    "fleet-protocol-cpp",
     "cpprestsdk"
   ],
   "Git": {

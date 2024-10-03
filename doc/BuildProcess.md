@@ -5,7 +5,7 @@ Each package has a Config file in the JSON format. (Config file details in [Cont
 
 ## Build All packages
 
-**Config phase**
+### Config phase for all packages
 
 - the default Package config structure is created (with defaults filled in, look for `Config`
   in the config module).
@@ -13,11 +13,11 @@ Each package has a Config file in the JSON format. (Config file details in [Cont
 - the default Package config is merged with the confile read from file. The config file
   data has a precedence over Default one.
 
-**Build phase**
+### Build phase for all packages
 
 - the package configs are stored in linear list
 - package config are topological sorted by `Dependencies`,
-- the packages are build from first item of the list (head of the list) to the las package of the list.
+- the packages are build from first item of the list (head of the list) to the last package of the list.
 
 During the build the package files installed by installation feature of the CMake are copied
 to the `install_sysroot` directory located in the working directory of the builder.
@@ -30,15 +30,15 @@ packages are not mixed together.
 
 ## Build single package
 
-**Config phase**
+### Config phase for single package
 
 Same as for All build except that only configs for given `package_group` are read and managed.
 
-**Build phase**
+### Build phase for single package
 
-Same as fo All build except that the dependencies are ignored. (so If you have not initialized `install_sysroot`
-then the package build fail)
+Same as for All build except that the dependencies are ignored. (so if you have not initialized
+`install_sysroot` then the package build may fail)
 
-
+If you want to build package with all dependencies, you can add `--build-deps` flag to script call.
 
 [Context Directory Structure]: ./ContextDirectoryStructure.md
