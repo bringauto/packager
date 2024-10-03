@@ -40,13 +40,31 @@ func removeDuplicates(configList *[]*bringauto_config.Config) []*bringauto_confi
 	return newConfigList
 }
 
-func (list *buildDepList) TopologicalSort(buildMap ConfigMapType) []*bringauto_config.Config {
+// checkForCircularDependency
+// Checks for circular dependency in defsMap. If there is one, returns error with message
+// and problematic packages, else returns nil.
+func checkForCircularDependency(dependsMap map[string]*map[string]bool) error {
+	for packageName, depsMap := range dependsMap {
+		for depPackageName, _ := range *depsMap {
+			if (*dependsMap[depPackageName])[packageName] {
+				return fmt.Errorf("circular dependency between packages %s and %s", packageName, depPackageName)
+			}
+		}
+	}
+	return nil
+}
+
+func (list *buildDepList) TopologicalSort(buildMap ConfigMapType) ([]*bringauto_config.Config, error) {
 
 	// Map represents 'PackageName: []DependsOnPackageNames'
 	var dependsMap map[string]*map[string]bool
 	var allDependencies map[string]bool
 
 	dependsMap, allDependencies = list.createDependsMap(&buildMap)
+	err := checkForCircularDependency(dependsMap)
+	if err != nil  {
+		return []*bringauto_config.Config{}, err
+	}
 
 	dependsMapCopy := make(map[string]*map[string]bool, len(dependsMap))
 	for key, value := range dependsMap {
@@ -76,7 +94,7 @@ func (list *buildDepList) TopologicalSort(buildMap ConfigMapType) []*bringauto_c
 		sortedDependenciesConfig = append(sortedDependenciesConfig, buildMap[packageName]...)
 	}
 
-	return removeDuplicates(&sortedDependenciesConfig)
+	return removeDuplicates(&sortedDependenciesConfig), nil
 }
 
 func (list *buildDepList) createDependsMap(buildMap *ConfigMapType) (dependsMapType, allDependenciesType) {
@@ -157,7 +175,10 @@ func buildAllPackages(cmdLine *BuildPackageCmdLineArgs, contextPath string, plat
 		addConfigsToDefsMap(&defsMap, packageJsonPathList)
 	}
 	depsList := buildDepList{}
-	configList := depsList.TopologicalSort(defsMap)
+	configList, err := depsList.TopologicalSort(defsMap)
+	if err != nil {
+		return err
+	}
 
 	logger := bringauto_log.GetLogger()
 
@@ -201,7 +222,10 @@ func buildSinglePackage(cmdLine *BuildPackageCmdLineArgs, contextPath string, pl
 		defsMap := make(ConfigMapType)
 		addConfigsToDefsMap(&defsMap, packageJsonPathList)
 		depList := buildDepList{}
-		configList = depList.TopologicalSort(defsMap)
+		configList, err = depList.TopologicalSort(defsMap)
+		if err != nil {
+			return err
+		}
 	} else {
 		packageJsonPathList, err := contextManager.GetPackageJsonDefPaths(packageName)
 		if err != nil {
