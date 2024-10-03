@@ -1,17 +1,19 @@
 package main
 
 import (
-	"bringauto/modules/bringauto_log"
 	"bringauto/modules/bringauto_build"
 	"bringauto/modules/bringauto_config"
-	"bringauto/modules/bringauto_package"
 	"bringauto/modules/bringauto_docker"
-	"bringauto/modules/bringauto_ssh"
+	"bringauto/modules/bringauto_log"
+	"bringauto/modules/bringauto_package"
 	"bringauto/modules/bringauto_prerequisites"
-	"bringauto/modules/bringauto_repository"
-	"bringauto/modules/bringauto_sysroot"
 	"bringauto/modules/bringauto_process"
+	"bringauto/modules/bringauto_repository"
+	"bringauto/modules/bringauto_ssh"
+	"bringauto/modules/bringauto_sysroot"
 	"fmt"
+	"io/fs"
+	"path/filepath"
 	"strconv"
 )
 
@@ -140,6 +142,34 @@ func (list *buildDepList) sortDependencies(rootName string, dependsMap *map[stri
 	return &sorted
 }
 
+
+// checkContextDirConsistency
+// Checks if all directories in contextPath have same name as Package names from JSON definitions
+// inside this directory. If not, returns error with description, else returns nil. Also returns error
+// if the Package JSON definition can't be loaded.
+func checkContextDirConsistency(contextPath string) error {
+	packageContextPath := filepath.Join(contextPath, PackageDirectoryNameConst)
+	err := filepath.WalkDir(packageContextPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !d.IsDir() {
+			var config bringauto_config.Config
+			err = config.LoadJSONConfig(path)
+			if err != nil {
+				return fmt.Errorf("couldn't load JSON config from %s path", path)
+			}
+			dirName := filepath.Base(filepath.Dir(path))
+			if config.Package.Name != dirName {
+				return fmt.Errorf("directory name (%s) is different from package name (%s)", dirName, config.Package.Name)
+			}
+		}
+		return nil
+	})
+
+	return err
+}
+
 // BuildPackage
 // process Package mode of the program
 func BuildPackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) error {
@@ -150,6 +180,10 @@ func BuildPackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) error {
 	err = checkSysrootDirs(platformString)
 	if err != nil {
 		return err
+	}
+	err = checkContextDirConsistency(contextPath)
+	if err != nil {
+		return fmt.Errorf("package context directory consistency check failed: %s", err)
 	}
 	buildAll := cmdLine.All
 	if *buildAll {
