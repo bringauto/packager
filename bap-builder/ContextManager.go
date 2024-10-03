@@ -90,12 +90,13 @@ func (context *ContextManager) GetPackageJsonDefPaths(packageName string) ([]str
 
 // getAllDepsJsonPaths
 // returns all json defintions paths recursively for given package specified by its json definition path
-func (context *ContextManager) getAllDepsJsonPaths(packageJsonPath string) ([]string, error) {
+func (context *ContextManager) getAllDepsJsonPaths(packageJsonPath string, visited map[string]struct{}) ([]string, error) {
 	var config bringauto_config.Config
 	err := config.LoadJSONConfig(packageJsonPath)
 	if err != nil {
 		return []string{}, fmt.Errorf("couldn't load JSON config from %s path - %s", packageJsonPath, err)
 	}
+	visited[packageJsonPath] = struct{}{}
 	var jsonPathListWithDeps []string
 	for _, packageDep := range config.DependsOn {
 		packageDepsJsonPaths, err := context.GetPackageJsonDefPaths(packageDep)
@@ -104,6 +105,10 @@ func (context *ContextManager) getAllDepsJsonPaths(packageJsonPath string) ([]st
 		}
 		var depConfig bringauto_config.Config
 		for _, packageDepJsonPath := range packageDepsJsonPaths {
+			_, packageVisited := visited[packageDepJsonPath]
+			if packageVisited {
+				continue
+			}
 			err := depConfig.LoadJSONConfig(packageDepJsonPath)
 			if err != nil {
 				return []string{}, fmt.Errorf("couldn't load JSON config from %s path - %s", packageDepJsonPath, err)
@@ -112,7 +117,7 @@ func (context *ContextManager) getAllDepsJsonPaths(packageJsonPath string) ([]st
 				continue
 			}
 			jsonPathListWithDeps = append(jsonPathListWithDeps, packageDepJsonPath)
-			jsonPathListWithDepsTmp, err := context.getAllDepsJsonPaths(packageDepJsonPath)
+			jsonPathListWithDepsTmp, err := context.getAllDepsJsonPaths(packageDepJsonPath, visited)
 			if err != nil {
 				return []string{}, err
 			}
@@ -131,8 +136,9 @@ func (context *ContextManager) GetPackageWithDepsJsonDefPaths(packageName string
 		return []string{}, fmt.Errorf("cannot get config paths for package '%s' - %s", packageName, err)
 	}
 	var packageDeps []string
+	visitedPackages := make(map[string]struct{})
 	for _, packageDef := range packageDefs {
-		packageDepsTmp, err := context.getAllDepsJsonPaths(packageDef)
+		packageDepsTmp, err := context.getAllDepsJsonPaths(packageDef, visitedPackages)
 		if err != nil {
 			return []string{}, err
 		}
