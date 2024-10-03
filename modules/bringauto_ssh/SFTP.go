@@ -122,31 +122,33 @@ func (sftpd *SFTP) copyFile(sftpClient *sftp.Client, remoteFile string, localDir
 		return err
 	}
 
-	copyIOFile(sourceFile, destFile)
-
-	return nil
+	return copyIOFile(sourceFile, destFile)
 }
 
-func copyIOFile(sourceFile *sftp.File, destFile *os.File) {
+func copyIOFile(sourceFile *sftp.File, destFile *os.File) error {
 	sourceFileBuff := bufio.NewReaderSize(sourceFile, bufferSize)
 	destFileBuff := bufio.NewWriterSize(destFile, bufferSize)
 
 	var err error
 	_, err = io.Copy(destFileBuff, sourceFileBuff)
 	if err != nil {
-		panic(fmt.Errorf("cannot copy remote IO files"))
+		return fmt.Errorf("cannot copy remote IO files: %s", err)
 	}
 
-	_ = destFileBuff.Flush()
+	err = destFileBuff.Flush()
+	if err != nil {
+		return fmt.Errorf("cannot flush destination buffer: %s", err)
+	}
 
 	err = destFile.Close()
 	if err != nil {
-		panic(fmt.Errorf("cannot close destFile: %s", err))
+		return fmt.Errorf("cannot close destination file: %s", err)
 	}
 	err = sourceFile.Close()
 	if err != nil {
-		panic(fmt.Errorf("cannot close sourceFile: %s", err))
+		return fmt.Errorf("cannot close source file: %s", err)
 	}
+	return nil
 }
 
 // normalizePath
