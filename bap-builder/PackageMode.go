@@ -46,14 +46,42 @@ func removeDuplicates(configList *[]*bringauto_config.Config) []*bringauto_confi
 // Checks for circular dependency in defsMap. If there is one, returns error with message
 // and problematic packages, else returns nil.
 func checkForCircularDependency(dependsMap map[string]*map[string]bool) error {
-	for packageName, depsMap := range dependsMap {
-		for depPackageName, _ := range *depsMap {
-			if (*dependsMap[depPackageName])[packageName] {
-				return fmt.Errorf("circular dependency between packages %s and %s", packageName, depPackageName)
-			}
+	visited := make(map[string]bool)
+
+	for packageName := range dependsMap {
+		cycleDetected, cycleString := detectCycle(packageName, dependsMap, visited)
+		if cycleDetected {
+			return fmt.Errorf("circular dependency detected - %s", packageName + " -> " + cycleString)
+		}
+		// Clearing recursion stack after one path through graph was checked
+		for visitedPackage := range visited {
+			visited[visitedPackage] = false
 		}
 	}
 	return nil
+}
+
+// detectCycle
+// Detects cycle between package dependencies in one path through graph. visited is current
+// recursion stack and dependsMap is whole graph representation. packageName is root node where
+// cycle detection should start.
+func detectCycle(packageName string, dependsMap map[string]*map[string]bool, visited map[string]bool) (bool, string) {
+	visited[packageName] = true
+	depsMap, found := dependsMap[packageName]
+	if found {
+		for depPackageName := range *depsMap {
+			if visited[depPackageName] {
+				return true, depPackageName
+			} else {
+				cycleDetected, cycleString := detectCycle(depPackageName, dependsMap, visited)
+				if cycleDetected {
+					return cycleDetected, depPackageName + " -> " + cycleString
+				}
+			}
+		}
+	}
+	visited[packageName] = false
+	return false, ""
 }
 
 func (list *buildDepList) TopologicalSort(buildMap ConfigMapType) ([]*bringauto_config.Config, error) {
