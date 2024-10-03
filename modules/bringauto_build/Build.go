@@ -140,7 +140,6 @@ func (build *Build) RunBuild() error {
 	if err != nil {
 		return err
 	}
-	defer build.stopAndRemoveContainer()
 
 	err = shellEvaluator.RunOverSSH(*build.SSHCredentials)
 	if err != nil {

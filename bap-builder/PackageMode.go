@@ -322,6 +322,8 @@ func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_bu
 	if err != nil {
 		return err
 	}
+	var removeHandler func()
+
 	logger := bringauto_log.GetLogger()
 
 	for _, buildConfig := range *build {
@@ -342,27 +344,31 @@ func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_bu
 
 		logger.InfoIndent("Copying to Git repository")
 
-		removeHandler := bringauto_process.SignalHandlerAddHandler(buildConfig.CleanUp)
+		removeHandler = bringauto_process.SignalHandlerAddHandler(buildConfig.CleanUp)
 
 		err = repo.CopyToRepository(*buildConfig.Package, buildConfig.GetLocalInstallDirPath())
 		if err != nil {
-			return err
+			break
 		}
 
 		logger.InfoIndent("Copying to local sysroot directory")
 		err = sysroot.CopyToSysroot(buildConfig.GetLocalInstallDirPath())
 		if err != nil {
-			return err
+			break
 		}
 
 		err = buildConfig.CleanUp()
 		removeHandler()
+		removeHandler = nil
 		if err != nil {
 			return err
 		}
 		logger.InfoIndent("Build OK")
 	}
-	return nil
+	if removeHandler != nil {
+		removeHandler()
+	}
+	return err
 }
 
 // determinePlatformString
