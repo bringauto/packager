@@ -365,14 +365,13 @@ func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_bu
 		buildConfig.SetSysroot(&sysroot)
 
 		logger.InfoIndent("Run build inside container")
+		removeHandler = bringauto_process.SignalHandlerAddHandler(buildConfig.CleanUp)
 		err = buildConfig.RunBuild()
 		if err != nil {
 			return err
 		}
 
 		logger.InfoIndent("Copying to Git repository")
-
-		removeHandler = bringauto_process.SignalHandlerAddHandler(buildConfig.CleanUp)
 
 		err = repo.CopyToRepository(*buildConfig.Package, buildConfig.GetLocalInstallDirPath())
 		if err != nil {
@@ -385,7 +384,6 @@ func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_bu
 			break
 		}
 
-		err = buildConfig.CleanUp()
 		removeHandler()
 		removeHandler = nil
 		if err != nil {
