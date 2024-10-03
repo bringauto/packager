@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 type Build struct {
@@ -133,7 +134,11 @@ func (build *Build) RunBuild() error {
 	}
 
 	dockerRun := (*bringauto_docker.DockerRun)(build.Docker)
-	removeHandler := bringauto_process.SignalHandlerAddHandler(build.stopAndRemoveContainer)
+	removeHandler := bringauto_process.SignalHandlerAddHandler(func() error {
+		// Waiting for docker run command to get container id
+		time.Sleep(300 * time.Millisecond)
+		return build.stopAndRemoveContainer()
+	})
 	defer removeHandler()
 
 	err = dockerRun.Run()
