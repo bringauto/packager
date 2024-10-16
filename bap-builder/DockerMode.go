@@ -22,8 +22,7 @@ func BuildDockerImage(cmdLine *BuildImageCmdLineArgs, contextPath string) error 
 	if err != nil {
 		return err
 	}
-	buildSingleDockerImage(*cmdLine.Name, dockerfilePath)
-	return nil
+	return buildSingleDockerImage(*cmdLine.Name, dockerfilePath)
 }
 
 // buildAllDockerImages
@@ -42,7 +41,7 @@ func buildAllDockerImages(contextManager ContextManager) error {
 			logger.Warn("Bug: multiple Dockerfile present for same image name %s", imageName)
 			continue
 		}
-		buildSingleDockerImage(imageName, dockerfilePath[0])
+		return buildSingleDockerImage(imageName, dockerfilePath[0])
 	}
 	return nil
 }

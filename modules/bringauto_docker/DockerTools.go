@@ -8,6 +8,9 @@ import (
 	"strconv"
 )
 
+// IsDefaultPortAvailable
+// Returns true if default port for docker is available, else returns false.
+// When false is returned, the error contains message from the docker command.
 func IsDefaultPortAvailable() (bool, error) {
 	var outBuff, errBuff bytes.Buffer
 

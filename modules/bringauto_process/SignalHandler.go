@@ -68,9 +68,9 @@ func removeLastHandler() {
 
 func executeAllHandlers() {
 	for i := len(handlers)-1; i >= 0; i-- {
-   		err := handlers[i]()
-     	if err != nil {
-      		bringauto_log.GetLogger().Error("Handler returned error - %s", err)
-      	}
+		err := handlers[i]()
+		if err != nil {
+			bringauto_log.GetLogger().Error("Handler returned error - %s", err)
+		}
 	}
 }
