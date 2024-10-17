@@ -23,7 +23,7 @@
     }
   },
   "Package": {
-    "Name": "osmium",
+    "Name": "libosmium",
     "VersionTag": "v2.17.3",
     "PlatformString": {
       "Mode": "auto"

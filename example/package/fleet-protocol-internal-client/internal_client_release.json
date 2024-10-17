@@ -20,7 +20,7 @@
     }
   },
   "Package": {
-    "Name": "internal-client",
+    "Name": "fleet-protocol-internal-client",
     "VersionTag": "v1.1.1",
     "PlatformString": {
       "Mode": "auto"

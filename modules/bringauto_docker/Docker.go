@@ -3,6 +3,7 @@ package bringauto_docker
 import (
 	"bringauto/modules/bringauto_prerequisites"
 	"bringauto/modules/bringauto_process"
+	"bringauto/modules/bringauto_const"
 	"fmt"
 	"os"
 )
@@ -33,7 +34,7 @@ func (docker *Docker) FillDefault(*bringauto_prerequisites.Args) error {
 		RunAsDaemon: true,
 		ImageName:   defaultImageNameConst,
 		Ports: map[int]int{
-			1122: 22,
+			bringauto_const.DefaultSSHPort: 22,
 		},
 	}
 	return nil
@@ -47,6 +48,12 @@ func (docker *Docker) FillDynamic(*bringauto_prerequisites.Args) error {
 // It checks if the docker is installed and can be run by given user.
 // Function returns nil if Docker installation is ok, not nil of the problem is recognized
 func (docker *Docker) CheckPrerequisites(*bringauto_prerequisites.Args) error {
+	portAvailable, err := IsDefaultPortAvailable()
+	if err != nil {
+		return err
+	} else if !portAvailable {
+		return fmt.Errorf("default port %d not available", bringauto_const.DefaultSSHPort)
+	}
 	process := bringauto_process.Process{
 		CommandAbsolutePath: DockerExecutablePathConst,
 		Args: bringauto_process.ProcessArgs{
@@ -55,7 +62,7 @@ func (docker *Docker) CheckPrerequisites(*bringauto_prerequisites.Args) error {
 			},
 		},
 	}
-	err := process.Run()
+	err = process.Run()
 	if err != nil {
 		return err
 	}

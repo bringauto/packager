@@ -100,7 +100,7 @@ func (lfs *GitLFSRepository) gitIsStatusEmpty() bool {
 }
 
 func (lfs *GitLFSRepository) gitAddAll(pack *bringauto_package.Package) error {
-	packageName := pack.CreatePackageName()
+	packageName := pack.GetFullPackageName()
 	var ok, _ = lfs.prepareAndRun([]string{
 		"add",
 		".",
@@ -113,7 +113,7 @@ func (lfs *GitLFSRepository) gitAddAll(pack *bringauto_package.Package) error {
 }
 
 func (lfs *GitLFSRepository) gitCommit(pack *bringauto_package.Package) error {
-	packageName := pack.CreatePackageName()
+	packageName := pack.GetFullPackageName()
 	var ok, _ = lfs.prepareAndRun([]string{
 		"commit",
 		"-m",

@@ -27,6 +27,8 @@ type BuildPackageCmdLineArgs struct {
 	All *bool
 	// Name of the package to build (name of the directory in packages/ dir)
 	Name *string
+	// BuildDeps Build all dependencies of package when building single package
+	BuildDeps *bool
 	// DockerImageName is a name of docker image to which packages will be build.
 	// If empty all docker images from DockerMatrix in config file are used for a given package.
 	// If not empty, only packages which contains DockerImageName in DockerMatrix will be built.
@@ -34,7 +36,7 @@ type BuildPackageCmdLineArgs struct {
 	DockerImageName *string
 	// OutputDir relative (to program working dir) ot absolute path where the package will be stored
 	OutputDir *string
-	// Output dir mode
+	// OutputDirMode Output dir mode
 	OutputDirMode *OutputDirMode
 }
 
@@ -87,6 +89,13 @@ func (cmd *CmdLineArgs) InitFlags() {
 			Help:     "Name of the package to build",
 		},
 	)
+	cmd.BuildPackageArgs.BuildDeps = cmd.buildPackageParser.Flag("", "build-deps",
+		&argparse.Options{
+			Required: false,
+			Default:  false,
+			Help:     "Build all dependencies of package when building single package",
+		},
+	)
 	cmd.BuildPackageArgs.OutputDir = cmd.buildPackageParser.String("", "output-dir",
 		&argparse.Options{
 			Required: true,
@@ -134,6 +143,9 @@ func (cmd *CmdLineArgs) ParseArgs(args []string) error {
 
 	cmd.BuildImage = cmd.buildImageParser.Happened()
 	cmd.BuildPackage = cmd.buildPackageParser.Happened()
+	if *cmd.BuildPackageArgs.All && *cmd.BuildPackageArgs.BuildDeps {
+		return fmt.Errorf("all and build-deps flags at the same time")
+	}
 
 	return nil
 }

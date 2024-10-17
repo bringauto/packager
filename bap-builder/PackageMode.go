@@ -3,13 +3,17 @@ package main
 import (
 	"bringauto/modules/bringauto_build"
 	"bringauto/modules/bringauto_config"
+	"bringauto/modules/bringauto_docker"
+	"bringauto/modules/bringauto_log"
 	"bringauto/modules/bringauto_package"
 	"bringauto/modules/bringauto_prerequisites"
+	"bringauto/modules/bringauto_process"
 	"bringauto/modules/bringauto_repository"
+	"bringauto/modules/bringauto_ssh"
 	"bringauto/modules/bringauto_sysroot"
 	"fmt"
-	"log"
-	"os"
+	"io/fs"
+	"path/filepath"
 	"strconv"
 )
 
@@ -38,13 +42,59 @@ func removeDuplicates(configList *[]*bringauto_config.Config) []*bringauto_confi
 	return newConfigList
 }
 
-func (list *buildDepList) TopologicalSort(buildMap ConfigMapType) []*bringauto_config.Config {
+// checkForCircularDependency
+// Checks for circular dependency in defsMap. If there is one, returns error with message
+// and problematic packages, else returns nil.
+func checkForCircularDependency(dependsMap map[string]*map[string]bool) error {
+	visited := make(map[string]bool)
+
+	for packageName := range dependsMap {
+		cycleDetected, cycleString := detectCycle(packageName, dependsMap, visited)
+		if cycleDetected {
+			return fmt.Errorf("circular dependency detected - %s", packageName + " -> " + cycleString)
+		}
+		// Clearing recursion stack after one path through graph was checked
+		for visitedPackage := range visited {
+			visited[visitedPackage] = false
+		}
+	}
+	return nil
+}
+
+// detectCycle
+// Detects cycle between package dependencies in one path through graph. visited is current
+// recursion stack and dependsMap is whole graph representation. packageName is root node where
+// cycle detection should start.
+func detectCycle(packageName string, dependsMap map[string]*map[string]bool, visited map[string]bool) (bool, string) {
+	visited[packageName] = true
+	depsMap, found := dependsMap[packageName]
+	if found {
+		for depPackageName := range *depsMap {
+			if visited[depPackageName] {
+				return true, depPackageName
+			} else {
+				cycleDetected, cycleString := detectCycle(depPackageName, dependsMap, visited)
+				if cycleDetected {
+					return cycleDetected, depPackageName + " -> " + cycleString
+				}
+			}
+		}
+	}
+	visited[packageName] = false
+	return false, ""
+}
+
+func (list *buildDepList) TopologicalSort(buildMap ConfigMapType) ([]*bringauto_config.Config, error) {
 
 	// Map represents 'PackageName: []DependsOnPackageNames'
 	var dependsMap map[string]*map[string]bool
 	var allDependencies map[string]bool
 
 	dependsMap, allDependencies = list.createDependsMap(&buildMap)
+	err := checkForCircularDependency(dependsMap)
+	if err != nil  {
+		return []*bringauto_config.Config{}, err
+	}
 
 	dependsMapCopy := make(map[string]*map[string]bool, len(dependsMap))
 	for key, value := range dependsMap {
@@ -74,7 +124,7 @@ func (list *buildDepList) TopologicalSort(buildMap ConfigMapType) []*bringauto_c
 		sortedDependenciesConfig = append(sortedDependenciesConfig, buildMap[packageName]...)
 	}
 
-	return removeDuplicates(&sortedDependenciesConfig)
+	return removeDuplicates(&sortedDependenciesConfig), nil
 }
 
 func (list *buildDepList) createDependsMap(buildMap *ConfigMapType) (dependsMapType, allDependenciesType) {
@@ -120,97 +170,173 @@ func (list *buildDepList) sortDependencies(rootName string, dependsMap *map[stri
 	return &sorted
 }
 
+
+// checkContextDirConsistency
+// Checks if all directories in contextPath have same name as Package names from JSON definitions
+// inside this directory. If not, returns error with description, else returns nil. Also returns error
+// if the Package JSON definition can't be loaded.
+func checkContextDirConsistency(contextPath string) error {
+	packageContextPath := filepath.Join(contextPath, PackageDirectoryNameConst)
+	err := filepath.WalkDir(packageContextPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !d.IsDir() {
+			var config bringauto_config.Config
+			err = config.LoadJSONConfig(path)
+			if err != nil {
+				return fmt.Errorf("couldn't load JSON config from %s path", path)
+			}
+			dirName := filepath.Base(filepath.Dir(path))
+			if config.Package.Name != dirName {
+				return fmt.Errorf("directory name (%s) is different from package name (%s)", dirName, config.Package.Name)
+			}
+		}
+		return nil
+	})
+
+	return err
+}
+
 // BuildPackage
 // process Package mode of the program
 func BuildPackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) error {
+	platformString, err := determinePlatformString(*cmdLine.DockerImageName)
+	if err != nil {
+		return err
+	}
+	err = checkSysrootDirs(platformString)
+	if err != nil {
+		return err
+	}
+	err = checkContextDirConsistency(contextPath)
+	if err != nil {
+		return fmt.Errorf("package context directory consistency check failed: %s", err)
+	}
 	buildAll := cmdLine.All
 	if *buildAll {
-		return buildAllPackages(cmdLine, contextPath)
+		return buildAllPackages(cmdLine, contextPath, platformString)
 	}
-	return buildSinglePackage(cmdLine, contextPath)
+	return buildSinglePackage(cmdLine, contextPath, platformString)
 }
 
 // buildAllPackages
-// builds all docker images in the given contextPath.
-// It returns nil if everything is ok, or not nil in case of error
-func buildAllPackages(cmdLine *BuildPackageCmdLineArgs, contextPath string) error {
+// Builds all packages specified in contextPath. Also takes care of building all deps for all
+// packages in correct order. It returns nil if everything is ok, or not nil in case of error.
+func buildAllPackages(cmdLine *BuildPackageCmdLineArgs, contextPath string, platformString *bringauto_package.PlatformString) error {
 	contextManager := ContextManager{
 		ContextPath: contextPath,
 	}
-	packagesDefs, err := contextManager.GetAllPackagesJsonDefPaths()
+	packageJsonPathMap, err := contextManager.GetAllPackagesJsonDefPaths()
 	if err != nil {
 		return err
 	}
 
-	defsList := make(map[string][]*bringauto_config.Config)
-	for _, packageJsonDef := range packagesDefs {
-		for _, defdef := range packageJsonDef {
-			var config bringauto_config.Config
-			err = config.LoadJSONConfig(defdef)
-			packageName := config.Package.Name
-			_, found := defsList[packageName]
-			if !found {
-				defsList[packageName] = []*bringauto_config.Config{}
-			}
-			defsList[packageName] = append(defsList[packageName], &config)
-		}
-
+	defsMap := make(ConfigMapType)
+	for _, packageJsonPathList := range packageJsonPathMap {
+		addConfigsToDefsMap(&defsMap, packageJsonPathList)
 	}
 	depsList := buildDepList{}
-	configList := depsList.TopologicalSort(defsList)
+	configList, err := depsList.TopologicalSort(defsMap)
+	if err != nil {
+		return err
+	}
+
+	logger := bringauto_log.GetLogger()
 
 	count := int32(0)
 	for _, config := range configList {
-		buildConfigs := config.GetBuildStructure(*cmdLine.DockerImageName)
+		buildConfigs := config.GetBuildStructure(*cmdLine.DockerImageName, platformString)
 		if len(buildConfigs) == 0 {
 			continue
 		}
 		count++
-		log.Printf("Build %s\n", buildConfigs[0].Package.CreatePackageName())
-		err = buildAndCopyPackage(cmdLine, &buildConfigs)
+		err = buildAndCopyPackage(cmdLine, &buildConfigs, platformString)
 		if err != nil {
-			panic(fmt.Errorf("cannot build package '%s' - %s", config.Package.Name, err))
+			logger.Fatal("cannot build package '%s' - %s", config.Package.Name, err)
 		}
 	}
 	if count == 0 {
-		log.Printf("Nothing to build. Did you enter correct image name?")
+		logger.Warn("Nothing to build. Did you enter correct image name?")
 	}
 
 	return nil
 }
 
 // buildSinglePackage
-// build single package specified by a name
-// It returns nil if everything is ok, or not nil in case of error
-func buildSinglePackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) error {
+// Builds single package specified by name in cmdLine. Also takes care of building all deps for
+// given package in correct order. It returns nil if everything is ok, or not nil in case of error.
+func buildSinglePackage(cmdLine *BuildPackageCmdLineArgs, contextPath string, platformString *bringauto_package.PlatformString) error {
 	contextManager := ContextManager{
 		ContextPath: contextPath,
 	}
 	packageName := *cmdLine.Name
-	packageJsonDefsList, err := contextManager.GetPackageJsonDefPaths(packageName)
-	if err != nil {
-		return err
+	var err error
+	logger := bringauto_log.GetLogger()
+
+	var configList []*bringauto_config.Config
+
+	if *cmdLine.BuildDeps {
+		packageJsonPathList, err := contextManager.GetPackageWithDepsJsonDefPaths(packageName)
+		if err != nil {
+			return err
+		}
+		defsMap := make(ConfigMapType)
+		addConfigsToDefsMap(&defsMap, packageJsonPathList)
+		depList := buildDepList{}
+		configList, err = depList.TopologicalSort(defsMap)
+		if err != nil {
+			return err
+		}
+	} else {
+		packageJsonPathList, err := contextManager.GetPackageJsonDefPaths(packageName)
+		if err != nil {
+			return err
+		}
+		for _, packageJsonPath := range packageJsonPathList {
+			var config bringauto_config.Config
+			err = config.LoadJSONConfig(packageJsonPath)
+			if err != nil {
+				logger.Warn("Couldn't load JSON config from %s path - %s", packageJsonPath, err)
+				continue
+			}
+			configList = append(configList, &config)
+		}
 	}
 
-	for _, packageJsonDef := range packageJsonDefsList {
-		var config bringauto_config.Config
-		err = config.LoadJSONConfig(packageJsonDef)
+	for _, config := range configList {
+		buildConfigs := config.GetBuildStructure(*cmdLine.DockerImageName, platformString)
+		err = buildAndCopyPackage(cmdLine, &buildConfigs, platformString)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "package '%s' JSON config def problem - %s\n", packageName, err)
-			continue
-		}
-
-		buildConfigs := config.GetBuildStructure(*cmdLine.DockerImageName)
-		err = buildAndCopyPackage(cmdLine, &buildConfigs)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "cannot build package '%s' - %s\n", packageName, err)
-			continue
+			logger.Fatal("cannot build package '%s' - %s", packageName, err)
 		}
 	}
 	return nil
 }
 
-func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_build.Build) error {
+// addConfigsToDefsMap
+// Adds all configs in packageJsonPathList to defsMap.
+func addConfigsToDefsMap(defsMap *ConfigMapType, packageJsonPathList []string) {
+	logger := bringauto_log.GetLogger()
+	for _, packageJsonPath := range packageJsonPathList {
+		var config bringauto_config.Config
+		err := config.LoadJSONConfig(packageJsonPath)
+		if err != nil {
+			logger.Error("Couldn't load JSON config from %s path - %s", packageJsonPath, err)
+			continue
+		}
+		packageName := config.Package.Name
+		_, found := (*defsMap)[packageName]
+		if !found {
+			(*defsMap)[packageName] = []*bringauto_config.Config{}
+		}
+		(*defsMap)[packageName] = append((*defsMap)[packageName], &config)
+	}
+}
+
+// buildAndCopyPackage
+// Builds single package, takes care of every step of build for single package.
+func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_build.Build, platformString *bringauto_package.PlatformString) error {
 	if *cmdLine.OutputDirMode != OutputDirModeGitLFS {
 		return fmt.Errorf("invalid OutputDirmode. Only GitLFS is supported")
 	}
@@ -224,61 +350,88 @@ func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_bu
 	if err != nil {
 		return err
 	}
+	var removeHandler func()
+
+	logger := bringauto_log.GetLogger()
 
 	for _, buildConfig := range *build {
-		platformString, err := determinePlatformString(&buildConfig)
-		if err != nil {
-			return err
-		}
+		logger.Info("Build %s", buildConfig.Package.GetFullPackageName())
 
 		sysroot := bringauto_sysroot.Sysroot{
 			IsDebug:        buildConfig.Package.IsDebug,
 			PlatformString: platformString,
 		}
 		err = bringauto_prerequisites.Initialize(&sysroot)
-
 		buildConfig.SetSysroot(&sysroot)
+
+		logger.InfoIndent("Run build inside container")
+		removeHandler = bringauto_process.SignalHandlerAddHandler(buildConfig.CleanUp)
 		err = buildConfig.RunBuild()
 		if err != nil {
 			return err
 		}
 
+		logger.InfoIndent("Copying to Git repository")
+
 		err = repo.CopyToRepository(*buildConfig.Package, buildConfig.GetLocalInstallDirPath())
 		if err != nil {
-			return err
+			break
 		}
 
+		logger.InfoIndent("Copying to local sysroot directory")
 		err = sysroot.CopyToSysroot(buildConfig.GetLocalInstallDirPath())
 		if err != nil {
-			return err
+			break
 		}
 
-		err = buildConfig.CleanUp()
+		removeHandler()
+		removeHandler = nil
 		if err != nil {
 			return err
 		}
+		logger.InfoIndent("Build OK")
 	}
-	return nil
+	if removeHandler != nil {
+		removeHandler()
+	}
+	return err
 }
 
-// determinePlatformString will construct platform string suitable
-// for sysroot.
-// For example: the any_machine platformString must be copied to all machine-specific sysroot for
-// a given image.
-func determinePlatformString(build *bringauto_build.Build) (*bringauto_package.PlatformString, error) {
-	platformStringSpecialized := build.Package.PlatformString
-	if build.Package.PlatformString.Mode == bringauto_package.ModeAnyMachine {
-		platformStringStruct := bringauto_package.PlatformString{
-			Mode: bringauto_package.ModeAuto,
-		}
-		platformStringStruct.Mode = bringauto_package.ModeAuto
-		err := bringauto_prerequisites.Initialize[bringauto_package.PlatformString](&platformStringStruct,
-			build.SSHCredentials, build.Docker,
-		)
-		if err != nil {
-			return nil, err
-		}
-		platformStringSpecialized.String.Machine = platformStringStruct.String.Machine
+// determinePlatformString
+// Will construct platform string suitable for sysroot.
+func determinePlatformString(dockerImageName string) (*bringauto_package.PlatformString, error) {
+	defaultDocker := bringauto_prerequisites.CreateAndInitialize[bringauto_docker.Docker]()
+	defaultDocker.ImageName = dockerImageName
+
+	sshCreds := bringauto_prerequisites.CreateAndInitialize[bringauto_ssh.SSHCredentials]()
+
+	platformString := bringauto_package.PlatformString{
+		Mode: bringauto_package.ModeAuto,
 	}
-	return &platformStringSpecialized, nil
+
+	err := bringauto_prerequisites.Initialize[bringauto_package.PlatformString](&platformString, sshCreds, defaultDocker)
+	return &platformString, err
+}
+
+// checkSysrootDirs
+// Checks if sysroot release and debug directories are empty. If not, prints a warning.
+func checkSysrootDirs(platformString *bringauto_package.PlatformString) (error) {
+	sysroot := bringauto_sysroot.Sysroot{
+		IsDebug:        false,
+		PlatformString: platformString,
+	}
+	err := bringauto_prerequisites.Initialize(&sysroot)
+	if err != nil {
+		return err
+	}
+
+	logger := bringauto_log.GetLogger()
+	if !sysroot.IsSysrootDirectoryEmpty() {
+		logger.WarnIndent("Sysroot release directory is not empty - the package build may fail")
+	}
+	sysroot.IsDebug = true
+	if !sysroot.IsSysrootDirectoryEmpty() {
+		logger.WarnIndent("Sysroot debug directory is not empty - the package build may fail")
+	}
+	return nil
 }
