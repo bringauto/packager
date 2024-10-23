@@ -52,13 +52,13 @@ The `bap-builder` builds and stores all dependencies in the git repository (LFS 
 2. Build all Docker images needed for the build:
 
     ```bash
-    bap-builder build-image --context ./example --name debian11
+    bap-builder build-image --context ./example --name debian12
     ```
 
 3. Build all packages for the given distro:
 
     ```bash
-    bap-builder build-package --context ./example --image-name debian11 --output-dir ./lfsrepo --all
+    bap-builder build-package --context ./example --image-name debian12 --output-dir ./lfsrepo --all
     ```
 
 *Note: If you do not have `bap-builder` in your system path, you need to use `./bap-builder/bap-builder` instead of `bap-builder`.*
