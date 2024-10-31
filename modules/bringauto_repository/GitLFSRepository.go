@@ -14,6 +14,7 @@ import (
 // GitLFSRepository represents Package repository based on Git LFS
 type GitLFSRepository struct {
 	GitRepoPath string
+	LocalInstallDir string
 }
 
 const (
@@ -43,40 +44,50 @@ func (lfs *GitLFSRepository) CheckPrerequisites(*bringauto_prerequisites.Args) e
 	return nil
 }
 
-// CopyToRepository copy package to the Git LFS repository.
-// Each package is stored in different directory structure represented by
-//	PlatformString.DistroName / PlatformString.DistroRelease / PlatformString.Machine / <package>
-func (lfs *GitLFSRepository) CopyToRepository(pack bringauto_package.Package, sourceDir string) error {
-	var err error
-	err = lfs.CheckPrerequisites(nil)
+func (lfs *GitLFSRepository) CommitAllChanges() error {
+	err := lfs.gitAddAll()
+	if err != nil {
+		return err
+	}
+	err = lfs.gitCommit()
 	if err != nil {
 		return err
 	}
 
+	return nil
+}
+
+func (lfs *GitLFSRepository) RestoreAllChanges() error {
+	err := lfs.gitRestoreAll()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (lfs *GitLFSRepository) createPackagePath(pack bringauto_package.Package) string {
 	repositoryPath := path.Join(
 		pack.PlatformString.String.DistroName,
 		pack.PlatformString.String.DistroRelease,
 		pack.PlatformString.String.Machine,
 		pack.Name,
 	)
-	archiveDirectory := path.Join(lfs.GitRepoPath, repositoryPath)
+	return path.Join(lfs.GitRepoPath, repositoryPath)
+}
 
+// CopyToRepository copy package to the Git LFS repository.
+// Each package is stored in different directory structure represented by
+//	PlatformString.DistroName / PlatformString.DistroRelease / PlatformString.Machine / <package>
+func (lfs *GitLFSRepository) CopyToRepository(pack bringauto_package.Package, sourceDir string) error {
+	archiveDirectory := lfs.createPackagePath(pack)
+
+	var err error
 	err = os.MkdirAll(archiveDirectory, 0755)
 	if err != nil {
 		return err
 	}
 
 	err = pack.CreatePackage(sourceDir, archiveDirectory)
-	if err != nil {
-		return err
-	}
-
-	err = lfs.gitAddAll(&pack)
-	if err != nil {
-		return err
-	}
-
-	err = lfs.gitCommit(&pack)
 	if err != nil {
 		return err
 	}
@@ -99,29 +110,39 @@ func (lfs *GitLFSRepository) gitIsStatusEmpty() bool {
 	return true
 }
 
-func (lfs *GitLFSRepository) gitAddAll(pack *bringauto_package.Package) error {
-	packageName := pack.GetFullPackageName()
+func (lfs *GitLFSRepository) gitAddAll() error {
 	var ok, _ = lfs.prepareAndRun([]string{
 		"add",
-		".",
+		"*",
 	},
 	)
 	if !ok {
-		return fmt.Errorf("cannot add changes for %s", packageName)
+		return fmt.Errorf("cannot add changes")
 	}
 	return nil
 }
 
-func (lfs *GitLFSRepository) gitCommit(pack *bringauto_package.Package) error {
-	packageName := pack.GetFullPackageName()
+func (lfs *GitLFSRepository) gitCommit() error {
 	var ok, _ = lfs.prepareAndRun([]string{
 		"commit",
 		"-m",
-		"package: " + packageName + "",
+		"Build packages",
 	},
 	)
 	if !ok {
-		return fmt.Errorf("cannot commit changes for %s", packageName)
+		return fmt.Errorf("cannot commit changes")
+	}
+	return nil
+}
+
+func (lfs *GitLFSRepository) gitRestoreAll() error {
+	var ok, _ = lfs.prepareAndRun([]string{
+		"restore",
+		".",
+	},
+	)
+	if !ok {
+		return fmt.Errorf("cannot restore changes")
 	}
 	return nil
 }
