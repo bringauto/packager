@@ -207,10 +207,6 @@ func BuildPackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) error {
 	if err != nil {
 		return err
 	}
-	err = checkSysrootDirs(platformString)
-	if err != nil {
-		return err
-	}
 	err = checkContextDirConsistency(contextPath)
 	if err != nil {
 		return fmt.Errorf("package context directory consistency check failed: %s", err)
@@ -226,6 +222,10 @@ func BuildPackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) error {
 		return err
 	}
 	err = repo.CheckGitLfsConsistency(&contextManager, platformString)
+	if err != nil {
+		return err
+	}
+	err = checkSysrootDirs(platformString)
 	if err != nil {
 		return err
 	}
