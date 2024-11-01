@@ -200,19 +200,31 @@ func checkContextDirConsistency(contextPath string) error {
 	return err
 }
 
+func performPreBuildChecks(contextPath string, repo *bringauto_repository.GitLFSRepository, platformString *bringauto_package.PlatformString) error {
+	err := checkContextDirConsistency(contextPath)
+	if err != nil {
+		return fmt.Errorf("package context directory consistency check failed: %s", err)
+	}
+	contextManager := bringauto_context.ContextManager{
+		ContextPath: contextPath,
+	}
+	err = repo.CheckGitLfsConsistency(&contextManager, platformString)
+	if err != nil {
+		return err
+	}
+	err = checkSysrootDirs(platformString)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // BuildPackage
 // process Package mode of the program
 func BuildPackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) error {
 	platformString, err := determinePlatformString(*cmdLine.DockerImageName)
 	if err != nil {
 		return err
-	}
-	err = checkContextDirConsistency(contextPath)
-	if err != nil {
-		return fmt.Errorf("package context directory consistency check failed: %s", err)
-	}
-	contextManager := bringauto_context.ContextManager{
-		ContextPath: contextPath,
 	}
 	repo := bringauto_repository.GitLFSRepository{
 		GitRepoPath: *cmdLine.OutputDir,
@@ -221,11 +233,7 @@ func BuildPackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) error {
 	if err != nil {
 		return err
 	}
-	err = repo.CheckGitLfsConsistency(&contextManager, platformString)
-	if err != nil {
-		return err
-	}
-	err = checkSysrootDirs(platformString)
+	err = performPreBuildChecks(contextPath, &repo, platformString)
 	if err != nil {
 		return err
 	}
