@@ -215,10 +215,17 @@ func BuildPackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) error {
 	if err != nil {
 		return fmt.Errorf("package context directory consistency check failed: %s", err)
 	}
+	contextManager := bringauto_context.ContextManager{
+		ContextPath: contextPath,
+	}
 	repo := bringauto_repository.GitLFSRepository{
 		GitRepoPath: *cmdLine.OutputDir,
 	}
 	err = bringauto_prerequisites.Initialize(&repo)
+	if err != nil {
+		return err
+	}
+	err = repo.CheckGitLfsConsistency(&contextManager, platformString)
 	if err != nil {
 		return err
 	}
@@ -333,10 +340,6 @@ func buildSinglePackage(
 		}
 	}
 
-	err = repo.CheckGitLfsConsistency(configList)
-	if err != nil {
-		return err
-	}
 	for _, config := range configList {
 		buildConfigs := config.GetBuildStructure(*cmdLine.DockerImageName, platformString)
 		err = buildAndCopyPackage(cmdLine, &buildConfigs, platformString, repo)

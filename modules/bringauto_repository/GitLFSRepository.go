@@ -1,24 +1,30 @@
 package bringauto_repository
 
 import (
+	"bringauto/modules/bringauto_config"
 	"bringauto/modules/bringauto_package"
 	"bringauto/modules/bringauto_prerequisites"
+	"bringauto/modules/bringauto_log"
+	"bringauto/modules/bringauto_context"
 	"bytes"
 	"fmt"
+	"io/fs"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
+	"slices"
 )
 
 // GitLFSRepository represents Package repository based on Git LFS
 type GitLFSRepository struct {
 	GitRepoPath string
-	LocalInstallDir string
 }
 
 const (
 	gitExecutablePath = "/usr/bin/git"
+	// Count of files which will be list in warnings
+	listFileCount = 10
 )
 
 func (lfs *GitLFSRepository) FillDefault(args *bringauto_prerequisites.Args) error {
@@ -61,6 +67,94 @@ func (lfs *GitLFSRepository) RestoreAllChanges() error {
 	err := lfs.gitRestoreAll()
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func (lfs *GitLFSRepository) CheckGitLfsConsistency(contextManager *bringauto_context.ContextManager, platformString *bringauto_package.PlatformString) error {
+	packages, err := getPackages(contextManager, platformString)
+
+	var expectedPackPaths []string
+	for _, pack := range packages {
+		packPath := filepath.Join(lfs.createPackagePath(pack) + "/" + pack.GetFullPackageName() + ".zip")
+		expectedPackPaths = append(expectedPackPaths, packPath)
+	}
+
+	var errorPackPaths []string
+	err = filepath.WalkDir(lfs.GitRepoPath, func(path string, d fs.DirEntry, err error) error {
+		if d.Name() == ".git" && d.IsDir() {
+			return filepath.SkipDir
+		}
+		if !d.IsDir() {
+			if !slices.Contains(expectedPackPaths, path) {
+				errorPackPaths = append(errorPackPaths, path)
+			} else {
+				// Remove element from expected package paths
+				index := slices.Index(expectedPackPaths, path)
+				expectedPackPaths[index] = expectedPackPaths[len(expectedPackPaths) - 1]
+				expectedPackPaths = expectedPackPaths[:len(expectedPackPaths) - 1]
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	err = printErrors(errorPackPaths, expectedPackPaths)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func getPackages(contextManager *bringauto_context.ContextManager, platformString *bringauto_package.PlatformString) ([]bringauto_package.Package, error) {
+	var packConfigs []*bringauto_config.Config
+	packageJsonPathMap, err := contextManager.GetAllPackagesJsonDefPaths()
+	if err != nil {
+		return nil, err
+	}
+	logger := bringauto_log.GetLogger()
+	for _, packageJsonPaths := range packageJsonPathMap {
+		for _, packageJsonPath := range packageJsonPaths {
+			var config bringauto_config.Config
+			err = config.LoadJSONConfig(packageJsonPath)
+			if err != nil {
+				logger.Warn("Couldn't load JSON config from %s path - %s", packageJsonPath, err)
+				continue
+			}
+			packConfigs = append(packConfigs, &config)
+		}
+	}
+	var packages []bringauto_package.Package
+	for _, packConfig := range packConfigs {
+		packConfig.Package.PlatformString = *platformString
+		packages = append(packages, packConfig.Package)
+	}
+
+	return packages, nil
+}
+
+func printErrors(errorPackPaths []string, expectedPackPaths []string) error {
+	logger := bringauto_log.GetLogger()
+	if len(errorPackPaths) > 0 {
+		logger.Error("%d packages are not in Json definitions but are in Git Lfs (listing first %d):", len(errorPackPaths), listFileCount)
+		for i, errorPackPath := range errorPackPaths {
+			if i > listFileCount - 1 {
+				break
+			}
+			logger.ErrorIndent(errorPackPath)
+		}
+		return fmt.Errorf("packages in Git Lfs are not subset of packages in Json definitions")
+	}
+
+	if len(expectedPackPaths) > 0 {
+		logger.Warn("Expected %d packages to be in git lfs (listing first %d):", len(expectedPackPaths), listFileCount)
+		for i, expectedPackPath := range expectedPackPaths {
+			if i > listFileCount - 1 {
+				break
+			}
+			logger.WarnIndent(expectedPackPath)
+		}
 	}
 	return nil
 }
