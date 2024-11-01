@@ -13,7 +13,7 @@ import (
 const (
 	red = 31
 	blue = 34
-	orange = 93
+	orange = 33
 	white = 97
 )
 
