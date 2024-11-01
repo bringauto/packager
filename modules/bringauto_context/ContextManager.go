@@ -1,7 +1,8 @@
-package main
+package bringauto_context
 
 import (
 	"bringauto/modules/bringauto_config"
+	"bringauto/modules/bringauto_const"
 	"fmt"
 	"io/fs"
 	"os"
@@ -25,7 +26,7 @@ func (context *ContextManager) GetAllPackagesJsonDefPaths() (map[string][]string
 		return nil, err
 	}
 
-	packageDir := path.Join(context.ContextPath, PackageDirectoryNameConst)
+	packageDir := path.Join(context.ContextPath, bringauto_const.PackageDirName)
 
 	reg, err := regexp.CompilePOSIX("^.*\\.json$")
 	if err != nil {
@@ -45,7 +46,7 @@ func (context *ContextManager) GetAllImagesDockerfilePaths() (map[string][]strin
 		return nil, err
 	}
 
-	imageDir := path.Join(context.ContextPath, DockerDirectoryNameConst)
+	imageDir := path.Join(context.ContextPath, bringauto_const.DockerDirName)
 
 	reg, err := regexp.CompilePOSIX("^Dockerfile$")
 	if err != nil {
@@ -65,7 +66,7 @@ func (context *ContextManager) GetPackageJsonDefPaths(packageName string) ([]str
 	if err != nil {
 		return []string{}, err
 	}
-	packageBasePath := path.Join(context.ContextPath, PackageDirectoryNameConst, packageName)
+	packageBasePath := path.Join(context.ContextPath, bringauto_const.PackageDirName, packageName)
 
 	packageBasePathStat, err := os.Stat(packageBasePath)
 	if os.IsNotExist(err) {
@@ -158,7 +159,7 @@ func (context *ContextManager) GetImageDockerfilePath(imageName string) (string,
 	if err != nil {
 		return "", err
 	}
-	dockerImageBasePath := path.Join(context.ContextPath, DockerDirectoryNameConst, imageName)
+	dockerImageBasePath := path.Join(context.ContextPath, bringauto_const.DockerDirName, imageName)
 
 	dockerImageBasePathStat, err := os.Stat(dockerImageBasePath)
 	if os.IsNotExist(err) {
@@ -189,7 +190,7 @@ func (context *ContextManager) validateContextPath() error {
 		return fmt.Errorf("context path is not a directory - %s\n", context.ContextPath)
 	}
 
-	dockerDirPath := path.Join(context.ContextPath, DockerDirectoryNameConst)
+	dockerDirPath := path.Join(context.ContextPath, bringauto_const.DockerDirName)
 	DockerStat, err := os.Stat(dockerDirPath)
 	if os.IsNotExist(err) {
 		return fmt.Errorf("docker dir path does not exist - %s\n", dockerDirPath)
@@ -198,7 +199,7 @@ func (context *ContextManager) validateContextPath() error {
 		return fmt.Errorf("docker path is not a directory - %s\n", dockerDirPath)
 	}
 
-	packageDirPath := path.Join(context.ContextPath, PackageDirectoryNameConst)
+	packageDirPath := path.Join(context.ContextPath, bringauto_const.PackageDirName)
 	packageStat, err := os.Stat(packageDirPath)
 	if os.IsNotExist(err) {
 		return fmt.Errorf("package path does not exist - %s\n", packageDirPath)

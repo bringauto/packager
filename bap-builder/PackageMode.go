@@ -3,6 +3,8 @@ package main
 import (
 	"bringauto/modules/bringauto_build"
 	"bringauto/modules/bringauto_config"
+	"bringauto/modules/bringauto_const"
+	"bringauto/modules/bringauto_context"
 	"bringauto/modules/bringauto_docker"
 	"bringauto/modules/bringauto_log"
 	"bringauto/modules/bringauto_package"
@@ -176,7 +178,7 @@ func (list *buildDepList) sortDependencies(rootName string, dependsMap *map[stri
 // inside this directory. If not, returns error with description, else returns nil. Also returns error
 // if the Package JSON definition can't be loaded.
 func checkContextDirConsistency(contextPath string) error {
-	packageContextPath := filepath.Join(contextPath, PackageDirectoryNameConst)
+	packageContextPath := filepath.Join(contextPath, bringauto_const.PackageDirName)
 	err := filepath.WalkDir(packageContextPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -246,7 +248,7 @@ func buildAllPackages(
 	platformString *bringauto_package.PlatformString,
 	repo           bringauto_repository.GitLFSRepository,
 ) error {
-	contextManager := ContextManager{
+	contextManager := bringauto_context.ContextManager{
 		ContextPath: contextPath,
 	}
 	packageJsonPathMap, err := contextManager.GetAllPackagesJsonDefPaths()
@@ -294,7 +296,7 @@ func buildSinglePackage(
 	platformString *bringauto_package.PlatformString,
 	repo           bringauto_repository.GitLFSRepository,
 ) error {
-	contextManager := ContextManager{
+	contextManager := bringauto_context.ContextManager{
 		ContextPath: contextPath,
 	}
 	packageName := *cmdLine.Name
