@@ -296,7 +296,7 @@ func buildAllPackages(
 		count++
 		err = buildAndCopyPackage(cmdLine, &buildConfigs, platformString, repo)
 		if err != nil {
-			logger.Fatal("cannot build package '%s' - %s", config.Package.Name, err)
+			return fmt.Errorf("cannot build package '%s' - %s", config.Package.Name, err)
 		}
 	}
 	if count == 0 {
@@ -356,7 +356,7 @@ func buildSinglePackage(
 		buildConfigs := config.GetBuildStructure(*cmdLine.DockerImageName, platformString)
 		err = buildAndCopyPackage(cmdLine, &buildConfigs, platformString, repo)
 		if err != nil {
-			logger.Fatal("cannot build package '%s' - %s", packageName, err)
+			return fmt.Errorf("cannot build package '%s' - %s", packageName, err)
 		}
 	}
 	return nil
