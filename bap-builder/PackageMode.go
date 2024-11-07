@@ -201,6 +201,8 @@ func checkContextDirConsistency(contextPath string) error {
 }
 
 func performPreBuildChecks(contextPath string, repo *bringauto_repository.GitLFSRepository, platformString *bringauto_package.PlatformString) error {
+	logger := bringauto_log.GetLogger()
+	logger.Info("Checking context directory (%s) consistency", contextPath)
 	err := checkContextDirConsistency(contextPath)
 	if err != nil {
 		return fmt.Errorf("package context directory consistency check failed: %s", err)
@@ -208,10 +210,12 @@ func performPreBuildChecks(contextPath string, repo *bringauto_repository.GitLFS
 	contextManager := bringauto_context.ContextManager{
 		ContextPath: contextPath,
 	}
+	logger.Info("Checking Git Lfs directory consistency")
 	err = repo.CheckGitLfsConsistency(&contextManager, platformString)
 	if err != nil {
 		return err
 	}
+	logger.Info("Checking Sysroot directory consistency")
 	err = checkSysrootDirs(platformString)
 	if err != nil {
 		return err
