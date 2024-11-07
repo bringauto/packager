@@ -472,11 +472,11 @@ func checkSysrootDirs(platformString *bringauto_package.PlatformString) (error) 
 
 	logger := bringauto_log.GetLogger()
 	if !sysroot.IsSysrootDirectoryEmpty() {
-		logger.WarnIndent("Sysroot release directory is not empty - the package build may fail")
+		logger.Warn("Sysroot release directory is not empty - the package build may fail")
 	}
 	sysroot.IsDebug = true
 	if !sysroot.IsSysrootDirectoryEmpty() {
-		logger.WarnIndent("Sysroot debug directory is not empty - the package build may fail")
+		logger.Warn("Sysroot debug directory is not empty - the package build may fail")
 	}
 	return nil
 }
