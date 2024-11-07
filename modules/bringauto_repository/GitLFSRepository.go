@@ -63,8 +63,14 @@ func (lfs *GitLFSRepository) CommitAllChanges() error {
 	return nil
 }
 
+// RestoreAllChanges
+// Restores all changes in repository and cleans all untracked changes.
 func (lfs *GitLFSRepository) RestoreAllChanges() error {
 	err := lfs.gitRestoreAll()
+	if err != nil {
+		return err
+	}
+	err = lfs.gitCleanAll()
 	if err != nil {
 		return err
 	}
@@ -237,6 +243,19 @@ func (lfs *GitLFSRepository) gitRestoreAll() error {
 	)
 	if !ok {
 		return fmt.Errorf("cannot restore changes")
+	}
+	return nil
+}
+
+func (lfs *GitLFSRepository) gitCleanAll() error {
+	var ok, _ = lfs.prepareAndRun([]string{
+		"clean",
+		"-f",
+		".",
+	},
+	)
+	if !ok {
+		return fmt.Errorf("cannot clean changes")
 	}
 	return nil
 }
