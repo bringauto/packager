@@ -82,7 +82,7 @@ func (lfs *GitLFSRepository) CheckGitLfsConsistency(contextManager *bringauto_co
 
 	var expectedPackPaths []string
 	for _, pack := range packages {
-		packPath := filepath.Join(lfs.createPackagePath(pack) + "/" + pack.GetFullPackageName() + ".zip")
+		packPath := filepath.Join(lfs.CreatePackagePath(pack) + "/" + pack.GetFullPackageName() + ".zip")
 		expectedPackPaths = append(expectedPackPaths, packPath)
 	}
 
@@ -165,7 +165,7 @@ func printErrors(errorPackPaths []string, expectedPackPaths []string) error {
 	return nil
 }
 
-func (lfs *GitLFSRepository) createPackagePath(pack bringauto_package.Package) string {
+func (lfs *GitLFSRepository) CreatePackagePath(pack bringauto_package.Package) string {
 	repositoryPath := path.Join(
 		pack.PlatformString.String.DistroName,
 		pack.PlatformString.String.DistroRelease,
@@ -179,7 +179,7 @@ func (lfs *GitLFSRepository) createPackagePath(pack bringauto_package.Package) s
 // Each package is stored in different directory structure represented by
 //	PlatformString.DistroName / PlatformString.DistroRelease / PlatformString.Machine / <package>
 func (lfs *GitLFSRepository) CopyToRepository(pack bringauto_package.Package, sourceDir string) error {
-	archiveDirectory := lfs.createPackagePath(pack)
+	archiveDirectory := lfs.CreatePackagePath(pack)
 
 	var err error
 	err = os.MkdirAll(archiveDirectory, 0755)

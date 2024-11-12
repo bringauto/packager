@@ -40,6 +40,17 @@ type BuildPackageCmdLineArgs struct {
 	OutputDirMode *OutputDirMode
 }
 
+// CreateSysrootCmdLineArgs
+// Options/setting for Sysroot mode
+type CreateSysrootCmdLineArgs struct {
+	// Path to the Git Lfs repository with packages
+	Repo *string
+	// Name of the new sysroot directory to be created
+	Sysroot *string
+	// Name of the docker image which are the packages build for
+	ImageName *string
+}
+
 // CmdLineArgs
 // Represents Cmd line arguments passed to  cmd line of the target program.
 // Program operates in two modes
@@ -54,11 +65,15 @@ type CmdLineArgs struct {
 	// Standard Cmd line arguments for Docker mode
 	BuildImagesArgs BuildImageCmdLineArgs
 	// If true the program is in the "Package" mode
-	BuildPackage       bool
-	BuildPackageArgs   BuildPackageCmdLineArgs
-	buildImageParser   *argparse.Command
-	buildPackageParser *argparse.Command
-	parser             *argparse.Parser
+	BuildPackage        bool
+	// If true the program is in the "Sysroot" mode
+	CreateSysroot       bool
+	BuildPackageArgs    BuildPackageCmdLineArgs
+	CreateSysrootArgs   CreateSysrootCmdLineArgs
+	buildImageParser    *argparse.Command
+	buildPackageParser  *argparse.Command
+	createSysrootParser *argparse.Command
+	parser              *argparse.Parser
 }
 
 // InitFlags
@@ -126,6 +141,27 @@ func (cmd *CmdLineArgs) InitFlags() {
 			Help:     "Name of the docker image to build",
 		},
 	)
+
+	cmd.createSysrootParser = cmd.parser.NewCommand("create-sysroot", "Create Sysroot")
+	cmd.CreateSysrootArgs.Sysroot = cmd.createSysrootParser.String("", "sysroot-dir",
+		&argparse.Options{
+			Required: true,
+			Help:     "Name of the sysroot directory which will be created",
+			Default:  false,
+		},
+	)
+	cmd.CreateSysrootArgs.Repo = cmd.createSysrootParser.String("", "git-lfs",
+		&argparse.Options{
+			Required: true,
+			Help:     "Git Lfs directory where packages are stored",
+		},
+	)
+	cmd.CreateSysrootArgs.ImageName = cmd.createSysrootParser.String("", "image-name",
+		&argparse.Options{
+			Required: true,
+			Help:     "Name of docker image which are the packages build for",
+		},
+	)
 }
 
 // ParseArgs
@@ -146,6 +182,7 @@ func (cmd *CmdLineArgs) ParseArgs(args []string) error {
 	if *cmd.BuildPackageArgs.All && *cmd.BuildPackageArgs.BuildDeps {
 		return fmt.Errorf("all and build-deps flags at the same time")
 	}
+	cmd.CreateSysroot = cmd.createSysrootParser.Happened()
 
 	return nil
 }

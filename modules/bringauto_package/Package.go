@@ -12,6 +12,7 @@ import (
 )
 
 const (
+	ZipExt = ".zip"
 	defaultPackageNameConst = "generic-package"
 	defaultVersionTagConst  = "v0.0.0"
 	stringSeparator = "_"
@@ -81,7 +82,7 @@ func (packg *Package) CreatePackage(sourceDir string, outputDir string) error {
 		return err
 	}
 
-	packageName := packg.GetFullPackageName() + ".zip"
+	packageName := packg.GetFullPackageName() + ZipExt
 
 	err = createZIPArchive(sourceDir, outputDir+"/"+packageName)
 	if err != nil {
