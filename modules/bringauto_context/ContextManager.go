@@ -3,6 +3,8 @@ package bringauto_context
 import (
 	"bringauto/modules/bringauto_config"
 	"bringauto/modules/bringauto_const"
+	"bringauto/modules/bringauto_log"
+	"bringauto/modules/bringauto_package"
 	"fmt"
 	"io/fs"
 	"os"
@@ -35,6 +37,35 @@ func (context *ContextManager) GetAllPackagesJsonDefPaths() (map[string][]string
 
 	packageJsonList, err := getAllFilesInSubdirByRegexp(packageDir, reg)
 	return packageJsonList, err
+}
+
+// GetAllPackagesConfigs
+// Returns configs of all packages JSON defintions. Given platformString will be added to all packages.
+func (context *ContextManager)  GetAllPackagesConfigs(platformString *bringauto_package.PlatformString) ([]bringauto_package.Package, error) {
+	var packConfigs []*bringauto_config.Config
+	packageJsonPathMap, err := context.GetAllPackagesJsonDefPaths()
+	if err != nil {
+		return nil, err
+	}
+	logger := bringauto_log.GetLogger()
+	for _, packageJsonPaths := range packageJsonPathMap {
+		for _, packageJsonPath := range packageJsonPaths {
+			var config bringauto_config.Config
+			err = config.LoadJSONConfig(packageJsonPath)
+			if err != nil {
+				logger.Warn("Couldn't load JSON config from %s path - %s", packageJsonPath, err)
+				continue
+			}
+			packConfigs = append(packConfigs, &config)
+		}
+	}
+	var packages []bringauto_package.Package
+	for _, packConfig := range packConfigs {
+		packConfig.Package.PlatformString = *platformString
+		packages = append(packages, packConfig.Package)
+	}
+
+	return packages, nil
 }
 
 // GetAllImagesDockerfilePaths

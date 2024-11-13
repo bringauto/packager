@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bringauto/modules/bringauto_config"
 	"bringauto/modules/bringauto_context"
 	"bringauto/modules/bringauto_log"
 	"bringauto/modules/bringauto_package"
@@ -56,7 +55,7 @@ func CreateSysroot(cmdLine *CreateSysrootCmdLineArgs, contextPath string) error 
 	if err != nil {
 		return err
 	}
-	packages, err := getPackages(&contextManager, platformString)
+	packages, err := contextManager.GetAllPackagesConfigs(platformString)
 
 	logger.Info("Creating sysroot directory from packages")
 	err = unzipAllPackagesToDir(packages, &repo, *cmdLine.Sysroot)
@@ -110,31 +109,4 @@ func isDirEmpty(path string) (bool, error) {
 	}
 
 	return false, nil
-}
-
-func getPackages(contextManager *bringauto_context.ContextManager, platformString *bringauto_package.PlatformString) ([]bringauto_package.Package, error) {
-	var packConfigs []*bringauto_config.Config
-	packageJsonPathMap, err := contextManager.GetAllPackagesJsonDefPaths()
-	if err != nil {
-		return nil, err
-	}
-	logger := bringauto_log.GetLogger()
-	for _, packageJsonPaths := range packageJsonPathMap {
-		for _, packageJsonPath := range packageJsonPaths {
-			var config bringauto_config.Config
-			err = config.LoadJSONConfig(packageJsonPath)
-			if err != nil {
-				logger.Warn("Couldn't load JSON config from %s path - %s", packageJsonPath, err)
-				continue
-			}
-			packConfigs = append(packConfigs, &config)
-		}
-	}
-	var packages []bringauto_package.Package
-	for _, packConfig := range packConfigs {
-		packConfig.Package.PlatformString = *platformString
-		packages = append(packages, packConfig.Package)
-	}
-
-	return packages, nil
 }

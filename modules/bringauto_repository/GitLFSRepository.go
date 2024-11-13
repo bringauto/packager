@@ -1,7 +1,6 @@
 package bringauto_repository
 
 import (
-	"bringauto/modules/bringauto_config"
 	"bringauto/modules/bringauto_package"
 	"bringauto/modules/bringauto_prerequisites"
 	"bringauto/modules/bringauto_log"
@@ -78,7 +77,7 @@ func (lfs *GitLFSRepository) RestoreAllChanges() error {
 }
 
 func (lfs *GitLFSRepository) CheckGitLfsConsistency(contextManager *bringauto_context.ContextManager, platformString *bringauto_package.PlatformString) error {
-	packages, err := getPackages(contextManager, platformString)
+	packages, err := contextManager.GetAllPackagesConfigs(platformString)
 
 	var expectedPackPaths []string
 	for _, pack := range packages {
@@ -111,33 +110,6 @@ func (lfs *GitLFSRepository) CheckGitLfsConsistency(contextManager *bringauto_co
 		return err
 	}
 	return nil
-}
-
-func getPackages(contextManager *bringauto_context.ContextManager, platformString *bringauto_package.PlatformString) ([]bringauto_package.Package, error) {
-	var packConfigs []*bringauto_config.Config
-	packageJsonPathMap, err := contextManager.GetAllPackagesJsonDefPaths()
-	if err != nil {
-		return nil, err
-	}
-	logger := bringauto_log.GetLogger()
-	for _, packageJsonPaths := range packageJsonPathMap {
-		for _, packageJsonPath := range packageJsonPaths {
-			var config bringauto_config.Config
-			err = config.LoadJSONConfig(packageJsonPath)
-			if err != nil {
-				logger.Warn("Couldn't load JSON config from %s path - %s", packageJsonPath, err)
-				continue
-			}
-			packConfigs = append(packConfigs, &config)
-		}
-	}
-	var packages []bringauto_package.Package
-	for _, packConfig := range packConfigs {
-		packConfig.Package.PlatformString = *platformString
-		packages = append(packages, packConfig.Package)
-	}
-
-	return packages, nil
 }
 
 func printErrors(errorPackPaths []string, expectedPackPaths []string) error {
