@@ -55,7 +55,7 @@ func CreateSysroot(cmdLine *CreateSysrootCmdLineArgs, contextPath string) error 
 	if err != nil {
 		return err
 	}
-	packages, err := contextManager.GetAllPackagesConfigs(platformString)
+	packages, err := contextManager.GetAllPackagesStructs(platformString)
 
 	logger.Info("Creating sysroot directory from packages")
 	err = unzipAllPackagesToDir(packages, &repo, *cmdLine.Sysroot)

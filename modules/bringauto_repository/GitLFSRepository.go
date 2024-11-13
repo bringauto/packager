@@ -77,7 +77,7 @@ func (lfs *GitLFSRepository) RestoreAllChanges() error {
 }
 
 func (lfs *GitLFSRepository) CheckGitLfsConsistency(contextManager *bringauto_context.ContextManager, platformString *bringauto_package.PlatformString) error {
-	packages, err := contextManager.GetAllPackagesConfigs(platformString)
+	packages, err := contextManager.GetAllPackagesStructs(platformString)
 
 	var expectedPackPaths []string
 	for _, pack := range packages {

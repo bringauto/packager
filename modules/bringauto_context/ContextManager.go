@@ -40,8 +40,8 @@ func (context *ContextManager) GetAllPackagesJsonDefPaths() (map[string][]string
 }
 
 // GetAllPackagesConfigs
-// Returns configs of all packages JSON defintions. Given platformString will be added to all packages.
-func (context *ContextManager)  GetAllPackagesConfigs(platformString *bringauto_package.PlatformString) ([]bringauto_package.Package, error) {
+// Returns Config structs of all packages JSON definitions.
+func (context *ContextManager) GetAllPackagesConfigs() ([]*bringauto_config.Config, error) {
 	var packConfigs []*bringauto_config.Config
 	packageJsonPathMap, err := context.GetAllPackagesJsonDefPaths()
 	if err != nil {
@@ -59,9 +59,23 @@ func (context *ContextManager)  GetAllPackagesConfigs(platformString *bringauto_
 			packConfigs = append(packConfigs, &config)
 		}
 	}
+	return packConfigs, nil
+}
+
+// GetAllPackagesConfigs
+// Returns Package structs of all packages JSON definitions. If platformString is not nil, it is added to
+// all packages.
+func (context *ContextManager) GetAllPackagesStructs(platformString *bringauto_package.PlatformString) ([]bringauto_package.Package, error) {
+	packConfigs, err := context.GetAllPackagesConfigs()
+	if err != nil {
+		return []bringauto_package.Package{}, nil
+	}
+
 	var packages []bringauto_package.Package
 	for _, packConfig := range packConfigs {
-		packConfig.Package.PlatformString = *platformString
+		if platformString != nil {
+			packConfig.Package.PlatformString = *platformString
+		}
 		packages = append(packages, packConfig.Package)
 	}
 
