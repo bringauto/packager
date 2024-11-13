@@ -3,6 +3,8 @@ package main
 import (
 	"bringauto/modules/bringauto_build"
 	"bringauto/modules/bringauto_config"
+	"bringauto/modules/bringauto_const"
+	"bringauto/modules/bringauto_context"
 	"bringauto/modules/bringauto_docker"
 	"bringauto/modules/bringauto_log"
 	"bringauto/modules/bringauto_package"
@@ -176,7 +178,7 @@ func (list *buildDepList) sortDependencies(rootName string, dependsMap *map[stri
 // inside this directory. If not, returns error with description, else returns nil. Also returns error
 // if the Package JSON definition can't be loaded.
 func checkContextDirConsistency(contextPath string) error {
-	packageContextPath := filepath.Join(contextPath, PackageDirectoryNameConst)
+	packageContextPath := filepath.Join(contextPath, bringauto_const.PackageDirName)
 	err := filepath.WalkDir(packageContextPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -198,6 +200,29 @@ func checkContextDirConsistency(contextPath string) error {
 	return err
 }
 
+func performPreBuildChecks(contextPath string, repo *bringauto_repository.GitLFSRepository, platformString *bringauto_package.PlatformString) error {
+	logger := bringauto_log.GetLogger()
+	logger.Info("Checking context directory (%s) consistency", contextPath)
+	err := checkContextDirConsistency(contextPath)
+	if err != nil {
+		return fmt.Errorf("package context directory consistency check failed: %s", err)
+	}
+	contextManager := bringauto_context.ContextManager{
+		ContextPath: contextPath,
+	}
+	logger.Info("Checking Git Lfs directory consistency")
+	err = repo.CheckGitLfsConsistency(&contextManager, platformString)
+	if err != nil {
+		return err
+	}
+	logger.Info("Checking Sysroot directory consistency")
+	err = checkSysrootDirs(platformString)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // BuildPackage
 // process Package mode of the program
 func BuildPackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) error {
@@ -205,26 +230,43 @@ func BuildPackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) error {
 	if err != nil {
 		return err
 	}
-	err = checkSysrootDirs(platformString)
+	repo := bringauto_repository.GitLFSRepository{
+		GitRepoPath: *cmdLine.OutputDir,
+	}
+	err = bringauto_prerequisites.Initialize(&repo)
 	if err != nil {
 		return err
 	}
-	err = checkContextDirConsistency(contextPath)
+	err = performPreBuildChecks(contextPath, &repo, platformString)
 	if err != nil {
-		return fmt.Errorf("package context directory consistency check failed: %s", err)
+		return err
 	}
-	buildAll := cmdLine.All
-	if *buildAll {
-		return buildAllPackages(cmdLine, contextPath, platformString)
+
+	handleRemover := bringauto_process.SignalHandlerAddHandler(repo.RestoreAllChanges)
+	if *cmdLine.All {
+		err = buildAllPackages(cmdLine, contextPath, platformString, repo)
+	} else {
+		err = buildSinglePackage(cmdLine, contextPath, platformString, repo)
 	}
-	return buildSinglePackage(cmdLine, contextPath, platformString)
+	if err != nil {
+		handleRemover()
+		return err
+	}
+	repo.CommitAllChanges()
+	handleRemover()
+	return nil
 }
 
 // buildAllPackages
 // Builds all packages specified in contextPath. Also takes care of building all deps for all
 // packages in correct order. It returns nil if everything is ok, or not nil in case of error.
-func buildAllPackages(cmdLine *BuildPackageCmdLineArgs, contextPath string, platformString *bringauto_package.PlatformString) error {
-	contextManager := ContextManager{
+func buildAllPackages(
+	cmdLine        *BuildPackageCmdLineArgs,
+	contextPath    string,
+	platformString *bringauto_package.PlatformString,
+	repo           bringauto_repository.GitLFSRepository,
+) error {
+	contextManager := bringauto_context.ContextManager{
 		ContextPath: contextPath,
 	}
 	packageJsonPathMap, err := contextManager.GetAllPackagesJsonDefPaths()
@@ -251,9 +293,9 @@ func buildAllPackages(cmdLine *BuildPackageCmdLineArgs, contextPath string, plat
 			continue
 		}
 		count++
-		err = buildAndCopyPackage(cmdLine, &buildConfigs, platformString)
+		err = buildAndCopyPackage(cmdLine, &buildConfigs, platformString, repo)
 		if err != nil {
-			logger.Fatal("cannot build package '%s' - %s", config.Package.Name, err)
+			return fmt.Errorf("cannot build package '%s' - %s", config.Package.Name, err)
 		}
 	}
 	if count == 0 {
@@ -266,8 +308,13 @@ func buildAllPackages(cmdLine *BuildPackageCmdLineArgs, contextPath string, plat
 // buildSinglePackage
 // Builds single package specified by name in cmdLine. Also takes care of building all deps for
 // given package in correct order. It returns nil if everything is ok, or not nil in case of error.
-func buildSinglePackage(cmdLine *BuildPackageCmdLineArgs, contextPath string, platformString *bringauto_package.PlatformString) error {
-	contextManager := ContextManager{
+func buildSinglePackage(
+	cmdLine        *BuildPackageCmdLineArgs,
+	contextPath    string,
+	platformString *bringauto_package.PlatformString,
+	repo           bringauto_repository.GitLFSRepository,
+) error {
+	contextManager := bringauto_context.ContextManager{
 		ContextPath: contextPath,
 	}
 	packageName := *cmdLine.Name
@@ -306,9 +353,9 @@ func buildSinglePackage(cmdLine *BuildPackageCmdLineArgs, contextPath string, pl
 
 	for _, config := range configList {
 		buildConfigs := config.GetBuildStructure(*cmdLine.DockerImageName, platformString)
-		err = buildAndCopyPackage(cmdLine, &buildConfigs, platformString)
+		err = buildAndCopyPackage(cmdLine, &buildConfigs, platformString, repo)
 		if err != nil {
-			logger.Fatal("cannot build package '%s' - %s", packageName, err)
+			return fmt.Errorf("cannot build package '%s' - %s", packageName, err)
 		}
 	}
 	return nil
@@ -336,20 +383,17 @@ func addConfigsToDefsMap(defsMap *ConfigMapType, packageJsonPathList []string) {
 
 // buildAndCopyPackage
 // Builds single package, takes care of every step of build for single package.
-func buildAndCopyPackage(cmdLine *BuildPackageCmdLineArgs, build *[]bringauto_build.Build, platformString *bringauto_package.PlatformString) error {
+func buildAndCopyPackage(
+	cmdLine *BuildPackageCmdLineArgs,
+	build *[]bringauto_build.Build,
+	platformString *bringauto_package.PlatformString,
+	repo bringauto_repository.GitLFSRepository,
+) error {
 	if *cmdLine.OutputDirMode != OutputDirModeGitLFS {
 		return fmt.Errorf("invalid OutputDirmode. Only GitLFS is supported")
 	}
 
 	var err error
-
-	repo := bringauto_repository.GitLFSRepository{
-		GitRepoPath: *cmdLine.OutputDir,
-	}
-	err = bringauto_prerequisites.Initialize(&repo)
-	if err != nil {
-		return err
-	}
 	var removeHandler func()
 
 	logger := bringauto_log.GetLogger()
@@ -427,11 +471,11 @@ func checkSysrootDirs(platformString *bringauto_package.PlatformString) (error) 
 
 	logger := bringauto_log.GetLogger()
 	if !sysroot.IsSysrootDirectoryEmpty() {
-		logger.WarnIndent("Sysroot release directory is not empty - the package build may fail")
+		logger.Warn("Sysroot release directory is not empty - the package build may fail")
 	}
 	sysroot.IsDebug = true
 	if !sysroot.IsSysrootDirectoryEmpty() {
-		logger.WarnIndent("Sysroot debug directory is not empty - the package build may fail")
+		logger.Warn("Sysroot debug directory is not empty - the package build may fail")
 	}
 	return nil
 }

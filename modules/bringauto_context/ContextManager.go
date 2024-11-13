@@ -1,7 +1,10 @@
-package main
+package bringauto_context
 
 import (
 	"bringauto/modules/bringauto_config"
+	"bringauto/modules/bringauto_const"
+	"bringauto/modules/bringauto_log"
+	"bringauto/modules/bringauto_package"
 	"fmt"
 	"io/fs"
 	"os"
@@ -25,7 +28,7 @@ func (context *ContextManager) GetAllPackagesJsonDefPaths() (map[string][]string
 		return nil, err
 	}
 
-	packageDir := path.Join(context.ContextPath, PackageDirectoryNameConst)
+	packageDir := path.Join(context.ContextPath, bringauto_const.PackageDirName)
 
 	reg, err := regexp.CompilePOSIX("^.*\\.json$")
 	if err != nil {
@@ -34,6 +37,35 @@ func (context *ContextManager) GetAllPackagesJsonDefPaths() (map[string][]string
 
 	packageJsonList, err := getAllFilesInSubdirByRegexp(packageDir, reg)
 	return packageJsonList, err
+}
+
+// GetAllPackagesConfigs
+// Returns configs of all packages JSON defintions. Given platformString will be added to all packages.
+func (context *ContextManager)  GetAllPackagesConfigs(platformString *bringauto_package.PlatformString) ([]bringauto_package.Package, error) {
+	var packConfigs []*bringauto_config.Config
+	packageJsonPathMap, err := context.GetAllPackagesJsonDefPaths()
+	if err != nil {
+		return nil, err
+	}
+	logger := bringauto_log.GetLogger()
+	for _, packageJsonPaths := range packageJsonPathMap {
+		for _, packageJsonPath := range packageJsonPaths {
+			var config bringauto_config.Config
+			err = config.LoadJSONConfig(packageJsonPath)
+			if err != nil {
+				logger.Warn("Couldn't load JSON config from %s path - %s", packageJsonPath, err)
+				continue
+			}
+			packConfigs = append(packConfigs, &config)
+		}
+	}
+	var packages []bringauto_package.Package
+	for _, packConfig := range packConfigs {
+		packConfig.Package.PlatformString = *platformString
+		packages = append(packages, packConfig.Package)
+	}
+
+	return packages, nil
 }
 
 // GetAllImagesDockerfilePaths
@@ -45,7 +77,7 @@ func (context *ContextManager) GetAllImagesDockerfilePaths() (map[string][]strin
 		return nil, err
 	}
 
-	imageDir := path.Join(context.ContextPath, DockerDirectoryNameConst)
+	imageDir := path.Join(context.ContextPath, bringauto_const.DockerDirName)
 
 	reg, err := regexp.CompilePOSIX("^Dockerfile$")
 	if err != nil {
@@ -65,7 +97,7 @@ func (context *ContextManager) GetPackageJsonDefPaths(packageName string) ([]str
 	if err != nil {
 		return []string{}, err
 	}
-	packageBasePath := path.Join(context.ContextPath, PackageDirectoryNameConst, packageName)
+	packageBasePath := path.Join(context.ContextPath, bringauto_const.PackageDirName, packageName)
 
 	packageBasePathStat, err := os.Stat(packageBasePath)
 	if os.IsNotExist(err) {
@@ -158,7 +190,7 @@ func (context *ContextManager) GetImageDockerfilePath(imageName string) (string,
 	if err != nil {
 		return "", err
 	}
-	dockerImageBasePath := path.Join(context.ContextPath, DockerDirectoryNameConst, imageName)
+	dockerImageBasePath := path.Join(context.ContextPath, bringauto_const.DockerDirName, imageName)
 
 	dockerImageBasePathStat, err := os.Stat(dockerImageBasePath)
 	if os.IsNotExist(err) {
@@ -189,7 +221,7 @@ func (context *ContextManager) validateContextPath() error {
 		return fmt.Errorf("context path is not a directory - %s\n", context.ContextPath)
 	}
 
-	dockerDirPath := path.Join(context.ContextPath, DockerDirectoryNameConst)
+	dockerDirPath := path.Join(context.ContextPath, bringauto_const.DockerDirName)
 	DockerStat, err := os.Stat(dockerDirPath)
 	if os.IsNotExist(err) {
 		return fmt.Errorf("docker dir path does not exist - %s\n", dockerDirPath)
@@ -198,7 +230,7 @@ func (context *ContextManager) validateContextPath() error {
 		return fmt.Errorf("docker path is not a directory - %s\n", dockerDirPath)
 	}
 
-	packageDirPath := path.Join(context.ContextPath, PackageDirectoryNameConst)
+	packageDirPath := path.Join(context.ContextPath, bringauto_const.PackageDirName)
 	packageStat, err := os.Stat(packageDirPath)
 	if os.IsNotExist(err) {
 		return fmt.Errorf("package path does not exist - %s\n", packageDirPath)
