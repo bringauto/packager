@@ -189,7 +189,7 @@ func (lfs *GitLFSRepository) gitAddAll() error {
 	},
 	)
 	if !ok {
-		return fmt.Errorf("cannot add changes")
+		return fmt.Errorf("cannot add changes in Git Lfs")
 	}
 	return nil
 }
@@ -202,7 +202,7 @@ func (lfs *GitLFSRepository) gitCommit() error {
 	},
 	)
 	if !ok {
-		return fmt.Errorf("cannot commit changes")
+		return fmt.Errorf("cannot commit changes in Git Lfs")
 	}
 	return nil
 }
@@ -214,7 +214,7 @@ func (lfs *GitLFSRepository) gitRestoreAll() error {
 	},
 	)
 	if !ok {
-		return fmt.Errorf("cannot restore changes")
+		return fmt.Errorf("cannot restore changes in Git Lfs")
 	}
 	return nil
 }
@@ -227,7 +227,7 @@ func (lfs *GitLFSRepository) gitCleanAll() error {
 	},
 	)
 	if !ok {
-		return fmt.Errorf("cannot clean changes")
+		return fmt.Errorf("cannot clean changes in Git Lfs")
 	}
 	return nil
 }
@@ -253,7 +253,6 @@ func (repo *GitLFSRepository) prepareAndRun(cmdline []string) (bool, *bytes.Buff
 	cmd.Stdout = &outBuffer
 	err = cmd.Run()
 	if err != nil {
-		fmt.Printf("cannot start command - %s", err)
 		return false, &outBuffer
 	}
 	if cmd.ProcessState.ExitCode() > 0 {
