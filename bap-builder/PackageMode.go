@@ -319,6 +319,8 @@ func prepareConfigs(packageJsonPaths []string) ([]*bringauto_config.Config, erro
 	return configList, nil
 }
 
+// prepareConfigsSinglePackageNoBuildDeps
+// Returns Config structures only for given package.
 func prepareConfigsSinglePackageNoBuildDeps(packageName string, contextManager bringauto_context.ContextManager) ([]*bringauto_config.Config, error) {
 	var configList []*bringauto_config.Config
 	packageJsonPaths, err := contextManager.GetPackageJsonDefPaths(packageName)
@@ -457,9 +459,6 @@ func buildAndCopyPackage(
 
 		removeHandler()
 		removeHandler = nil
-		if err != nil {
-			return err
-		}
 		logger.InfoIndent("Build OK")
 	}
 	if removeHandler != nil {
