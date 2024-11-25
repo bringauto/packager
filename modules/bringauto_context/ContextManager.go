@@ -196,6 +196,57 @@ func (context *ContextManager) GetPackageWithDepsJsonDefPaths(packageName string
 	return packageDefs, nil
 }
 
+// GetPackageWithDepsOnJsonDefPaths
+// Returns all Json definitions paths which depends on given package and all its dependencies Json
+// definitions paths recursively without package (packageName) itself and its dependencies.
+func (context *ContextManager) GetDepsOnJsonDefPaths(packageName string) ([]string, error) {
+	packsToBuild, err := context.GetPackageJsonDefPaths(packageName)
+	if err != nil {
+		return []string{}, err
+	}
+	packConfigs, err := context.GetAllPackagesConfigs()
+	if err != nil {
+		return []string{}, err
+	}
+	for _, config := range packConfigs {
+		if config.Package.Name == packageName {
+			continue
+		}
+		for _, dep := range config.DependsOn {
+			if dep == packageName {
+				packWithDeps, err := context.GetPackageWithDepsJsonDefPaths(config.Package.Name)
+				if err != nil {
+					return []string{}, err
+				}
+				packsToBuild = append(packsToBuild, packWithDeps...)
+				break
+			}
+		}
+	}
+	packsToRemove, err := context.GetPackageWithDepsJsonDefPaths(packageName)
+	packsToBuild = removeStrings(packsToBuild, packsToRemove)
+	return packsToBuild, nil
+}
+
+func removeStrings(strList1 []string, strList2 []string) []string {
+	for _, str2 := range strList2 {
+		strList1 = removeString(strList1, str2)
+	}
+	return strList1
+}
+
+func removeString(strList1 []string, str string) []string {
+	i := 0
+	for _, str1 := range strList1 {
+		if str1 != str {
+			strList1[i] = str1
+			i++
+		}
+	}
+	return strList1[:i]
+}
+
+
 // GetImageDockerfilePath
 // returns Dockerfile path for the given Image locate in the given context
 func (context *ContextManager) GetImageDockerfilePath(imageName string) (string, error) {

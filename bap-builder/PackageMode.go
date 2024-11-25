@@ -305,6 +305,39 @@ func buildAllPackages(
 	return nil
 }
 
+// prepareConfigs
+// Returns Config structures list based on given jsonPaths.
+func prepareConfigs(packageJsonPaths []string) ([]*bringauto_config.Config, error) {
+	var configList []*bringauto_config.Config
+	defsMap := make(ConfigMapType)
+	addConfigsToDefsMap(&defsMap, packageJsonPaths)
+	depList := buildDepList{}
+	configList, err := depList.TopologicalSort(defsMap)
+	if err != nil {
+		return []*bringauto_config.Config{}, err
+	}
+	return configList, nil
+}
+
+func prepareConfigsSinglePackageNoBuildDeps(packageName string, contextManager bringauto_context.ContextManager) ([]*bringauto_config.Config, error) {
+	var configList []*bringauto_config.Config
+	packageJsonPaths, err := contextManager.GetPackageJsonDefPaths(packageName)
+	if err != nil {
+		return []*bringauto_config.Config{}, err
+	}
+	for _, packageJsonPath := range packageJsonPaths {
+		var config bringauto_config.Config
+		err = config.LoadJSONConfig(packageJsonPath)
+		if err != nil {
+			logger := bringauto_log.GetLogger()
+			logger.Warn("Couldn't load JSON config from %s path - %s", packageJsonPath, err)
+			continue
+		}
+		configList = append(configList, &config)
+	}
+	return configList, nil
+}
+
 // buildSinglePackage
 // Builds single package specified by name in cmdLine. Also takes care of building all deps for
 // given package in correct order. It returns nil if everything is ok, or not nil in case of error.
@@ -319,36 +352,30 @@ func buildSinglePackage(
 	}
 	packageName := *cmdLine.Name
 	var err error
-	logger := bringauto_log.GetLogger()
-
 	var configList []*bringauto_config.Config
 
-	if *cmdLine.BuildDeps {
-		packageJsonPathList, err := contextManager.GetPackageWithDepsJsonDefPaths(packageName)
-		if err != nil {
-			return err
-		}
-		defsMap := make(ConfigMapType)
-		addConfigsToDefsMap(&defsMap, packageJsonPathList)
-		depList := buildDepList{}
-		configList, err = depList.TopologicalSort(defsMap)
-		if err != nil {
-			return err
-		}
-	} else {
-		packageJsonPathList, err := contextManager.GetPackageJsonDefPaths(packageName)
-		if err != nil {
-			return err
-		}
-		for _, packageJsonPath := range packageJsonPathList {
-			var config bringauto_config.Config
-			err = config.LoadJSONConfig(packageJsonPath)
+	if *cmdLine.BuildDeps || *cmdLine.BuildDepsOn {
+		var packageJsonPaths []string
+		if *cmdLine.BuildDeps {
+			paths, err := contextManager.GetPackageWithDepsJsonDefPaths(packageName)
 			if err != nil {
-				logger.Warn("Couldn't load JSON config from %s path - %s", packageJsonPath, err)
-				continue
+				return err
 			}
-			configList = append(configList, &config)
+			packageJsonPaths = append(packageJsonPaths, paths...)
 		}
+		if *cmdLine.BuildDepsOn {
+			paths, err := contextManager.GetDepsOnJsonDefPaths(packageName)
+			if err != nil {
+				return err
+			}
+			packageJsonPaths = append(packageJsonPaths, paths...)
+		}
+		configList, err = prepareConfigs(packageJsonPaths)
+	} else {
+		configList, err = prepareConfigsSinglePackageNoBuildDeps(packageName, contextManager)
+	}
+	if err != nil {
+		return err
 	}
 
 	for _, config := range configList {

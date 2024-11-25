@@ -29,6 +29,8 @@ type BuildPackageCmdLineArgs struct {
 	Name *string
 	// BuildDeps Build all dependencies of package when building single package
 	BuildDeps *bool
+	// BuildDepsOn Build package with all packages which depends on it
+	BuildDepsOn *bool
 	// DockerImageName is a name of docker image to which packages will be build.
 	// If empty all docker images from DockerMatrix in config file are used for a given package.
 	// If not empty, only packages which contains DockerImageName in DockerMatrix will be built.
@@ -111,6 +113,13 @@ func (cmd *CmdLineArgs) InitFlags() {
 			Help:     "Build all dependencies of package when building single package",
 		},
 	)
+	cmd.BuildPackageArgs.BuildDepsOn = cmd.buildPackageParser.Flag("", "build-deps-on",
+		&argparse.Options{
+			Required: false,
+			Default:  false,
+			Help:     "Build package with all packages which depends on it",
+		},
+	)
 	cmd.BuildPackageArgs.OutputDir = cmd.buildPackageParser.String("", "output-dir",
 		&argparse.Options{
 			Required: true,
@@ -180,7 +189,12 @@ func (cmd *CmdLineArgs) ParseArgs(args []string) error {
 	cmd.BuildImage = cmd.buildImageParser.Happened()
 	cmd.BuildPackage = cmd.buildPackageParser.Happened()
 	if *cmd.BuildPackageArgs.All && *cmd.BuildPackageArgs.BuildDeps {
-		return fmt.Errorf("all and build-deps flags at the same time")
+		if *cmd.BuildPackageArgs.BuildDeps {
+			return fmt.Errorf("all and build-deps flags at the same time")
+		}
+		if *cmd.BuildPackageArgs.BuildDepsOn {
+			return fmt.Errorf("all and build-deps-on flags at the same time")
+		}
 	}
 	cmd.CreateSysroot = cmd.createSysrootParser.Happened()
 
