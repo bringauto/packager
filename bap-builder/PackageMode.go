@@ -452,7 +452,7 @@ func buildAndCopyPackage(
 		}
 
 		logger.InfoIndent("Copying to local sysroot directory")
-		err = sysroot.CopyToSysroot(buildConfig.GetLocalInstallDirPath())
+		err = sysroot.CopyToSysroot(buildConfig.GetLocalInstallDirPath(), buildConfig.Package.GetShortPackageName())
 		if err != nil {
 			break
 		}

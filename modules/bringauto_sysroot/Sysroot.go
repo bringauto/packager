@@ -27,6 +27,7 @@ type Sysroot struct {
 	IsDebug bool
 	// PlatformString
 	PlatformString *bringauto_package.PlatformString
+	builtPackages BuiltPackages
 }
 
 func (sysroot *Sysroot) FillDefault(*bringauto_prerequisites.Args) error {
@@ -45,7 +46,7 @@ func (sysroot *Sysroot) CheckPrerequisites(args *bringauto_prerequisites.Args) e
 }
 
 // CopyToSysroot copy source to a sysroot
-func (sysroot *Sysroot) CopyToSysroot(source string) error {
+func (sysroot *Sysroot) CopyToSysroot(source string, packageName string) error {
 	err := sysroot.checkForOverwritingFiles(source)
 	if err != nil {
 		return err
@@ -56,6 +57,10 @@ func (sysroot *Sysroot) CopyToSysroot(source string) error {
 		PreserveTimes: true,
 	}
 	err = copy.Copy(source, sysroot.GetSysrootPath(), copyOptions)
+	if err != nil {
+		return err
+	}
+	err = sysroot.builtPackages.AddToBuiltPackages(packageName)
 	if err != nil {
 		return err
 	}
