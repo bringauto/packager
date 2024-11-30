@@ -17,11 +17,6 @@ type BuiltPackages struct {
 }
 
 func (builtPackages *BuiltPackages) AddToBuiltPackages(packageName string) error {
-	err := builtPackages.updateBuiltPackages()
-	if err != nil {
-		return err
-	}
-
 	builtPackages.Packages = append(builtPackages.Packages, packageName)
 	bytes, err := json.Marshal(builtPackages.Packages)
 	if err != nil {
@@ -31,7 +26,7 @@ func (builtPackages *BuiltPackages) AddToBuiltPackages(packageName string) error
 	return err
 }
 
-func (builtPackages *BuiltPackages) updateBuiltPackages() error {
+func (builtPackages *BuiltPackages) UpdateBuiltPackages() error {
 	bytes, err := os.ReadFile(path.Join(sysrootDirectoryName, jsonFileName))
 	if err != nil {
 		return nil

@@ -366,6 +366,15 @@ func buildSinglePackage(
 			packageJsonPaths = append(packageJsonPaths, paths...)
 		}
 		if *cmdLine.BuildDepsOn {
+			if !*cmdLine.BuildDeps {
+				value, err := isPackageWithDepsInSysroot(packageName, &contextManager, platformString)
+				if err != nil {
+					return err
+				}
+				if !value {
+					return fmt.Errorf("--build-deps-on set but base package or its dependencies are not in sysroot")
+				}
+			}
 			paths, err := contextManager.GetDepsOnJsonDefPaths(packageName)
 			if err != nil {
 				return err
@@ -504,4 +513,32 @@ func checkSysrootDirs(platformString *bringauto_package.PlatformString) (error) 
 		logger.Warn("Sysroot debug directory is not empty - the package build may fail")
 	}
 	return nil
+}
+
+// arePackagesInSysroot
+// Returns true if packageName an its dependencies are in sysroot, else returns false.
+func isPackageWithDepsInSysroot(packageName string, contextManager *bringauto_context.ContextManager, platformString *bringauto_package.PlatformString) (bool, error) {
+	packageJsonPaths, err := contextManager.GetPackageWithDepsJsonDefPaths(packageName)
+	if err != nil {
+		return false, err
+	}
+	configList, err := prepareConfigs(packageJsonPaths)
+	if err != nil {
+		return false, err
+	}
+
+	sysroot := bringauto_sysroot.Sysroot{
+		IsDebug:        false,
+		PlatformString: platformString,
+	}
+	err = bringauto_prerequisites.Initialize(&sysroot)
+
+	for _, config := range configList {
+		packName := config.Package.GetShortPackageName()
+		if !sysroot.IsPackageInSysroot(packName) {
+			return false, nil
+		}
+	}
+
+	return true, nil
 }

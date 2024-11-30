@@ -11,6 +11,7 @@ import (
 	"io/fs"
 	"path/filepath"
 	"strings"
+	"slices"
 )
 
 const (
@@ -42,6 +43,10 @@ func (sysroot *Sysroot) CheckPrerequisites(args *bringauto_prerequisites.Args) e
 	if sysroot.PlatformString == nil {
 		return fmt.Errorf("sysroot PlatformString cannot be nil")
 	}
+	err := sysroot.builtPackages.UpdateBuiltPackages()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -65,6 +70,15 @@ func (sysroot *Sysroot) CopyToSysroot(source string, packageName string) error {
 		return err
 	}
 	return nil
+}
+
+// ArePackagesInSysroot
+// Returns true if all expectedPackages are built in sysroot, else false.
+func (sysroot *Sysroot) IsPackageInSysroot(packageName string) bool {
+	if slices.Contains(sysroot.builtPackages.Packages, packageName) {
+		return true
+	}
+	return false
 }
 
 // checkForOverwritingFiles
