@@ -228,6 +228,8 @@ func (context *ContextManager) GetDepsOnJsonDefPaths(packageName string) ([]stri
 	return packsToBuild, nil
 }
 
+// removeStrings
+// Removes strList2 strings from strList1
 func removeStrings(strList1 []string, strList2 []string) []string {
 	for _, str2 := range strList2 {
 		strList1 = removeString(strList1, str2)
@@ -235,6 +237,8 @@ func removeStrings(strList1 []string, strList2 []string) []string {
 	return strList1
 }
 
+// removeString
+// Removes str string from strList1
 func removeString(strList1 []string, str string) []string {
 	i := 0
 	for _, str1 := range strList1 {

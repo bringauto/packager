@@ -319,9 +319,9 @@ func prepareConfigs(packageJsonPaths []string) ([]*bringauto_config.Config, erro
 	return configList, nil
 }
 
-// prepareConfigsSinglePackageNoBuildDeps
+// prepareConfigsNoBuildDeps
 // Returns Config structures only for given package.
-func prepareConfigsSinglePackageNoBuildDeps(packageName string, contextManager bringauto_context.ContextManager) ([]*bringauto_config.Config, error) {
+func prepareConfigsNoBuildDeps(packageName string, contextManager *bringauto_context.ContextManager) ([]*bringauto_config.Config, error) {
 	var configList []*bringauto_config.Config
 	packageJsonPaths, err := contextManager.GetPackageJsonDefPaths(packageName)
 	if err != nil {
@@ -338,6 +338,41 @@ func prepareConfigsSinglePackageNoBuildDeps(packageName string, contextManager b
 		configList = append(configList, &config)
 	}
 	return configList, nil
+}
+
+// prepareConfigsBuildDepsOrBuildDepsOn
+// Returns Config structures based on --build-deps and --build-deps-on flags.
+func prepareConfigsBuildDepsOrBuildDepsOn(
+	cmdLine        *BuildPackageCmdLineArgs,
+	packageName    string,
+	contextManager *bringauto_context.ContextManager,
+	platformString *bringauto_package.PlatformString,
+) ([]*bringauto_config.Config, error) {
+	var packageJsonPaths []string
+	if *cmdLine.BuildDeps {
+		paths, err := contextManager.GetPackageWithDepsJsonDefPaths(packageName)
+		if err != nil {
+			return []*bringauto_config.Config{}, err
+		}
+		packageJsonPaths = append(packageJsonPaths, paths...)
+	} else if *cmdLine.BuildDepsOn {
+		value, err := isPackageWithDepsInSysroot(packageName, contextManager, platformString)
+		if err != nil {
+			return []*bringauto_config.Config{}, err
+		}
+		if !value {
+			err = fmt.Errorf("--build-deps-on set but base package or its dependencies are not in sysroot")
+			return []*bringauto_config.Config{}, err
+		}
+	}
+	if *cmdLine.BuildDepsOn {
+		paths, err := contextManager.GetDepsOnJsonDefPaths(packageName)
+		if err != nil {
+			return []*bringauto_config.Config{}, err
+		}
+		packageJsonPaths = append(packageJsonPaths, paths...)
+	}
+	return prepareConfigs(packageJsonPaths)
 }
 
 // buildSinglePackage
@@ -357,33 +392,9 @@ func buildSinglePackage(
 	var configList []*bringauto_config.Config
 
 	if *cmdLine.BuildDeps || *cmdLine.BuildDepsOn {
-		var packageJsonPaths []string
-		if *cmdLine.BuildDeps {
-			paths, err := contextManager.GetPackageWithDepsJsonDefPaths(packageName)
-			if err != nil {
-				return err
-			}
-			packageJsonPaths = append(packageJsonPaths, paths...)
-		}
-		if *cmdLine.BuildDepsOn {
-			if !*cmdLine.BuildDeps {
-				value, err := isPackageWithDepsInSysroot(packageName, &contextManager, platformString)
-				if err != nil {
-					return err
-				}
-				if !value {
-					return fmt.Errorf("--build-deps-on set but base package or its dependencies are not in sysroot")
-				}
-			}
-			paths, err := contextManager.GetDepsOnJsonDefPaths(packageName)
-			if err != nil {
-				return err
-			}
-			packageJsonPaths = append(packageJsonPaths, paths...)
-		}
-		configList, err = prepareConfigs(packageJsonPaths)
+		configList, err = prepareConfigsBuildDepsOrBuildDepsOn(cmdLine, packageName, &contextManager, platformString)
 	} else {
-		configList, err = prepareConfigsSinglePackageNoBuildDeps(packageName, contextManager)
+		configList, err = prepareConfigsNoBuildDeps(packageName, &contextManager)
 	}
 	if err != nil {
 		return err
