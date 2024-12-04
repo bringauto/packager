@@ -128,8 +128,7 @@ func (cmd *CmdLineArgs) InitFlags() {
 	)
 	cmd.BuildPackageArgs.DockerImageName = cmd.buildPackageParser.String("", "image-name",
 		&argparse.Options{
-			Required: false,
-			Default:  "",
+			Required: true,
 			Help: "Docker image name for which packages will be build.\n" +
 				"Only packages that contains image-name in the DockerMatrix will be built.\n" +
 				"Given packages will be build by toolchain represented by image-name",
