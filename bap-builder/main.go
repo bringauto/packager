@@ -40,5 +40,14 @@ func main() {
 		return
 	}
 
+	if args.CreateSysroot {
+		err = CreateSysroot(&args.CreateSysrootArgs, *args.Context)
+		if err != nil {
+			logger.Error("Failed to create sys: %s", err)
+			return
+		}
+		return
+	}
+
 	return
 }

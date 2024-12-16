@@ -10,4 +10,8 @@ const (
 	DockerInstallDirConst = string(filepath.Separator) + "INSTALL"
 	// Default SSH port of docker container
 	DefaultSSHPort = 1122
+	// Name of the docker directory
+	DockerDirName  = "docker"
+	// Name of the package directory
+	PackageDirName = "package"
 )
