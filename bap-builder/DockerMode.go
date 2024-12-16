@@ -42,7 +42,10 @@ func buildAllDockerImages(contextManager bringauto_context.ContextManager) error
 			logger.Warn("Bug: multiple Dockerfile present for same image name %s", imageName)
 			continue
 		}
-		return buildSingleDockerImage(imageName, dockerfilePath[0])
+		err = buildSingleDockerImage(imageName, dockerfilePath[0])
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
