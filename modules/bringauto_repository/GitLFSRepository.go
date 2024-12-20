@@ -85,8 +85,10 @@ func (lfs *GitLFSRepository) CheckGitLfsConsistency(contextManager *bringauto_co
 		expectedPackPaths = append(expectedPackPaths, packPath)
 	}
 
+	lookupPath := filepath.Join(lfs.GitRepoPath, platformString.String.DistroName, platformString.String.DistroRelease, platformString.String.Machine)
+
 	var errorPackPaths []string
-	err = filepath.WalkDir(lfs.GitRepoPath, func(path string, d fs.DirEntry, err error) error {
+	err = filepath.WalkDir(lookupPath, func(path string, d fs.DirEntry, err error) error {
 		if d.Name() == ".git" && d.IsDir() {
 			return filepath.SkipDir
 		}
