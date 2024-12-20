@@ -29,6 +29,8 @@ type BuildPackageCmdLineArgs struct {
 	Name *string
 	// BuildDeps Build all dependencies of package when building single package
 	BuildDeps *bool
+	// BuildDepsOn Build package with all packages which depends on it
+	BuildDepsOn *bool
 	// DockerImageName is a name of docker image to which packages will be build.
 	// If empty all docker images from DockerMatrix in config file are used for a given package.
 	// If not empty, only packages which contains DockerImageName in DockerMatrix will be built.
@@ -38,6 +40,17 @@ type BuildPackageCmdLineArgs struct {
 	OutputDir *string
 	// OutputDirMode Output dir mode
 	OutputDirMode *OutputDirMode
+}
+
+// CreateSysrootCmdLineArgs
+// Options/setting for Sysroot mode
+type CreateSysrootCmdLineArgs struct {
+	// Path to the Git Lfs repository with packages
+	Repo *string
+	// Name of the new sysroot directory to be created
+	Sysroot *string
+	// Name of the docker image which are the packages build for
+	ImageName *string
 }
 
 // CmdLineArgs
@@ -54,11 +67,15 @@ type CmdLineArgs struct {
 	// Standard Cmd line arguments for Docker mode
 	BuildImagesArgs BuildImageCmdLineArgs
 	// If true the program is in the "Package" mode
-	BuildPackage       bool
-	BuildPackageArgs   BuildPackageCmdLineArgs
-	buildImageParser   *argparse.Command
-	buildPackageParser *argparse.Command
-	parser             *argparse.Parser
+	BuildPackage        bool
+	// If true the program is in the "Sysroot" mode
+	CreateSysroot       bool
+	BuildPackageArgs    BuildPackageCmdLineArgs
+	CreateSysrootArgs   CreateSysrootCmdLineArgs
+	buildImageParser    *argparse.Command
+	buildPackageParser  *argparse.Command
+	createSysrootParser *argparse.Command
+	parser              *argparse.Parser
 }
 
 // InitFlags
@@ -96,6 +113,13 @@ func (cmd *CmdLineArgs) InitFlags() {
 			Help:     "Build all dependencies of package when building single package",
 		},
 	)
+	cmd.BuildPackageArgs.BuildDepsOn = cmd.buildPackageParser.Flag("", "build-deps-on",
+		&argparse.Options{
+			Required: false,
+			Default:  false,
+			Help:     "Build package with all packages which depends on it",
+		},
+	)
 	cmd.BuildPackageArgs.OutputDir = cmd.buildPackageParser.String("", "output-dir",
 		&argparse.Options{
 			Required: true,
@@ -104,8 +128,7 @@ func (cmd *CmdLineArgs) InitFlags() {
 	)
 	cmd.BuildPackageArgs.DockerImageName = cmd.buildPackageParser.String("", "image-name",
 		&argparse.Options{
-			Required: false,
-			Default:  "",
+			Required: true,
 			Help: "Docker image name for which packages will be build.\n" +
 				"Only packages that contains image-name in the DockerMatrix will be built.\n" +
 				"Given packages will be build by toolchain represented by image-name",
@@ -126,6 +149,27 @@ func (cmd *CmdLineArgs) InitFlags() {
 			Help:     "Name of the docker image to build",
 		},
 	)
+
+	cmd.createSysrootParser = cmd.parser.NewCommand("create-sysroot", "Create Sysroot")
+	cmd.CreateSysrootArgs.Sysroot = cmd.createSysrootParser.String("", "sysroot-dir",
+		&argparse.Options{
+			Required: true,
+			Help:     "Name of the sysroot directory which will be created",
+			Default:  false,
+		},
+	)
+	cmd.CreateSysrootArgs.Repo = cmd.createSysrootParser.String("", "git-lfs",
+		&argparse.Options{
+			Required: true,
+			Help:     "Git Lfs directory where packages are stored",
+		},
+	)
+	cmd.CreateSysrootArgs.ImageName = cmd.createSysrootParser.String("", "image-name",
+		&argparse.Options{
+			Required: true,
+			Help:     "Name of docker image which are the packages build for",
+		},
+	)
 }
 
 // ParseArgs
@@ -144,8 +188,14 @@ func (cmd *CmdLineArgs) ParseArgs(args []string) error {
 	cmd.BuildImage = cmd.buildImageParser.Happened()
 	cmd.BuildPackage = cmd.buildPackageParser.Happened()
 	if *cmd.BuildPackageArgs.All && *cmd.BuildPackageArgs.BuildDeps {
-		return fmt.Errorf("all and build-deps flags at the same time")
+		if *cmd.BuildPackageArgs.BuildDeps {
+			return fmt.Errorf("all and build-deps flags at the same time")
+		}
+		if *cmd.BuildPackageArgs.BuildDepsOn {
+			return fmt.Errorf("all and build-deps-on flags at the same time")
+		}
 	}
+	cmd.CreateSysroot = cmd.createSysrootParser.Happened()
 
 	return nil
 }
