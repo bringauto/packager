@@ -88,24 +88,27 @@ func (lfs *GitLFSRepository) CheckGitLfsConsistency(contextManager *bringauto_co
 	lookupPath := filepath.Join(lfs.GitRepoPath, platformString.String.DistroName, platformString.String.DistroRelease, platformString.String.Machine)
 
 	var errorPackPaths []string
-	err = filepath.WalkDir(lookupPath, func(path string, d fs.DirEntry, err error) error {
-		if d.Name() == ".git" && d.IsDir() {
-			return filepath.SkipDir
-		}
-		if !d.IsDir() {
-			if !slices.Contains(expectedPackPaths, path) {
-				errorPackPaths = append(errorPackPaths, path)
-			} else {
-				// Remove element from expected package paths
-				index := slices.Index(expectedPackPaths, path)
-				expectedPackPaths[index] = expectedPackPaths[len(expectedPackPaths) - 1]
-				expectedPackPaths = expectedPackPaths[:len(expectedPackPaths) - 1]
+	_, err = os.Stat(lookupPath)
+	if !os.IsNotExist(err) {
+		err = filepath.WalkDir(lookupPath, func(path string, d fs.DirEntry, err error) error {
+			if d.Name() == ".git" && d.IsDir() {
+				return filepath.SkipDir
 			}
+			if !d.IsDir() {
+				if !slices.Contains(expectedPackPaths, path) {
+					errorPackPaths = append(errorPackPaths, path)
+				} else {
+					// Remove element from expected package paths
+					index := slices.Index(expectedPackPaths, path)
+					expectedPackPaths[index] = expectedPackPaths[len(expectedPackPaths) - 1]
+					expectedPackPaths = expectedPackPaths[:len(expectedPackPaths) - 1]
+				}
+			}
+			return nil
+		})
+		if err != nil {
+			return err
 		}
-		return nil
-	})
-	if err != nil {
-		return err
 	}
 	err = printErrors(errorPackPaths, expectedPackPaths)
 	if err != nil {
