@@ -40,7 +40,7 @@ func CreateSysroot(cmdLine *CreateSysrootCmdLineArgs, contextPath string) error 
 	}
 	err = bringauto_prerequisites.Initialize(&repo)
 	if err != nil {
-		return nil
+		return err
 	}
 	platformString, err := determinePlatformString(*cmdLine.ImageName)
 	if err != nil {
