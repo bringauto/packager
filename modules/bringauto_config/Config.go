@@ -102,8 +102,7 @@ func (config *Config) GetBuildStructure(imageName string, platformString *bringa
 
 func (config *Config) fillBuildStructure(dockerImageName string, platformString *bringauto_package.PlatformString) bringauto_build.Build {
 	var err error
-	defaultDocker := bringauto_prerequisites.CreateAndInitialize[bringauto_docker.Docker]()
-	defaultDocker.ImageName = dockerImageName
+	defaultDocker := bringauto_prerequisites.CreateAndInitialize[bringauto_docker.Docker](dockerImageName)
 
 	env := &bringauto_build.EnvironmentVariables{
 		Env: config.Env,

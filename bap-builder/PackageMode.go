@@ -490,7 +490,7 @@ func buildAndCopyPackage(
 // determinePlatformString
 // Will construct platform string suitable for sysroot.
 func determinePlatformString(dockerImageName string) (*bringauto_package.PlatformString, error) {
-	defaultDocker := bringauto_prerequisites.CreateAndInitialize[bringauto_docker.Docker]()
+	defaultDocker := bringauto_prerequisites.CreateAndInitialize[bringauto_docker.Docker](dockerImageName)
 	defaultDocker.ImageName = dockerImageName
 
 	sshCreds := bringauto_prerequisites.CreateAndInitialize[bringauto_ssh.SSHCredentials]()
