@@ -129,6 +129,7 @@ func (cmd *CmdLineArgs) InitFlags() {
 	cmd.BuildPackageArgs.DockerImageName = cmd.buildPackageParser.String("", "image-name",
 		&argparse.Options{
 			Required: true,
+			Validate: checkForEmpty,
 			Help: "Docker image name for which packages will be build.\n" +
 				"Only packages that contains image-name in the DockerMatrix will be built.\n" +
 				"Given packages will be build by toolchain represented by image-name",
@@ -167,9 +168,19 @@ func (cmd *CmdLineArgs) InitFlags() {
 	cmd.CreateSysrootArgs.ImageName = cmd.createSysrootParser.String("", "image-name",
 		&argparse.Options{
 			Required: true,
+			Validate: checkForEmpty,
 			Help:     "Name of docker image which are the packages build for",
 		},
 	)
+}
+
+func checkForEmpty(args []string) error {
+	if len(args) == 1 {
+		if len(args[0]) == 0 {
+			return fmt.Errorf("cannot be empty")
+		}
+	}
+	return nil
 }
 
 // ParseArgs
