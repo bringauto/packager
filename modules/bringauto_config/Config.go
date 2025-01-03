@@ -89,7 +89,7 @@ func (config *Config) GetBuildStructure(imageName string, platformString *bringa
 			continue
 		}
 		build := config.fillBuildStructure(imageName, platformString)
-		defaultBuild := bringauto_prerequisites.CreateAndInitialize[bringauto_build.Build]()
+		defaultBuild := bringauto_prerequisites.CreateAndInitialize[bringauto_build.Build](imageName)
 		err := copier.CopyWithOption(defaultBuild, build, copier.Option{DeepCopy: true, IgnoreEmpty: true})
 		if err != nil {
 			panic(fmt.Errorf("cannot merge default and real build config"))

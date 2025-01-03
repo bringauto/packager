@@ -27,14 +27,20 @@ type Build struct {
 	sysroot        *bringauto_sysroot.Sysroot
 }
 
+type buildInitArgs struct {
+	DockerImageName string
+}
+
 // FillDefault
 // It fills up defaults for all members in the Build structure.
-func (build *Build) FillDefault(*bringauto_prerequisites.Args) error {
+func (build *Build) FillDefault(args *bringauto_prerequisites.Args) error {
+	var argsStruct buildInitArgs
+	bringauto_prerequisites.GetArgs(args, &argsStruct)
 	if build.Git == nil {
 		build.Git = bringauto_prerequisites.CreateAndInitialize[bringauto_git.Git]()
 	}
 	if build.Docker == nil {
-		build.Docker = bringauto_prerequisites.CreateAndInitialize[bringauto_docker.Docker]()
+		build.Docker = bringauto_prerequisites.CreateAndInitialize[bringauto_docker.Docker](argsStruct.DockerImageName)
 	}
 	if build.SSHCredentials == nil {
 		build.SSHCredentials = bringauto_prerequisites.CreateAndInitialize[bringauto_ssh.SSHCredentials]()
