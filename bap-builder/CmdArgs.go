@@ -118,14 +118,16 @@ func (cmd *CmdLineArgs) InitFlags() {
 		&argparse.Options{
 			Required: false,
 			Default:  false,
-			Help:     "Build package with all packages which depends on it",
+			Help:     "Build packages which depends on given package without itself, " +
+			"the packages are built with its dependencies",
 		},
 	)
 	cmd.BuildPackageArgs.BuildDepsOnRecursive = cmd.buildPackageParser.Flag("", "build-deps-on-recursive",
 		&argparse.Options{
 			Required: false,
 			Default:  false,
-			Help:     "Build package with all packages which depends on it recursively",
+			Help:     "Build packages which depends on given package without itself recursively, " +
+			"the packages are built with its dependencies",
 		},
 	)
 	cmd.BuildPackageArgs.OutputDir = cmd.buildPackageParser.String("", "output-dir",
