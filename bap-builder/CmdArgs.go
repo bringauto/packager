@@ -85,9 +85,8 @@ func (cmd *CmdLineArgs) InitFlags() {
 	cmd.parser = argparse.NewParser("BringAuto Packager", "Build and track C++ dependencies")
 	cmd.Context = cmd.parser.String("", "context",
 		&argparse.Options{
-			Required: false,
-			Default:  ".",
-			Help:     "Command context",
+			Required: true,
+			Help:     "Context directory where are the json definition of packages",
 		},
 	)
 
@@ -130,9 +129,9 @@ func (cmd *CmdLineArgs) InitFlags() {
 		&argparse.Options{
 			Required: true,
 			Validate: checkForEmpty,
-			Help: "Docker image name for which packages will be build.\n" +
-				"Only packages that contains image-name in the DockerMatrix will be built.\n" +
-				"Given packages will be build by toolchain represented by image-name",
+			Help: "Docker image name for which packages will be build. " +
+			"Only packages that contains image-name in the DockerMatrix will be built. " +
+			"Given packages will be build by toolchain represented by image-name",
 		},
 	)
 
@@ -169,7 +168,7 @@ func (cmd *CmdLineArgs) InitFlags() {
 		&argparse.Options{
 			Required: true,
 			Validate: checkForEmpty,
-			Help:     "Name of docker image which are the packages build for",
+			Help:     "Name of docker image which are the packages built for",
 		},
 	)
 }
