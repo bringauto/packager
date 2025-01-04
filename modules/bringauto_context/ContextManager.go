@@ -199,7 +199,7 @@ func (context *ContextManager) GetPackageWithDepsJsonDefPaths(packageName string
 // GetPackageWithDepsOnJsonDefPaths
 // Returns all Json definitions paths which depends on given package and all its dependencies Json
 // definitions paths recursively without package (packageName) itself and its dependencies.
-func (context *ContextManager) GetDepsOnJsonDefPaths(packageName string) ([]string, error) {
+func (context *ContextManager) GetDepsOnJsonDefPaths(packageName string, recursively bool) ([]string, error) {
 	packsToBuild, err := context.GetPackageJsonDefPaths(packageName)
 	if err != nil {
 		return []string{}, err
@@ -219,6 +219,13 @@ func (context *ContextManager) GetDepsOnJsonDefPaths(packageName string) ([]stri
 					return []string{}, err
 				}
 				packsToBuild = append(packsToBuild, packWithDeps...)
+				if recursively {
+					packsDepsOnRecursive, err := context.GetDepsOnJsonDefPaths(config.Package.Name, false)
+					if err != nil {
+						return []string{}, err
+					}
+					packsToBuild = append(packsToBuild, packsDepsOnRecursive...)
+				}
 				break
 			}
 		}

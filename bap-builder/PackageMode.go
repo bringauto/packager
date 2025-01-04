@@ -355,18 +355,18 @@ func prepareConfigsBuildDepsOrBuildDepsOn(
 			return []*bringauto_config.Config{}, err
 		}
 		packageJsonPaths = append(packageJsonPaths, paths...)
-	} else if *cmdLine.BuildDepsOn {
+	} else if *cmdLine.BuildDepsOn || *cmdLine.BuildDepsOnRecursive {
 		value, err := isPackageWithDepsInSysroot(packageName, contextManager, platformString)
 		if err != nil {
 			return []*bringauto_config.Config{}, err
 		}
 		if !value {
-			err = fmt.Errorf("--build-deps-on set but base package or its dependencies are not in sysroot")
+			err = fmt.Errorf("--build-deps-on(-recursive) set but base package or its dependencies are not in sysroot")
 			return []*bringauto_config.Config{}, err
 		}
 	}
-	if *cmdLine.BuildDepsOn {
-		paths, err := contextManager.GetDepsOnJsonDefPaths(packageName)
+	if *cmdLine.BuildDepsOn || *cmdLine.BuildDepsOnRecursive {
+		paths, err := contextManager.GetDepsOnJsonDefPaths(packageName, *cmdLine.BuildDepsOnRecursive)
 		if err != nil {
 			return []*bringauto_config.Config{}, err
 		}
@@ -391,7 +391,7 @@ func buildSinglePackage(
 	var err error
 	var configList []*bringauto_config.Config
 
-	if *cmdLine.BuildDeps || *cmdLine.BuildDepsOn {
+	if *cmdLine.BuildDeps || *cmdLine.BuildDepsOn || *cmdLine.BuildDepsOnRecursive {
 		configList, err = prepareConfigsBuildDepsOrBuildDepsOn(cmdLine, packageName, &contextManager, platformString)
 	} else {
 		configList, err = prepareConfigsNoBuildDeps(packageName, &contextManager)

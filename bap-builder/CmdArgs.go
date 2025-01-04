@@ -31,6 +31,8 @@ type BuildPackageCmdLineArgs struct {
 	BuildDeps *bool
 	// BuildDepsOn Build package with all packages which depends on it
 	BuildDepsOn *bool
+	// BuildDepsOn Build package with all packages which depends on it recursively
+	BuildDepsOnRecursive *bool
 	// DockerImageName is a name of docker image to which packages will be build.
 	// If empty all docker images from DockerMatrix in config file are used for a given package.
 	// If not empty, only packages which contains DockerImageName in DockerMatrix will be built.
@@ -119,6 +121,13 @@ func (cmd *CmdLineArgs) InitFlags() {
 			Help:     "Build package with all packages which depends on it",
 		},
 	)
+	cmd.BuildPackageArgs.BuildDepsOnRecursive = cmd.buildPackageParser.Flag("", "build-deps-on-recursive",
+		&argparse.Options{
+			Required: false,
+			Default:  false,
+			Help:     "Build package with all packages which depends on it recursively",
+		},
+	)
 	cmd.BuildPackageArgs.OutputDir = cmd.buildPackageParser.String("", "output-dir",
 		&argparse.Options{
 			Required: true,
@@ -205,6 +214,13 @@ func (cmd *CmdLineArgs) ParseArgs(args []string) error {
 		}
 		if *cmd.BuildPackageArgs.BuildDepsOn {
 			return fmt.Errorf("all and build-deps-on flags at the same time")
+		}
+		if *cmd.BuildPackageArgs.BuildDepsOnRecursive {
+			return fmt.Errorf("all and build-deps-on-recursive flags at the same time")
+		}
+	} else if *cmd.BuildPackageArgs.BuildDepsOn {
+		if *cmd.BuildPackageArgs.BuildDepsOnRecursive {
+			return fmt.Errorf("build-deps-on and build-deps-on-recursive flags at the same time")
 		}
 	}
 
