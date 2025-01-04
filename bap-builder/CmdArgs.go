@@ -197,7 +197,9 @@ func (cmd *CmdLineArgs) ParseArgs(args []string) error {
 
 	cmd.BuildImage = cmd.buildImageParser.Happened()
 	cmd.BuildPackage = cmd.buildPackageParser.Happened()
-	if *cmd.BuildPackageArgs.All && *cmd.BuildPackageArgs.BuildDeps {
+	cmd.CreateSysroot = cmd.createSysrootParser.Happened()
+
+	if *cmd.BuildPackageArgs.All {
 		if *cmd.BuildPackageArgs.BuildDeps {
 			return fmt.Errorf("all and build-deps flags at the same time")
 		}
@@ -205,7 +207,6 @@ func (cmd *CmdLineArgs) ParseArgs(args []string) error {
 			return fmt.Errorf("all and build-deps-on flags at the same time")
 		}
 	}
-	cmd.CreateSysroot = cmd.createSysrootParser.Happened()
 
 	return nil
 }
