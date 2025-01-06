@@ -40,8 +40,9 @@ func (context *ContextManager) GetAllPackagesJsonDefPaths() (map[string][]string
 }
 
 // GetAllPackagesConfigs
-// Returns Config structs of all packages JSON definitions.
-func (context *ContextManager) GetAllPackagesConfigs() ([]*bringauto_config.Config, error) {
+// Returns Config structs of all packages JSON definitions. If platformString is not nil, it is
+// added to all packages.
+func (context *ContextManager) GetAllPackagesConfigs(platformString *bringauto_package.PlatformString) ([]*bringauto_config.Config, error) {
 	var packConfigs []*bringauto_config.Config
 	packageJsonPathMap, err := context.GetAllPackagesJsonDefPaths()
 	if err != nil {
@@ -56,6 +57,9 @@ func (context *ContextManager) GetAllPackagesConfigs() ([]*bringauto_config.Conf
 				logger.Warn("Couldn't load JSON config from %s path - %s", packageJsonPath, err)
 				continue
 			}
+			if platformString != nil {
+				config.Package.PlatformString = *platformString
+			}
 			packConfigs = append(packConfigs, &config)
 		}
 	}
@@ -66,16 +70,13 @@ func (context *ContextManager) GetAllPackagesConfigs() ([]*bringauto_config.Conf
 // Returns Package structs of all packages JSON definitions. If platformString is not nil, it is added to
 // all packages.
 func (context *ContextManager) GetAllPackagesStructs(platformString *bringauto_package.PlatformString) ([]bringauto_package.Package, error) {
-	packConfigs, err := context.GetAllPackagesConfigs()
+	packConfigs, err := context.GetAllPackagesConfigs(platformString)
 	if err != nil {
 		return []bringauto_package.Package{}, nil
 	}
 
 	var packages []bringauto_package.Package
 	for _, packConfig := range packConfigs {
-		if platformString != nil {
-			packConfig.Package.PlatformString = *platformString
-		}
 		packages = append(packages, packConfig.Package)
 	}
 
@@ -204,7 +205,7 @@ func (context *ContextManager) GetDepsOnJsonDefPaths(packageName string, recursi
 	if err != nil {
 		return []string{}, err
 	}
-	packConfigs, err := context.GetAllPackagesConfigs()
+	packConfigs, err := context.GetAllPackagesConfigs(nil)
 	if err != nil {
 		return []string{}, err
 	}

@@ -5,6 +5,7 @@ import (
 	"bringauto/modules/bringauto_prerequisites"
 	"bringauto/modules/bringauto_log"
 	"bringauto/modules/bringauto_context"
+	"bringauto/modules/bringauto_config"
 	"bytes"
 	"fmt"
 	"io/fs"
@@ -76,13 +77,37 @@ func (lfs *GitLFSRepository) RestoreAllChanges() error {
 	return nil
 }
 
-func (lfs *GitLFSRepository) CheckGitLfsConsistency(contextManager *bringauto_context.ContextManager, platformString *bringauto_package.PlatformString) error {
-	packages, err := contextManager.GetAllPackagesStructs(platformString)
+func dividePackagesForCurrentImage(allConfigs []*bringauto_config.Config, imageName string) ([]bringauto_package.Package, []bringauto_package.Package) {
+	var packagesForImage []bringauto_package.Package
+	var packagesNotForImage []bringauto_package.Package
 
-	var expectedPackPaths []string
-	for _, pack := range packages {
+	for _, config := range allConfigs {
+		if slices.Contains(config.DockerMatrix.ImageNames, imageName) {
+			packagesForImage = append(packagesForImage, config.Package)
+		} else {
+			packagesNotForImage = append(packagesNotForImage, config.Package)
+		}
+	}
+
+	return packagesForImage, packagesNotForImage
+}
+
+func (lfs *GitLFSRepository) CheckGitLfsConsistency(contextManager *bringauto_context.ContextManager, platformString *bringauto_package.PlatformString, imageName string) error {
+	packConfigs, err := contextManager.GetAllPackagesConfigs(platformString)
+	if err != nil {
+		return err
+	}
+
+	packagesForImage, packagesNotForImage := dividePackagesForCurrentImage(packConfigs, imageName)
+
+	var expectedPackForImagePaths, expectedPackNotForImagePaths []string
+	for _, pack := range packagesForImage {
 		packPath := filepath.Join(lfs.CreatePackagePath(pack) + "/" + pack.GetFullPackageName() + ".zip")
-		expectedPackPaths = append(expectedPackPaths, packPath)
+		expectedPackForImagePaths = append(expectedPackForImagePaths, packPath)
+	}
+	for _, pack := range packagesNotForImage {
+		packPath := filepath.Join(lfs.CreatePackagePath(pack) + "/" + pack.GetFullPackageName() + ".zip")
+		expectedPackNotForImagePaths = append(expectedPackNotForImagePaths, packPath)
 	}
 
 	lookupPath := filepath.Join(lfs.GitRepoPath, platformString.String.DistroName, platformString.String.DistroRelease, platformString.String.Machine)
@@ -95,13 +120,13 @@ func (lfs *GitLFSRepository) CheckGitLfsConsistency(contextManager *bringauto_co
 				return filepath.SkipDir
 			}
 			if !d.IsDir() {
-				if !slices.Contains(expectedPackPaths, path) {
+				if !slices.Contains(expectedPackForImagePaths, path) {
 					errorPackPaths = append(errorPackPaths, path)
 				} else {
 					// Remove element from expected package paths
-					index := slices.Index(expectedPackPaths, path)
-					expectedPackPaths[index] = expectedPackPaths[len(expectedPackPaths) - 1]
-					expectedPackPaths = expectedPackPaths[:len(expectedPackPaths) - 1]
+					index := slices.Index(expectedPackForImagePaths, path)
+					expectedPackForImagePaths[index] = expectedPackForImagePaths[len(expectedPackForImagePaths) - 1]
+					expectedPackForImagePaths = expectedPackForImagePaths[:len(expectedPackForImagePaths) - 1]
 				}
 			}
 			return nil
@@ -110,14 +135,14 @@ func (lfs *GitLFSRepository) CheckGitLfsConsistency(contextManager *bringauto_co
 			return err
 		}
 	}
-	err = printErrors(errorPackPaths, expectedPackPaths)
+	err = printErrors(errorPackPaths, expectedPackForImagePaths, expectedPackNotForImagePaths)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func printErrors(errorPackPaths []string, expectedPackPaths []string) error {
+func printErrors(errorPackPaths []string, expectedPackForImagePaths []string, expectedPackNotForImagePaths []string) error {
 	logger := bringauto_log.GetLogger()
 	if len(errorPackPaths) > 0 {
 		logger.Error("%d packages are not in Json definitions but are in Git Lfs (listing first %d):", len(errorPackPaths), listFileCount)
@@ -130,13 +155,22 @@ func printErrors(errorPackPaths []string, expectedPackPaths []string) error {
 		return fmt.Errorf("packages in Git Lfs are not subset of packages in Json definitions")
 	}
 
-	if len(expectedPackPaths) > 0 {
-		logger.Warn("Expected %d packages to be in git lfs (listing first %d):", len(expectedPackPaths), listFileCount)
-		for i, expectedPackPath := range expectedPackPaths {
+	if len(expectedPackForImagePaths) > 0 {
+		logger.Warn("Expected %d packages (built for target image) to be in git lfs (listing first %d):", len(expectedPackForImagePaths), listFileCount)
+		for i, expectedPackForImagePath := range expectedPackForImagePaths {
 			if i > listFileCount - 1 {
 				break
 			}
-			logger.WarnIndent(expectedPackPath)
+			logger.WarnIndent(expectedPackForImagePath)
+		}
+	}
+	if len(expectedPackNotForImagePaths) > 0 {
+		logger.Warn("%d packages are in context but are not built for target image (listing first %d):", len(expectedPackNotForImagePaths), listFileCount)
+		for i, expectedPackNotForImagePath := range expectedPackNotForImagePaths {
+			if i > listFileCount - 1 {
+				break
+			}
+			logger.WarnIndent(expectedPackNotForImagePath)
 		}
 	}
 	return nil

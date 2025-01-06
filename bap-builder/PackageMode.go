@@ -200,7 +200,7 @@ func checkContextDirConsistency(contextPath string) error {
 	return err
 }
 
-func performPreBuildChecks(contextPath string, repo *bringauto_repository.GitLFSRepository, platformString *bringauto_package.PlatformString) error {
+func performPreBuildChecks(contextPath string, repo *bringauto_repository.GitLFSRepository, platformString *bringauto_package.PlatformString, imageName string) error {
 	logger := bringauto_log.GetLogger()
 	logger.Info("Checking context directory (%s) consistency", contextPath)
 	err := checkContextDirConsistency(contextPath)
@@ -211,7 +211,7 @@ func performPreBuildChecks(contextPath string, repo *bringauto_repository.GitLFS
 		ContextPath: contextPath,
 	}
 	logger.Info("Checking Git Lfs directory consistency")
-	err = repo.CheckGitLfsConsistency(&contextManager, platformString)
+	err = repo.CheckGitLfsConsistency(&contextManager, platformString, imageName)
 	if err != nil {
 		return err
 	}
@@ -237,7 +237,7 @@ func BuildPackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) error {
 	if err != nil {
 		return err
 	}
-	err = performPreBuildChecks(contextPath, &repo, platformString)
+	err = performPreBuildChecks(contextPath, &repo, platformString, *cmdLine.DockerImageName)
 	if err != nil {
 		return err
 	}

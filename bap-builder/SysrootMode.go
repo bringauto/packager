@@ -51,7 +51,7 @@ func CreateSysroot(cmdLine *CreateSysrootCmdLineArgs, contextPath string) error 
 	}
 	logger := bringauto_log.GetLogger()
 	logger.Info("Checking Git Lfs directory consistency")
-	err = repo.CheckGitLfsConsistency(&contextManager, platformString)
+	err = repo.CheckGitLfsConsistency(&contextManager, platformString, *cmdLine.ImageName)
 	if err != nil {
 		return err
 	}
