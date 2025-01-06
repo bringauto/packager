@@ -526,7 +526,7 @@ func checkSysrootDirs(platformString *bringauto_package.PlatformString) (error) 
 	return nil
 }
 
-// arePackagesInSysroot
+// isPackageWithDepsInSysroot
 // Returns true if packageName an its dependencies are in sysroot, else returns false.
 func isPackageWithDepsInSysroot(packageName string, contextManager *bringauto_context.ContextManager, platformString *bringauto_package.PlatformString) (bool, error) {
 	packageJsonPaths, err := contextManager.GetPackageWithDepsJsonDefPaths(packageName)

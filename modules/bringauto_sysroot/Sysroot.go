@@ -72,7 +72,7 @@ func (sysroot *Sysroot) CopyToSysroot(source string, packageName string) error {
 	return nil
 }
 
-// ArePackagesInSysroot
+// IsPackageInSysroot
 // Returns true if all expectedPackages are built in sysroot, else false.
 func (sysroot *Sysroot) IsPackageInSysroot(packageName string) bool {
 	if slices.Contains(sysroot.builtPackages.Packages, packageName) {
