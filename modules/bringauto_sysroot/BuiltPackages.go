@@ -2,6 +2,7 @@ package bringauto_sysroot
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path"
 )
@@ -28,10 +29,15 @@ func (builtPackages *BuiltPackages) AddToBuiltPackages(packageName string) error
 
 func (builtPackages *BuiltPackages) UpdateBuiltPackages() error {
 	bytes, err := os.ReadFile(path.Join(sysrootDirectoryName, jsonFileName))
-	if err != nil {
+	if os.IsNotExist(err) {
 		return nil
+	} else if err != nil {
+		return fmt.Errorf("failed to read built packages file - %s", err)
 	}
 
 	err = json.Unmarshal(bytes, &builtPackages.Packages)
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to parse built packages file - %s", err)
+	}
+	return nil
 }

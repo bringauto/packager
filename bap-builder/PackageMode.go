@@ -252,9 +252,9 @@ func BuildPackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) error {
 		handleRemover()
 		return err
 	}
-	repo.CommitAllChanges()
+	err = repo.CommitAllChanges()
 	handleRemover()
-	return nil
+	return err
 }
 
 // buildAllPackages
@@ -543,6 +543,9 @@ func isPackageWithDepsInSysroot(packageName string, contextManager *bringauto_co
 		PlatformString: platformString,
 	}
 	err = bringauto_prerequisites.Initialize(&sysroot)
+	if err != nil {
+		return false, err
+	}
 
 	for _, config := range configList {
 		packName := config.Package.GetShortPackageName()
