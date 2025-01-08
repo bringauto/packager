@@ -232,6 +232,9 @@ func (context *ContextManager) GetDepsOnJsonDefPaths(packageName string, recursi
 		}
 	}
 	packsToRemove, err := context.GetPackageWithDepsJsonDefPaths(packageName)
+	if err != nil {
+		return []string{}, err
+	}
 	packsToBuild = removeStrings(packsToBuild, packsToRemove)
 	return packsToBuild, nil
 }
