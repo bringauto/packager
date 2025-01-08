@@ -150,7 +150,7 @@ func printErrors(errorPackPaths []string, expectedPackForImagePaths []string, ex
 			if i > listFileCount - 1 {
 				break
 			}
-			logger.ErrorIndent(errorPackPath)
+			logger.ErrorIndent("%s", errorPackPath)
 		}
 		return fmt.Errorf("packages in Git Lfs are not subset of packages in Json definitions")
 	}
@@ -161,7 +161,7 @@ func printErrors(errorPackPaths []string, expectedPackForImagePaths []string, ex
 			if i > listFileCount - 1 {
 				break
 			}
-			logger.WarnIndent(expectedPackForImagePath)
+			logger.WarnIndent("%s", expectedPackForImagePath)
 		}
 	}
 	if len(expectedPackNotForImagePaths) > 0 {
@@ -170,7 +170,7 @@ func printErrors(errorPackPaths []string, expectedPackForImagePaths []string, ex
 			if i > listFileCount - 1 {
 				break
 			}
-			logger.WarnIndent(expectedPackNotForImagePath)
+			logger.WarnIndent("%s", expectedPackNotForImagePath)
 		}
 	}
 	return nil
