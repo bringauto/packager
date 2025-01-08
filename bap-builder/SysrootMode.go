@@ -22,11 +22,6 @@ const (
 // BuildDockerImage
 // process Docker mode of cmd line
 func CreateSysroot(cmdLine *CreateSysrootCmdLineArgs, contextPath string) error {
-	err := os.MkdirAll(*cmdLine.Repo, 0766)
-	if err != nil {
-		return err
-	}
-
 	dirEmpty, err := isDirEmpty(*cmdLine.Sysroot)
 	if err != nil {
 		return err
