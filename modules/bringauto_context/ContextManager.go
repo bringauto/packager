@@ -72,7 +72,7 @@ func (context *ContextManager) GetAllPackagesConfigs(platformString *bringauto_p
 func (context *ContextManager) GetAllPackagesStructs(platformString *bringauto_package.PlatformString) ([]bringauto_package.Package, error) {
 	packConfigs, err := context.GetAllPackagesConfigs(platformString)
 	if err != nil {
-		return []bringauto_package.Package{}, nil
+		return []bringauto_package.Package{}, err
 	}
 
 	var packages []bringauto_package.Package
