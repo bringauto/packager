@@ -62,6 +62,7 @@ func CreateSysroot(cmdLine *CreateSysrootCmdLineArgs, contextPath string) error 
 }
 
 func unzipAllPackagesToDir(packages []bringauto_package.Package, repo *bringauto_repository.GitLFSRepository, dirPath string) error {
+	anyPackageCopied := false
 	for _, pack := range packages {
 		packPath := path.Join(repo.CreatePackagePath(pack), pack.GetFullPackageName() + bringauto_package.ZipExt)
 		_, err := os.Stat(packPath)
@@ -82,7 +83,12 @@ func unzipAllPackagesToDir(packages []bringauto_package.Package, repo *bringauto
 			if err != nil {
 				return err
 			}
+			anyPackageCopied = true
 		}
+	}
+	if !anyPackageCopied {
+		logger := bringauto_log.GetLogger()
+		logger.Warn("No package from context is in Git Lfs, so nothing copied to sysroot")
 	}
 
 	return nil
