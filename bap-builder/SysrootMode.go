@@ -24,7 +24,7 @@ const (
 func CreateSysroot(cmdLine *CreateSysrootCmdLineArgs, contextPath string) error {
 	err := os.MkdirAll(*cmdLine.Repo, 0766)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	dirEmpty, err := isDirEmpty(*cmdLine.Sysroot)
@@ -95,8 +95,10 @@ func unzipAllPackagesToDir(packages []bringauto_package.Package, repo *bringauto
 
 func isDirEmpty(path string) (bool, error) {
 	f, err := os.Open(path)
-	if err != nil { // The directory do not exists
+	if os.IsNotExist(err) {
 		return true, nil
+	} else if err != nil {
+		return false, err
 	}
 	defer f.Close()
 

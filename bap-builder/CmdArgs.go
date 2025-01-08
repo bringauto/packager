@@ -166,7 +166,6 @@ func (cmd *CmdLineArgs) InitFlags() {
 		&argparse.Options{
 			Required: true,
 			Help:     "Name of the sysroot directory which will be created",
-			Default:  false,
 		},
 	)
 	cmd.CreateSysrootArgs.Repo = cmd.createSysrootParser.String("", "git-lfs",
