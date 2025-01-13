@@ -40,7 +40,7 @@ These three attributes unique identifies the package.
 Let A, B are packages. We say that package A is equal to package B
 If and only if
 
-- `package_name` of A is equal to `paclage_name` of B,
+- `package_name` of A is equal to `package_name` of B,
 - `version_tag` of A is equal to `version_tag` of B,
 - `platform_string` of A is equal to `platform_string` of B.
 
@@ -82,6 +82,7 @@ Each package name consist from three parts
 - [CMake Project Requirements]
 - [Build Process]
 - [Package Dependencies]
+- [Use Case Scenarios]
 
 [Context Directory Structure]:     ./ContextDirectoryStructure.md
 [Package JSON Structure]:          ./PackageJSONStructure.md
@@ -90,3 +91,4 @@ Each package name consist from three parts
 [Build a Reliable Package Source]: ./ReliablePackageSource.md
 [Build Process]:                   ./BuildProcess.md
 [Package Dependencies]:            ./PackageDependencies.md
+[Git Repository]:                  ./UseCaseScenarios.md

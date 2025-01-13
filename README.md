@@ -39,7 +39,17 @@ Additional requirements for `build.sh`:
 
 ## Usage
 
-The `bap-builder` builds and stores all dependencies in the git repository (LFS enabled is recommended).
+The `packager` (`bap-builder`) has these commands:
+ - `build-image` for building Docker images
+ - `build-package` for building packages
+ - `create-sysroot` for creating sysroot from already built packages
+
+The `build-package` and `create-sysroot` commands are using Git Repository as storage for built
+packages. Given Git Repository must be created before usage.
+
+**NOTE:** Detailed use case scenarios is decribed in [UseCaseScenarios](./doc/UseCaseScenarios.md) document.
+
+### Example
 
 1. Create a git repository (optionally with LFS):
 
@@ -61,7 +71,13 @@ The `bap-builder` builds and stores all dependencies in the git repository (LFS 
     bap-builder build-package --context ./example --image-name debian12 --output-dir ./lfsrepo --all
     ```
 
-*Note: If you do not have `bap-builder` in your system path, you need to use `./bap-builder/bap-builder` instead of `bap-builder`.*
+4. Create sysroot for built packages:
+
+    ```bash
+    bap-builder create-sysroot --context ./example --image-name debian12 --git-lfs ./lfsrepo --sysroot-dir ./new_sysroot
+    ```
+
+**Note:** If you do not have `bap-builder` in your system path, you need to use `./bap-builder/bap-builder` instead of `bap-builder`.
 
 ## Documentation
 
