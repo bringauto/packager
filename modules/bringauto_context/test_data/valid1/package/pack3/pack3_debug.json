@@ -1,0 +1,32 @@
+{
+  "Env": {},
+  "DependsOn": [
+    "pack1",
+    "pack2"
+  ],
+  "Git": {
+    "URI": "https://github.com/bringauto/pack3.git",
+    "Revision": "v1.0.0"
+  },
+  "Build": {
+    "CMake": {
+      "Defines": {}
+    }
+  },
+  "Package": {
+    "Name": "pack3",
+    "VersionTag": "v1.0.0",
+    "PlatformString": {
+      "Mode": "auto"
+    },
+    "IsLibrary": true,
+    "IsDevLib": true,
+    "IsDebug": true
+  },
+  "DockerMatrix": {
+    "ImageNames": [
+      "image1",
+      "image2"
+    ]
+  }
+}
