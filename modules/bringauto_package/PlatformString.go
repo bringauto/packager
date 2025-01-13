@@ -159,6 +159,7 @@ func (pstr *PlatformString) Serialize() string {
 	return pstr.String.Machine + "-" + pstr.String.DistroName + "-" + pstr.String.DistroRelease
 }
 
+//   - If the command cannot be executed or encounters an error during SSH connection or execution
 func runShellCommandOverSSH(credentials bringauto_ssh.SSHCredentials, command string) string {
 	var err error
 	commandSsh := bringauto_ssh.Command{
