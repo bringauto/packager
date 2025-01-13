@@ -3,8 +3,8 @@ package bringauto_package
 import (
 	"bringauto/modules/bringauto_docker"
 	"bringauto/modules/bringauto_prerequisites"
-	"bringauto/modules/bringauto_ssh"
 	"bringauto/modules/bringauto_process"
+	"bringauto/modules/bringauto_ssh"
 	"fmt"
 	"regexp"
 	"strings"
@@ -165,18 +165,7 @@ func runShellCommandOverSSH(credentials bringauto_ssh.SSHCredentials, command st
 		Command: command,
 	}
 
-	// If the fake lsb_release run in the Docker container
-	// it fails in 2/3. So we try to run fake lsb_release and fake uname multiple times.
-	i := 0
-	var commandStdOut string
-	for {
-		commandStdOut, err = commandSsh.RunCommandOverSSH(credentials)
-		if err != nil && i < NumberOfTriesForFakeCommands {
-			i++
-			continue
-		}
-		break
-	}
+	commandStdOut, err := commandSsh.RunCommandOverSSH(credentials)
 	if err != nil {
 		panic(fmt.Errorf("cannot run command '%s', error: %s", command, err))
 	}
