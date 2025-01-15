@@ -144,6 +144,7 @@ func (context *ContextManager) getAllDepsJsonPaths(packageJsonPath string, visit
 		return []string{}, fmt.Errorf("couldn't load JSON config from %s path - %s", packageJsonPath, err)
 	}
 	visited[packageJsonPath] = struct{}{}
+	addedPackages := 0
 	var jsonPathListWithDeps []string
 	for _, packageDep := range config.DependsOn {
 		packageDepsJsonPaths, err := context.GetPackageJsonDefPaths(packageDep)
@@ -152,15 +153,16 @@ func (context *ContextManager) getAllDepsJsonPaths(packageJsonPath string, visit
 		}
 		var depConfig bringauto_config.Config
 		for _, packageDepJsonPath := range packageDepsJsonPaths {
-			_, packageVisited := visited[packageDepJsonPath]
-			if packageVisited {
-				continue
-			}
 			err := depConfig.LoadJSONConfig(packageDepJsonPath)
 			if err != nil {
 				return []string{}, fmt.Errorf("couldn't load JSON config from %s path - %s", packageDepJsonPath, err)
 			}
 			if depConfig.Package.IsDebug != config.Package.IsDebug {
+				continue
+			}
+			addedPackages++
+			_, packageVisited := visited[packageDepJsonPath]
+			if packageVisited {
 				continue
 			}
 			jsonPathListWithDeps = append(jsonPathListWithDeps, packageDepJsonPath)
@@ -170,6 +172,10 @@ func (context *ContextManager) getAllDepsJsonPaths(packageJsonPath string, visit
 			}
 			jsonPathListWithDeps = append(jsonPathListWithDeps, jsonPathListWithDepsTmp...)
 		}
+	}
+
+	if addedPackages < len(config.DependsOn) {
+		return []string{}, fmt.Errorf("package %s dependencies do not have package with same build type", config.Package.Name)
 	}
 
 	return jsonPathListWithDeps, nil
