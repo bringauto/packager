@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"slices"
 	"testing"
+	"os"
 )
 
 const (
@@ -40,7 +41,7 @@ func TestMain(m *testing.M) {
 		Mode: bringauto_package.ModeExplicit,
 		String: stringExplicit,
 	}
-	m.Run()
+	os.Exit(m.Run())
 }
 
 func TestGetAllPackagesJsonDefPaths(t *testing.T) {

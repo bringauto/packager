@@ -49,11 +49,12 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		panic(fmt.Sprintf("can't setup package files - %s", err))
 	}
-	m.Run()
+	code := m.Run()
 	err = deletePackageFiles()
 	if err != nil {
 		panic(fmt.Sprintf("can't delete package files - %s", err))
 	}
+	os.Exit(code)
 }
 
 func TestInitializePlatformStringNil(t *testing.T) {
@@ -99,7 +100,7 @@ func TestCreateSysrootDir(t *testing.T) {
 
 	defaultSysroot.CreateSysrootDir()
 
-	_, err = os.ReadFile(sysrootPath)
+	_, err = os.Stat(sysrootPath)
 	if os.IsNotExist(err) {
 		t.Fail()
 	}

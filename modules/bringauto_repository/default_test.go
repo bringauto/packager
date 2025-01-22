@@ -38,9 +38,16 @@ func TestMain(m *testing.M) {
 		Mode: bringauto_package.ModeExplicit,
 		String: stringExplicit,
 	}
-	setupPackages()
-	m.Run()
-	deletePackages()
+	err := setupPackages()
+	if err != nil {
+		panic(fmt.Sprintf("can't setup packages - %s", err))
+	}
+	code := m.Run()
+	err = deletePackages()
+	if err != nil {
+		panic(fmt.Sprintf("can't delete packages - %s", err))
+	}
+	os.Exit(code)
 }
 
 func TestDirDoesNotExists(t *testing.T) {
@@ -176,7 +183,10 @@ func TestCommitAllChanges(t *testing.T) {
 	if err != nil {
 		t.Errorf("CopyToRepository failed - %s", err)
 	}
-	repo.CommitAllChanges()
+	err = repo.CommitAllChanges()
+	if err != nil {
+		t.Errorf("can't commit changes - %s", err)
+	}
 
 	err = os.Chdir(RepoName)
 	if err != nil {
@@ -219,7 +229,10 @@ func TestRestoreAllChanges(t *testing.T) {
 	if err != nil {
 		t.Errorf("CopyToRepository failed - %s", err)
 	}
-	repo.RestoreAllChanges()
+	err = repo.RestoreAllChanges()
+	if err != nil {
+		t.Errorf("can't restore changes - %s", err)
+	}
 
 	err = os.Chdir(RepoName)
 	if err != nil {
@@ -232,7 +245,7 @@ func TestRestoreAllChanges(t *testing.T) {
 		t.Errorf("git status failed - %s", err)
 	}
 	if len(stdout) > 0 {
-		t.Error("git status not empty after CommitAllChanges")
+		t.Error("git status not empty after RestoreAllChanges")
 	}
 
 	cmd = exec.Command("git", "log")
