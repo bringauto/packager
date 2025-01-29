@@ -11,18 +11,21 @@ import (
 
 const (
 	TestDataDirName = "test_data"
-	Valid1DirName = "valid1"
-	Valid2DirName = "valid2"
-	Invalid1DirName = "invalid1"
-	Valid1DirPath = TestDataDirName + "/" + Valid1DirName
-	Valid2DirPath = TestDataDirName + "/" + Valid2DirName
-	Invalid1DirPath = TestDataDirName + "/" + Invalid1DirName
+	Set1DirName = "set1"
+	Set2DirName = "set2"
+	Set3DirName = "set3"
+	Set4DirName = "set4"
+	Set1DirPath = TestDataDirName + "/" + Set1DirName
+	Set2DirPath = TestDataDirName + "/" + Set2DirName
+	Set3DirPath = TestDataDirName + "/" + Set3DirName
+	Set4DirPath = TestDataDirName + "/" + Set4DirName
 
 	Pack1Name = "pack1"
 	Pack2Name = "pack2"
 	Pack3Name = "pack3"
 	Pack4Name = "pack4"
 	Pack5Name = "pack5"
+	Pack6Name = "pack6"
 	Image1Name = "image1"
 	Image2Name = "image2"
 	DockerfileName = "Dockerfile"
@@ -46,7 +49,7 @@ func TestMain(m *testing.M) {
 
 func TestGetAllPackagesJsonDefPaths(t *testing.T) {
 	context := ContextManager {
-		ContextPath: Valid1DirPath,
+		ContextPath: Set1DirPath,
 	}
 
 	jsonPaths, err := context.GetAllPackagesJsonDefPaths()
@@ -62,7 +65,7 @@ func TestGetAllPackagesJsonDefPaths(t *testing.T) {
 		t.Fatalf("some package was not returned")
 	}
 
-	commonPath := filepath.Join(Valid1DirPath, bringauto_const.PackageDirName)
+	commonPath := filepath.Join(Set1DirPath, bringauto_const.PackageDirName)
 	pack1Json1Path := filepath.Join(commonPath, Pack1Name, Pack1Name + "_release.json")
 	pack1Json2Path := filepath.Join(commonPath, Pack1Name, Pack1Name + "_debug.json")
 	pack2Json1Path := filepath.Join(commonPath, Pack2Name, Pack2Name + ".json")
@@ -78,7 +81,7 @@ func TestGetAllPackagesJsonDefPaths(t *testing.T) {
 
 func TestGetPackageJsonDefPaths(t *testing.T) {
 	context := ContextManager {
-		ContextPath: Valid1DirPath,
+		ContextPath: Set1DirPath,
 	}
 
 	pack1Paths, err := context.GetPackageJsonDefPaths(Pack1Name)
@@ -86,7 +89,7 @@ func TestGetPackageJsonDefPaths(t *testing.T) {
 		t.Fatalf("GetPackageJsonDefPaths failed - %s", err)
 	}
 
-	commonPath := filepath.Join(Valid1DirPath, bringauto_const.PackageDirName)
+	commonPath := filepath.Join(Set1DirPath, bringauto_const.PackageDirName)
 	pack1Json1Path := filepath.Join(commonPath, Pack1Name, Pack1Name + "_release.json")
 	pack1Json2Path := filepath.Join(commonPath, Pack1Name, Pack1Name + "_debug.json")
 
@@ -98,7 +101,7 @@ func TestGetPackageJsonDefPaths(t *testing.T) {
 
 func TestGetAllPackagesConfigs(t *testing.T) {
 	context := ContextManager {
-		ContextPath: Valid1DirPath,
+		ContextPath: Set1DirPath,
 	}
 
 	configs, err := context.GetAllPackagesConfigs(&defaultPlatformString)
@@ -138,7 +141,7 @@ func TestGetAllPackagesConfigs(t *testing.T) {
 
 func TestGetAllImagesDockerfilePaths(t *testing.T) {
 	context := ContextManager {
-		ContextPath: Valid1DirPath,
+		ContextPath: Set1DirPath,
 	}
 
 	paths, err := context.GetAllImagesDockerfilePaths()
@@ -153,7 +156,7 @@ func TestGetAllImagesDockerfilePaths(t *testing.T) {
 		t.Fatalf("some image was not returned")
 	}
 
-	commonPath := filepath.Join(Valid1DirPath, bringauto_const.DockerDirName)
+	commonPath := filepath.Join(Set1DirPath, bringauto_const.DockerDirName)
 	image1Path := filepath.Join(commonPath, Image1Name, DockerfileName)
 	image2Path := filepath.Join(commonPath, Image2Name, DockerfileName)
 
@@ -165,7 +168,7 @@ func TestGetAllImagesDockerfilePaths(t *testing.T) {
 
 func TestGetPackageWithDepsJsonDefPaths(t *testing.T) {
 	context := ContextManager {
-		ContextPath: Valid2DirPath,
+		ContextPath: Set2DirPath,
 	}
 
 	paths, err := context.GetPackageWithDepsJsonDefPaths(Pack3Name)
@@ -173,7 +176,7 @@ func TestGetPackageWithDepsJsonDefPaths(t *testing.T) {
 		t.Fatalf("GetPackageWithDepsJsonDefPaths failed - %s", err)
 	}
 
-	commonPath := filepath.Join(Valid2DirPath, bringauto_const.PackageDirName)
+	commonPath := filepath.Join(Set2DirPath, bringauto_const.PackageDirName)
 	pack1Path := filepath.Join(commonPath, Pack1Name, Pack1Name + ".json")
 	pack2Path := filepath.Join(commonPath, Pack2Name, Pack2Name + ".json")
 	pack3Path := filepath.Join(commonPath, Pack3Name, Pack3Name + ".json")
@@ -184,13 +187,13 @@ func TestGetPackageWithDepsJsonDefPaths(t *testing.T) {
 		!slices.Contains(paths, pack2Path) ||
 		!slices.Contains(paths, pack3Path) ||
 	 	!slices.Contains(paths, pack4Path)) {
-		t.Fatalf("wrong returned paths")
+		t.Fatalf("wrong returned paths - %s", paths)
 	}
 }
 
 func TestGetPackageWithDepsJsonDefPathsNoDepWithBuildType(t *testing.T) {
 	context := ContextManager {
-		ContextPath: Invalid1DirPath,
+		ContextPath: Set3DirPath,
 	}
 
 	_, err := context.GetPackageWithDepsJsonDefPaths(Pack2Name)
@@ -199,9 +202,32 @@ func TestGetPackageWithDepsJsonDefPathsNoDepWithBuildType(t *testing.T) {
 	}
 }
 
+func TestGetPackageWithDepsJsonDefPathsCircularDependency(t *testing.T) {
+	context := ContextManager {
+		ContextPath: Set4DirPath,
+	}
+
+	paths, err := context.GetPackageWithDepsJsonDefPaths(Pack1Name)
+	if err != nil {
+		t.Fatalf("GetPackageWithDepsJsonDefPaths failed - %s", err)
+	}
+
+	commonPath := filepath.Join(Set4DirPath, bringauto_const.PackageDirName)
+	pack1Path := filepath.Join(commonPath, Pack1Name, Pack1Name + ".json")
+	pack2Path := filepath.Join(commonPath, Pack2Name, Pack2Name + ".json")
+	pack3Path := filepath.Join(commonPath, Pack3Name, Pack3Name + ".json")
+
+	if (len(paths) != 3 ||
+		!slices.Contains(paths, pack1Path) ||
+		!slices.Contains(paths, pack2Path) ||
+		!slices.Contains(paths, pack3Path)) {
+		t.Fatalf("wrong returned paths - %s", paths)
+	}
+}
+
 func TestGetDepsOnJsonDefPaths(t *testing.T) {
 	context := ContextManager {
-		ContextPath: Valid2DirPath,
+		ContextPath: Set2DirPath,
 	}
 
 	paths, err := context.GetDepsOnJsonDefPaths(Pack1Name, false)
@@ -209,18 +235,22 @@ func TestGetDepsOnJsonDefPaths(t *testing.T) {
 		t.Fatalf("GetDepsOnJsonDefPaths failed - %s", err)
 	}
 
-	commonPath := filepath.Join(Valid2DirPath, bringauto_const.PackageDirName)
+	commonPath := filepath.Join(Set2DirPath, bringauto_const.PackageDirName)
 	pack4Path := filepath.Join(commonPath, Pack4Name, Pack4Name + ".json")
+	pack5Path := filepath.Join(commonPath, Pack5Name, Pack5Name + ".json")
+	pack6Path := filepath.Join(commonPath, Pack6Name, Pack6Name + ".json")
 
-	if (len(paths) != 1 ||
-		!slices.Contains(paths, pack4Path)) {
-		t.Fatalf("wrong returned paths")
+	if (len(paths) != 3 ||
+		!slices.Contains(paths, pack4Path) ||
+		!slices.Contains(paths, pack5Path) ||
+		!slices.Contains(paths, pack6Path)) {
+		t.Fatalf("wrong returned paths - %s", paths)
 	}
 }
 
 func TestGetDepsOnJsonDefPathsRecursively(t *testing.T) {
 	context := ContextManager {
-		ContextPath: Valid2DirPath,
+		ContextPath: Set2DirPath,
 	}
 
 	paths, err := context.GetDepsOnJsonDefPaths(Pack1Name, true)
@@ -228,15 +258,35 @@ func TestGetDepsOnJsonDefPathsRecursively(t *testing.T) {
 		t.Fatalf("GetDepsOnJsonDefPaths failed - %s", err)
 	}
 
-	commonPath := filepath.Join(Valid2DirPath, bringauto_const.PackageDirName)
+	commonPath := filepath.Join(Set2DirPath, bringauto_const.PackageDirName)
 	pack3Path := filepath.Join(commonPath, Pack3Name, Pack3Name + ".json")
 	pack4Path := filepath.Join(commonPath, Pack4Name, Pack4Name + ".json")
 	pack5Path := filepath.Join(commonPath, Pack5Name, Pack5Name + ".json")
+	pack6Path := filepath.Join(commonPath, Pack6Name, Pack6Name + ".json")
 
-	if (len(paths) != 3 ||
+	if (len(paths) != 4 ||
 		!slices.Contains(paths, pack3Path) ||
 		!slices.Contains(paths, pack4Path) ||
-		!slices.Contains(paths, pack5Path)) {
-		t.Fatalf("wrong returned paths")
+		!slices.Contains(paths, pack5Path) ||
+		!slices.Contains(paths, pack6Path)) {
+		t.Fatalf("wrong returned paths - %s", paths)
+	}
+}
+
+func TestGetDepsOnJsonDefPathsRecursivelyCircularDependency(t *testing.T) {
+	context := ContextManager {
+		ContextPath: Set4DirPath,
+	}
+
+	paths, err := context.GetDepsOnJsonDefPaths(Pack1Name, true)
+	if err != nil {
+		t.Fatalf("GetDepsOnJsonDefPaths failed - %s", err)
+	}
+
+	commonPath := filepath.Join(Set4DirPath, bringauto_const.PackageDirName)
+	pack4Path := filepath.Join(commonPath, Pack4Name, Pack4Name + ".json")
+
+	if (len(paths) != 1 || !slices.Contains(paths, pack4Path)) {
+		t.Fatalf("wrong returned paths - %s", paths)
 	}
 }
