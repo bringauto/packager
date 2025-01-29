@@ -370,6 +370,10 @@ func prepareConfigsBuildDepsOrBuildDepsOn(
 		if err != nil {
 			return []*bringauto_config.Config{}, err
 		}
+		if len(paths) == 0 {
+			logger := bringauto_log.GetLogger()
+			logger.Warn("No package depends on %s", packageName)
+		}
 		packageJsonPaths = append(packageJsonPaths, paths...)
 	}
 	return prepareConfigs(packageJsonPaths)
@@ -399,7 +403,9 @@ func buildSinglePackage(
 	if err != nil {
 		return err
 	}
-
+	if len(configList) == 0 {
+		return fmt.Errorf("nothing to build")
+	}
 	for _, config := range configList {
 		buildConfigs := config.GetBuildStructure(*cmdLine.DockerImageName, platformString)
 		err = buildAndCopyPackage(cmdLine, &buildConfigs, platformString, repo)
