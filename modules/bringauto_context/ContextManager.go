@@ -181,6 +181,46 @@ func (context *ContextManager) getAllDepsJsonPaths(packageJsonPath string, visit
 	return jsonPathListWithDeps, nil
 }
 
+// getAllDepsJsonPaths
+// returns all json defintions paths recursively for given package specified by its json definition path
+func (context *ContextManager) getAllDepsOnJsonPaths(config bringauto_config.Config, visited map[string]struct{}, recursively bool) ([]string, error) {
+	packConfigs, err := context.GetAllPackagesConfigs(nil)
+	if err != nil {
+		return []string{}, err
+	}
+	visited[config.Package.Name] = struct{}{}
+	var packsToBuild []string
+	for _, packConfig := range packConfigs {
+		if (packConfig.Package.Name == config.Package.Name ||
+	 	  	packConfig.Package.IsDebug != config.Package.IsDebug){
+			continue
+		}
+		for _, dep := range packConfig.DependsOn {
+			if dep == config.Package.Name {
+				_, packageVisited := visited[packConfig.Package.Name]
+				if packageVisited {
+					break
+				}
+				packWithDeps, err := context.GetPackageWithDepsJsonDefPaths(packConfig.Package.Name)
+				if err != nil {
+					return []string{}, err
+				}
+				packsToBuild = append(packsToBuild, packWithDeps...)
+				if recursively {
+					packsDepsOnRecursive, err := context.getAllDepsOnJsonPaths(*packConfig, visited, true)
+					if err != nil {
+						return []string{}, err
+					}
+					packsToBuild = append(packsToBuild, packsDepsOnRecursive...)
+				}
+				break
+			}
+		}
+	}
+
+	return packsToBuild, nil
+}
+
 // GetPackageWithDepsJsonDefPaths
 // returns all json definitions paths for given package and all its dependencies json definitions paths recursively
 func (context *ContextManager) GetPackageWithDepsJsonDefPaths(packageName string) ([]string, error) {
@@ -207,42 +247,31 @@ func (context *ContextManager) GetPackageWithDepsJsonDefPaths(packageName string
 // Returns all Json definitions paths which depends on given package and all its dependencies Json
 // definitions paths recursively without package (packageName) itself and its dependencies.
 func (context *ContextManager) GetDepsOnJsonDefPaths(packageName string, recursively bool) ([]string, error) {
-	packsToBuild, err := context.GetPackageJsonDefPaths(packageName)
+	packageDefs, err := context.GetPackageJsonDefPaths(packageName)
 	if err != nil {
 		return []string{}, err
 	}
-	packConfigs, err := context.GetAllPackagesConfigs(nil)
-	if err != nil {
-		return []string{}, err
-	}
-	for _, config := range packConfigs {
-		if config.Package.Name == packageName {
-			continue
+	var packsToBuild []string
+	visitedPackages := make(map[string]struct{})
+	for _, packageDef := range packageDefs {
+		var config bringauto_config.Config
+		err := config.LoadJSONConfig(packageDef)
+		if err != nil {
+			return []string{}, fmt.Errorf("couldn't load JSON config from %s path - %s", packageDef, err)
 		}
-		for _, dep := range config.DependsOn {
-			if dep == packageName {
-				packWithDeps, err := context.GetPackageWithDepsJsonDefPaths(config.Package.Name)
-				if err != nil {
-					return []string{}, err
-				}
-				packsToBuild = append(packsToBuild, packWithDeps...)
-				if recursively {
-					packsDepsOnRecursive, err := context.GetDepsOnJsonDefPaths(config.Package.Name, false)
-					if err != nil {
-						return []string{}, err
-					}
-					packsToBuild = append(packsToBuild, packsDepsOnRecursive...)
-				}
-				break
-			}
+		packageDepsTmp, err := context.getAllDepsOnJsonPaths(config, visitedPackages, recursively)
+		if err != nil {
+			return []string{}, err
 		}
+		packsToBuild = append(packsToBuild, packageDepsTmp...)
 	}
+
 	packsToRemove, err := context.GetPackageWithDepsJsonDefPaths(packageName)
 	if err != nil {
 		return []string{}, err
 	}
 	packsToBuild = removeStrings(packsToBuild, packsToRemove)
-	return packsToBuild, nil
+	return removeDuplicates(packsToBuild), nil
 }
 
 // removeStrings
@@ -267,6 +296,20 @@ func removeString(strList1 []string, str string) []string {
 	return strList1[:i]
 }
 
+// removeDuplicates
+// Removes duplicate entries in strList
+func removeDuplicates(strList []string) []string {
+	keys := make(map[string]struct{})
+    list := []string{}
+    for _, item := range strList {
+    	_, value := keys[item]
+        if !value {
+            keys[item] = struct{}{}
+            list = append(list, item)
+        }
+    }
+    return list
+}
 
 // GetImageDockerfilePath
 // returns Dockerfile path for the given Image locate in the given context
