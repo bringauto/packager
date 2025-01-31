@@ -1,19 +1,47 @@
 
-# Use Case List
+# Use Case Scenarios
 
-List of use-cases and all usage-related options needed to understand intent and full-feature set
-of Packager
+List of use cases and all usage related options needed to understand intent and full feature set
+of Packager.
+
+## Build Image
+
+Build image based on Dockerfile in Context. It is used before `build-package` command.
+
+### Build Single Image
+
+Build single image specified by name.
+
+**Command**
+
+```bash
+packager build-image
+  --context ./example \
+  --name debian
+```
+
+### Build All Images
+
+Build all images in Context.
+
+**Command**
+
+```bash
+packager build-image
+  --context ./example \
+  --all
+```
 
 ## Build Package
 
 ### Dependencies
 
-Each use-case is described by a simple mermaid diagram which describes dependency graph of noted
-packages.
+Each use case is described by a simple mermaid diagram which describes dependency graph of noted
+Packages.
 
-Green color indicates which packages will be built.
+Green color indicates which Packages will be built.
 
-Arrows indicate dependency (build deps) between packages. When package A depends on package B the
+Arrows indicate dependency (build deps) between Packages. When Package A depends on Package B the
 following is written.
 
 ```mermaid
@@ -24,9 +52,9 @@ graph TD
 
 ### Build Package - without Dependencies
 
-Build single package (F) without any dependencies.
+Build single Package (F) without any dependencies.
 
-It expects all package dependencies are already build and installed into build sysroot directory.
+It expects all Package dependencies are already build and installed into build sysroot directory.
 
 ```mermaid
 graph TD
@@ -50,7 +78,8 @@ graph TD
 **Command**
 
 ```bash
-packager --context ./example \
+packager build-package
+  --context ./example \
   --image-name debian \
   --name F \
   --output-dir ./git-lfs-repo
@@ -58,7 +87,7 @@ packager --context ./example \
 
 ### Build Package - with Dependencies
 
-Build all dependencies (J, K, L) of the package (F) before the package (F) is build.
+Build all dependencies (J, K, L) of the Package (F) before the Package (F) is build.
 
 ```mermaid
 graph TD
@@ -88,7 +117,8 @@ graph TD
 **Command**
 
 ```bash
-packager --context ./example \
+packager build-package
+  --context ./example \
   --image-name debian \
   --name F \
   --build-deps \
@@ -97,7 +127,7 @@ packager --context ./example \
 
 ### Build Package - with Depends on Packages
 
-Build packages (C) which depends on package (F) with its dependencies (G, K) without package (F)
+Build Packages (C) which depends on Package (F) with its dependencies (G, K) without Package (F)
 and its dependencies (J, L, M).
 
 ```mermaid
@@ -126,7 +156,8 @@ graph TD
 **Command**
 
 ```bash
-packager --context ./example \
+packager build-package
+  --context ./example \
   --image-name debian \
   --name F \
   --build-deps-on \
@@ -136,8 +167,8 @@ packager --context ./example \
 
 ### Build Package - with Depends on Packages Recursive
 
-Build packages (C, A) which depends on package (F) recursively with its dependencies
-(G, K, B, D, E, H, I) without package (F) and its dependencies (J, L, M).
+Build Packages (C, A) which depends on Package (F) recursively with its dependencies
+(G, K, B, D, E, H, I) without Package (F) and its dependencies (J, L, M).
 
 ```mermaid
 graph TD
@@ -171,7 +202,8 @@ graph TD
 **Command**
 
 ```bash
-packager --context ./example \
+packager build-package
+  --context ./example \
   --image-name debian \
   --name F \
   --build-deps-on-recursive \
@@ -180,17 +212,17 @@ packager --context ./example \
 
 ## Create Sysroot
 
-When all packages are build and stored as part of `--output-dir` directory the sysroot can be
+When all Packages are build and stored as part of `--output-dir` directory the sysroot can be
 created.
 
-The packager takes all archives for a given Image name and Architecture
-and unzip them into the specified directory.
+The packager takes all archives for a given Image name and Architecture and unzip them into the
+specified directory.
 
 TODO: Does it preserve UNIX permissions?
 
 **Command**
 
-Creates sysroot from packages in Git Lfs for `debian` image in `new_sysroot/` directory.
+Creates sysroot from Packages in Package Repository for `debian` image in `new_sysroot/` directory.
 
 ```bash
 packager create-sysroot

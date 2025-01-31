@@ -41,11 +41,11 @@ Additional requirements for `build.sh`:
 
 The `packager` (`bap-builder`) has these commands:
  - `build-image` for building Docker images
- - `build-package` for building packages
- - `create-sysroot` for creating sysroot from already built packages
+ - `build-package` for building Packages
+ - `create-sysroot` for creating sysroot from already built Packages
 
 The `build-package` and `create-sysroot` commands are using Git Repository as storage for built
-packages. Given Git Repository must be created before usage.
+Packages. Given Git Repository must be created before usage.
 
 **NOTE:** Detailed use case scenarios is decribed in [UseCaseScenarios](./doc/UseCaseScenarios.md) document.
 
@@ -59,19 +59,19 @@ packages. Given Git Repository must be created before usage.
     cd ../
     ```
 
-2. Build all Docker images needed for the build:
+2. Build Docker image needed for the build:
 
     ```bash
     bap-builder build-image --context ./example --name debian12
     ```
 
-3. Build all packages for the given distro:
+3. Build all Packages for the given distro:
 
     ```bash
     bap-builder build-package --context ./example --image-name debian12 --output-dir ./lfsrepo --all
     ```
 
-4. Create sysroot for built packages:
+4. Create sysroot for built Packages:
 
     ```bash
     bap-builder create-sysroot --context ./example --image-name debian12 --git-lfs ./lfsrepo --sysroot-dir ./new_sysroot
