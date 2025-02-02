@@ -53,9 +53,8 @@ Package without dependencies:
 
 - if the Package has no dependencies build Package as is.
 
-**NOTE**: currently there is no command for "Create sysroot from already built Packages".\
-If you want to build only your Package you need to build all dependencies one by one or
-build complete Package repository from scratch.
+**NOTE**: currently there is a command for "Create sysroot from already built Packages" -
+`create-sysroot`.
 
 ## Update Package
 

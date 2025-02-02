@@ -218,8 +218,6 @@ created.
 The packager takes all archives for a given Image name and Architecture and unzip them into the
 specified directory.
 
-TODO: Does it preserve UNIX permissions?
-
 **Command**
 
 Creates sysroot from Packages in Package Repository for `debian` image in `new_sysroot/` directory.
