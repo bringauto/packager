@@ -20,7 +20,7 @@
     "Name": "fleet-protocol-interface",
     "VersionTag": "v2.0.0",
     "PlatformString": {
-      "Mode": "any_machine"
+      "Mode": "auto"
     },
     "IsLibrary": true,
     "IsDevLib": true,

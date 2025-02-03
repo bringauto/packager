@@ -21,8 +21,6 @@ const (
 	// ModeExplicit denotes that the plafrom string is filled-up by user.
 	// Function determinePlatformString should not be used with ModeExplicit.
 	ModeExplicit PlatformStringMode = "explicit"
-	// ModeAnyMachine is a same as ModeAuto except Machine that is se to "any"
-	ModeAnyMachine = "any_machine"
 	// ModeAuto compute platform string automatically by lsb_release and uname
 	ModeAuto = "auto"
 )
@@ -36,7 +34,7 @@ type PlatformString struct {
 }
 
 // PlatformStringExplicit represent explicit platform string
-// constructed by ModeAuto, ModeAnyMachine or ModeExplicit
+// constructed by ModeAuto or ModeExplicit
 type PlatformStringExplicit struct {
 	DistroName    string
 	DistroRelease string
@@ -83,7 +81,6 @@ func (pstr *PlatformString) CheckPrerequisites(args *bringauto_prerequisites.Arg
 	}
 	switch pstr.Mode {
 	case ModeAuto:
-	case ModeAnyMachine:
 		return nil
 	case ModeExplicit:
 		break
@@ -108,8 +105,8 @@ func (pstr *PlatformString) CheckPrerequisites(args *bringauto_prerequisites.Arg
 	return nil
 }
 
-// determinePlatformString tries to compute
-// platform string for ModeAuto and ModeAnyMachine.
+// determinePlatformString
+// Computes platform string for ModeAuto.
 // If the PlatformString is in ModeExplicit the panic raise.
 func (pstr *PlatformString) determinePlatformString(credentials bringauto_ssh.SSHCredentials, docker *bringauto_docker.Docker) error {
 	if pstr.Mode == ModeExplicit {
@@ -137,8 +134,6 @@ func (pstr *PlatformString) determinePlatformString(credentials bringauto_ssh.SS
 	switch pstr.Mode {
 	case ModeAuto:
 		pstr.String.Machine = getSystemArchitecture(credentials)
-	case ModeAnyMachine:
-		pstr.String.Machine = "any"
 	default:
 		panic(fmt.Errorf("unsupported PlatformStringMode"))
 	}

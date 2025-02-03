@@ -66,15 +66,11 @@ Examples:
 Platform String mode determines how the PlatformString is constructed.
 
 ``` plaintext
-Mode = "auto" | "any_machine" | "explicit"
+Mode = "auto" | "explicit"
 ```
 
 **auto** - Constructs the PlatformString for a target machine automatically.
 Example for Debian 11 (x86_64): "x86-64-debian-11"
-
-**any_machine** - Constructs the platform string specific only to the Distro name and distro
-release, with the machine part of the PlatformString set to "any".
-Example for Debian 11 (x86_64): "any-debian-11"
 
 **explicit** - User must fill in all three parts manually:
 
