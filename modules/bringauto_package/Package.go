@@ -39,8 +39,8 @@ func (packg *Package) FillDefault(*bringauto_prerequisites.Args) error {
 		Name:       defaultPackageNameConst,
 		VersionTag: defaultVersionTagConst,
 		IsDebug:    false,
-		IsDevLib:   true,
-		IsLibrary:  true,
+		IsDevLib:   false,
+		IsLibrary:  false,
 		PlatformString: PlatformString{
 			Mode: ModeAuto,
 		},
