@@ -19,8 +19,8 @@ const (
 	DebugPath = "debug"
 )
 
-// BuildDockerImage
-// process Docker mode of cmd line
+// CreateSysroot
+// Creates new sysroot based on Context and Packages in Git Lfs.
 func CreateSysroot(cmdLine *CreateSysrootCmdLineArgs, contextPath string) error {
 	dirEmpty, err := isDirEmpty(*cmdLine.Sysroot)
 	if err != nil {
@@ -64,6 +64,8 @@ func CreateSysroot(cmdLine *CreateSysrootCmdLineArgs, contextPath string) error 
 	return nil
 }
 
+// unzipAllPackagesToDir
+// Unzips all given Packages in repo to specified dirPath.
 func unzipAllPackagesToDir(packages []bringauto_package.Package, repo *bringauto_repository.GitLFSRepository, dirPath string) error {
 	anyPackageCopied := false
 	for _, pack := range packages {
@@ -97,6 +99,8 @@ func unzipAllPackagesToDir(packages []bringauto_package.Package, repo *bringauto
 	return nil
 }
 
+// isDirEmpty
+// Checks if the given path is empty.
 func isDirEmpty(path string) (bool, error) {
 	f, err := os.Open(path)
 	if os.IsNotExist(err) {

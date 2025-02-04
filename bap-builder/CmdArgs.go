@@ -183,6 +183,8 @@ func (cmd *CmdLineArgs) InitFlags() {
 	)
 }
 
+// checkForEmpty
+// Checks the given argument. If it is empty, returns error, else nil.
 func checkForEmpty(args []string) error {
 	if len(args) == 1 {
 		if len(args[0]) == 0 {

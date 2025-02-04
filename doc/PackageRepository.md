@@ -1,7 +1,7 @@
 # Package Repository
 
-The Package Repository is used for storage of built Packages. It is a git repository at the same time.
-The git tool is used for managing consistent storage of Packages.
+The Package Repository (or Git Lfs) is used for storage of built Packages. It is a git repository
+at the same time. The git tool is used for managing consistent storage of Packages.
 
 ## Behaviour
 

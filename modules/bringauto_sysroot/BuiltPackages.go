@@ -11,12 +11,14 @@ const (
 	jsonFileName = "built_packages.json"
 )
 
-// Contains built packages in sysroot and have functions for Json encoding and decoding of built
-// packages.
+// Contains built Packages in sysroot and has functions for Json encoding and decoding of built
+// Packages.
 type BuiltPackages struct {
 	Packages []string
 }
 
+// AddToBuiltPackages
+// Adds packageName to built Packages.
 func (builtPackages *BuiltPackages) AddToBuiltPackages(packageName string) error {
 	builtPackages.Packages = append(builtPackages.Packages, packageName)
 	bytes, err := json.Marshal(builtPackages.Packages)
@@ -27,6 +29,8 @@ func (builtPackages *BuiltPackages) AddToBuiltPackages(packageName string) error
 	return err
 }
 
+// UpdateBuiltPackages
+// Updates builtPackages struct based on built_packages.json.
 func (builtPackages *BuiltPackages) UpdateBuiltPackages() error {
 	bytes, err := os.ReadFile(path.Join(sysrootDirectoryName, jsonFileName))
 	if os.IsNotExist(err) {

@@ -73,7 +73,7 @@ func (sysroot *Sysroot) CopyToSysroot(source string, packageName string) error {
 }
 
 // IsPackageInSysroot
-// Returns true if all expectedPackages are built in sysroot, else false.
+// Returns true if packageName is built in sysroot, else false.
 func (sysroot *Sysroot) IsPackageInSysroot(packageName string) bool {
 	if slices.Contains(sysroot.builtPackages.Packages, packageName) {
 		return true
@@ -119,7 +119,8 @@ func (sysroot *Sysroot) printOverwriteFilesError(problematicFiles []string, n in
 	}
 }
 
-// GetSysrootPath returns absolute path ot the sysroot
+// GetSysrootPath
+// Returns absolute path to the sysroot.
 func (sysroot *Sysroot) GetSysrootPath() string {
 	workingDir, err := os.Getwd()
 	if err != nil {
@@ -136,8 +137,8 @@ func (sysroot *Sysroot) GetSysrootPath() string {
 	return sysrootDir
 }
 
-// CreateSysrootDir creates a Sysroot dir.
-// If not succeed the panic occurred
+// CreateSysrootDir
+// Creates a Sysroot dir. If not succeed the panic occurrs.
 func (sysroot *Sysroot) CreateSysrootDir() {
 	var err error
 	sysPath := sysroot.GetSysrootPath()
@@ -150,7 +151,7 @@ func (sysroot *Sysroot) CreateSysrootDir() {
 }
 
 // IsSysrootDirectoryEmpty
-// Returns true if specified dir do not exists or exists but is empty, otherwise returns false
+// Returns true if specified dir do not exists or exists but is empty, otherwise returns false.
 func (sysroot *Sysroot) IsSysrootDirectoryEmpty() bool {
 	f, err := os.Open(sysroot.GetSysrootPath())
 	if err != nil { // The directory do not exists
@@ -174,7 +175,7 @@ func onSymlink(src string) copy.SymlinkAction {
 }
 
 // getExistingFilesInDir
-// Returns array of string which contains all file paths existing in dirPath directory. The
+// Returns slice of strings which contain all file paths existing in dirPath directory. The
 // returned paths are without dirPath prefix.
 func getExistingFilesInDir(dirPath string) []string {
 	var existingFiles []string

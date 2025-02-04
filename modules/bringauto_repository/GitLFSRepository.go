@@ -50,6 +50,8 @@ func (lfs *GitLFSRepository) CheckPrerequisites(*bringauto_prerequisites.Args) e
 	return nil
 }
 
+// CommitAllChanges
+// Adds all changes to staged and then makes a commit.
 func (lfs *GitLFSRepository) CommitAllChanges() error {
 	err := lfs.gitAddAll()
 	if err != nil {
@@ -81,6 +83,8 @@ func (lfs *GitLFSRepository) RestoreAllChanges() error {
 	return nil
 }
 
+// dividePackagesForCurrentImage
+// Divides allConfigs to packages for imageName and not for imageName and returns 2 slices.
 func dividePackagesForCurrentImage(allConfigs []*bringauto_config.Config, imageName string) ([]bringauto_package.Package, []bringauto_package.Package) {
 	var packagesForImage []bringauto_package.Package
 	var packagesNotForImage []bringauto_package.Package
@@ -96,6 +100,10 @@ func dividePackagesForCurrentImage(allConfigs []*bringauto_config.Config, imageN
 	return packagesForImage, packagesNotForImage
 }
 
+// CheckGitLfsConsistency
+// Checks Git Lfs consistency based on Context. Prints and returns errors if in Git Lfs is any
+// Package which is not in Context. Prints warnings if the Git Lfs is missing any Packages present
+// in Context and prints warnings if any Package won't build for current imageName.
 func (lfs *GitLFSRepository) CheckGitLfsConsistency(contextManager *bringauto_context.ContextManager, platformString *bringauto_package.PlatformString, imageName string) error {
 	packConfigs, err := contextManager.GetAllPackagesConfigs(platformString)
 	if err != nil {
@@ -146,6 +154,8 @@ func (lfs *GitLFSRepository) CheckGitLfsConsistency(contextManager *bringauto_co
 	return nil
 }
 
+// printErrors
+// Prints errors and warnings for Git Lfs consistency check.
 func printErrors(errorPackPaths []string, expectedPackForImagePaths []string, expectedPackNotForImagePaths []string) error {
 	logger := bringauto_log.GetLogger()
 	if len(errorPackPaths) > 0 {
@@ -180,6 +190,8 @@ func printErrors(errorPackPaths []string, expectedPackForImagePaths []string, ex
 	return nil
 }
 
+// CreatePackagePath
+// Returns path for specific pack inside Git Lfs.
 func (lfs *GitLFSRepository) CreatePackagePath(pack bringauto_package.Package) string {
 	repositoryPath := path.Join(
 		pack.PlatformString.String.DistroName,
@@ -190,9 +202,10 @@ func (lfs *GitLFSRepository) CreatePackagePath(pack bringauto_package.Package) s
 	return path.Join(lfs.GitRepoPath, repositoryPath)
 }
 
-// CopyToRepository copy package to the Git LFS repository.
-// Each package is stored in different directory structure represented by
-//	PlatformString.DistroName / PlatformString.DistroRelease / PlatformString.Machine / <package>
+// CopyToRepository
+// Copies the pack to the Git LFS repository. Each package is stored in different directory
+// structure represented by
+// PlatformString.DistroName / PlatformString.DistroRelease / PlatformString.Machine / <package>
 func (lfs *GitLFSRepository) CopyToRepository(pack bringauto_package.Package, sourceDir string) error {
 	archiveDirectory := lfs.CreatePackagePath(pack)
 
@@ -210,6 +223,8 @@ func (lfs *GitLFSRepository) CopyToRepository(pack bringauto_package.Package, so
 	return nil
 }
 
+// gitIsStatusEmpty
+// Returns true, if the git status in Git Lfs is empty, else returns false.
 func (lfs *GitLFSRepository) gitIsStatusEmpty() bool {
 	var ok, buffer = lfs.prepareAndRun([]string{
 		"status",
@@ -225,6 +240,8 @@ func (lfs *GitLFSRepository) gitIsStatusEmpty() bool {
 	return true
 }
 
+// gitAddAll
+// Adds all to staged in Git Lfs.
 func (lfs *GitLFSRepository) gitAddAll() error {
 	var ok, _ = lfs.prepareAndRun([]string{
 		"add",
@@ -237,6 +254,8 @@ func (lfs *GitLFSRepository) gitAddAll() error {
 	return nil
 }
 
+// gitCommit
+// Commits all in Git Lfs.
 func (lfs *GitLFSRepository) gitCommit() error {
 	var ok, _ = lfs.prepareAndRun([]string{
 		"commit",
@@ -250,6 +269,8 @@ func (lfs *GitLFSRepository) gitCommit() error {
 	return nil
 }
 
+// gitRestoreAll
+// Restores all changes in Git Lfs.
 func (lfs *GitLFSRepository) gitRestoreAll() error {
 	var ok, _ = lfs.prepareAndRun([]string{
 		"restore",
@@ -262,6 +283,8 @@ func (lfs *GitLFSRepository) gitRestoreAll() error {
 	return nil
 }
 
+// gitCleanAll
+// Cleans all changes in Git Lfs.
 func (lfs *GitLFSRepository) gitCleanAll() error {
 	var ok, _ = lfs.prepareAndRun([]string{
 		"clean",
@@ -275,6 +298,8 @@ func (lfs *GitLFSRepository) gitCleanAll() error {
 	return nil
 }
 
+// isRepoEmpty
+// Returns true, if the Git Lfs is empty (no commits), else returns false.
 func (lfs *GitLFSRepository) isRepoEmpty() bool {
 	var ok, _ = lfs.prepareAndRun([]string{
 		"log",

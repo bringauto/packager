@@ -200,6 +200,9 @@ func checkContextDirConsistency(contextPath string) error {
 	return err
 }
 
+// performPreBuildChecks
+// Performs Context directory, Git lfs and sysroot consistency checks. This should be called before
+// builds.
 func performPreBuildChecks(contextPath string, repo *bringauto_repository.GitLFSRepository, platformString *bringauto_package.PlatformString, imageName string) error {
 	logger := bringauto_log.GetLogger()
 	logger.Info("Checking context directory (%s) consistency", contextPath)

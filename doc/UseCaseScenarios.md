@@ -54,7 +54,7 @@ graph TD
 
 Build single Package (F) without any dependencies.
 
-It expects all Package dependencies are already build and installed into build sysroot directory.
+It expects all Package dependencies are already built and installed into build sysroot directory.
 
 ```mermaid
 graph TD
@@ -87,7 +87,7 @@ packager build-package
 
 ### Build Package - with Dependencies
 
-Build all dependencies (J, K, L) of the Package (F) before the Package (F) is build.
+Build all dependencies (J, K, L) of the Package (F) before the Package (F) is built.
 
 ```mermaid
 graph TD

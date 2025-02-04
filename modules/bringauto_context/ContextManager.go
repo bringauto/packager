@@ -14,13 +14,13 @@ import (
 )
 
 // ContextManager
-// manage all operations on the given context
+// Manages all operations on the given Context.
 type ContextManager struct {
 	ContextPath string
 }
 
 // GetAllPackagesJsonDefPaths
-// return all package JSON definitions in the context directory
+// Returns all Package Configs in the context directory.
 func (context *ContextManager) GetAllPackagesJsonDefPaths() (map[string][]string, error) {
 	var err error
 	err = context.validateContextPath()
@@ -40,8 +40,8 @@ func (context *ContextManager) GetAllPackagesJsonDefPaths() (map[string][]string
 }
 
 // GetAllPackagesConfigs
-// Returns Config structs of all packages JSON definitions. If platformString is not nil, it is
-// added to all packages.
+// Returns Config structs of all Package Configs. If platformString is not nil, it is added to all
+// Packages.
 func (context *ContextManager) GetAllPackagesConfigs(platformString *bringauto_package.PlatformString) ([]*bringauto_config.Config, error) {
 	var packConfigs []*bringauto_config.Config
 	packageJsonPathMap, err := context.GetAllPackagesJsonDefPaths()
@@ -67,8 +67,8 @@ func (context *ContextManager) GetAllPackagesConfigs(platformString *bringauto_p
 }
 
 // GetAllPackagesConfigs
-// Returns Package structs of all packages JSON definitions. If platformString is not nil, it is added to
-// all packages.
+// Returns Package structs of all Package Configs. If platformString is not nil, it is added to all
+// Packages.
 func (context *ContextManager) GetAllPackagesStructs(platformString *bringauto_package.PlatformString) ([]bringauto_package.Package, error) {
 	packConfigs, err := context.GetAllPackagesConfigs(platformString)
 	if err != nil {
@@ -84,7 +84,7 @@ func (context *ContextManager) GetAllPackagesStructs(platformString *bringauto_p
 }
 
 // GetAllImagesDockerfilePaths
-// returns all dockerfile located in the context directory
+// Returns all Dockerfile paths located in the Context directory.
 func (context *ContextManager) GetAllImagesDockerfilePaths() (map[string][]string, error) {
 	var err error
 	err = context.validateContextPath()
@@ -105,7 +105,7 @@ func (context *ContextManager) GetAllImagesDockerfilePaths() (map[string][]strin
 }
 
 // GetPackageJsonDefPaths
-// returns all json definitions for given package
+// Returns all Config for given Package.
 func (context *ContextManager) GetPackageJsonDefPaths(packageName string) ([]string, error) {
 	var err error
 	err = context.validateContextPath()
@@ -136,7 +136,9 @@ func (context *ContextManager) GetPackageJsonDefPaths(packageName string) ([]str
 }
 
 // getAllDepsJsonPaths
-// returns all json defintions paths recursively for given package specified by its json definition path
+// Returns all Config paths for given Package (specified with packageJsonPath) and all Configs for
+// its dependencies recursively. For tracking of circular dependencies, the visited map must be
+// initialized before function call.
 func (context *ContextManager) getAllDepsJsonPaths(packageJsonPath string, visited map[string]struct{}) ([]string, error) {
 	var config bringauto_config.Config
 	err := config.LoadJSONConfig(packageJsonPath)
@@ -181,8 +183,10 @@ func (context *ContextManager) getAllDepsJsonPaths(packageJsonPath string, visit
 	return jsonPathListWithDeps, nil
 }
 
-// getAllDepsJsonPaths
-// returns all json defintions paths recursively for given package specified by its json definition path
+// getAllDepsOnJsonPaths
+// Returns all Config paths of Packages which depends on Package specified with config. If
+// recursively is set to true, it is done recursively. For tracking of circular dependencies,
+// the visited map must be initialized before function call.
 func (context *ContextManager) getAllDepsOnJsonPaths(config bringauto_config.Config, visited map[string]struct{}, recursively bool) ([]string, error) {
 	packConfigs, err := context.GetAllPackagesConfigs(nil)
 	if err != nil {
@@ -222,7 +226,7 @@ func (context *ContextManager) getAllDepsOnJsonPaths(config bringauto_config.Con
 }
 
 // GetPackageWithDepsJsonDefPaths
-// returns all json definitions paths for given package and all its dependencies json definitions paths recursively
+// Returns all Config paths for given Package and all its dependencies Config paths recursively.
 func (context *ContextManager) GetPackageWithDepsJsonDefPaths(packageName string) ([]string, error) {
 	packageDefs, err := context.GetPackageJsonDefPaths(packageName)
 	if err != nil {
@@ -244,8 +248,9 @@ func (context *ContextManager) GetPackageWithDepsJsonDefPaths(packageName string
 }
 
 // GetPackageWithDepsOnJsonDefPaths
-// Returns all Json definitions paths which depends on given package and all its dependencies Json
-// definitions paths recursively without package (packageName) itself and its dependencies.
+// Returns all Config paths which depends on given Package and all its dependencies Config paths
+// without package (packageName) itself and its dependencies. If recursively is set to true, it is
+// done recursively.
 func (context *ContextManager) GetDepsOnJsonDefPaths(packageName string, recursively bool) ([]string, error) {
 	packageDefs, err := context.GetPackageJsonDefPaths(packageName)
 	if err != nil {
@@ -275,7 +280,7 @@ func (context *ContextManager) GetDepsOnJsonDefPaths(packageName string, recursi
 }
 
 // removeStrings
-// Removes strList2 strings from strList1
+// Removes strList2 strings from strList1.
 func removeStrings(strList1 []string, strList2 []string) []string {
 	for _, str2 := range strList2 {
 		strList1 = removeString(strList1, str2)
@@ -284,7 +289,7 @@ func removeStrings(strList1 []string, strList2 []string) []string {
 }
 
 // removeString
-// Removes str string from strList1
+// Removes str string from strList1.
 func removeString(strList1 []string, str string) []string {
 	i := 0
 	for _, str1 := range strList1 {
@@ -297,7 +302,7 @@ func removeString(strList1 []string, str string) []string {
 }
 
 // removeDuplicates
-// Removes duplicate entries in strList
+// Removes duplicate entries in strList.
 func removeDuplicates(strList []string) []string {
 	keys := make(map[string]struct{})
     list := []string{}
@@ -312,7 +317,7 @@ func removeDuplicates(strList []string) []string {
 }
 
 // GetImageDockerfilePath
-// returns Dockerfile path for the given Image locate in the given context
+// Returns Dockerfile path for the given Image locate in the given Context.
 func (context *ContextManager) GetImageDockerfilePath(imageName string) (string, error) {
 	var err error
 	err = context.validateContextPath()
@@ -338,8 +343,8 @@ func (context *ContextManager) GetImageDockerfilePath(imageName string) (string,
 }
 
 // validateContextPath
-// validates context path if the structure in the context directory works
-// Return nil if structure is valid, error if the structure is invalid
+// Validates Context path if the structure in the Context directory works
+// Return nil if structure is valid, error if the structure is invalid.
 func (context *ContextManager) validateContextPath() error {
 	var err error
 	ContextStat, err := os.Stat(context.ContextPath)
@@ -372,7 +377,7 @@ func (context *ContextManager) validateContextPath() error {
 }
 
 // getAllFilesInDirByRegexp
-// Get all file in subdirs of rootDir which matches given regexp
+// Get all file in subdirs of rootDir which matches given regexp.
 func getAllFilesInSubdirByRegexp(rootDir string, reg *regexp.Regexp) (map[string][]string, error) {
 	acceptedFileList := map[string][]string{}
 	walkError := filepath.WalkDir(rootDir, func(item string, d fs.DirEntry, err error) error {
@@ -393,7 +398,7 @@ func getAllFilesInSubdirByRegexp(rootDir string, reg *regexp.Regexp) (map[string
 }
 
 // getAllFilesInDirByRegexp
-// get all files from given rootDir which matches given regexp
+// Get all files from given rootDir which matches given regexp.
 func getAllFilesInDirByRegexp(rootDir string, reg *regexp.Regexp) ([]string, error) {
 	var acceptedFileList []string
 	dirEntryList, err := os.ReadDir(rootDir)
