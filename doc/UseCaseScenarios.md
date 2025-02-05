@@ -195,8 +195,15 @@ graph TD
     style E color:green;
     style H color:green;
     style I color:green;
+    linkStyle 0 stroke:green,stroke-width:2px;
     linkStyle 1 stroke:green,stroke-width:2px;
+    linkStyle 2 stroke:green,stroke-width:2px;
+    linkStyle 3 stroke:green,stroke-width:2px;
     linkStyle 4 stroke:green,stroke-width:2px;
+    linkStyle 5 stroke:green,stroke-width:2px;
+    linkStyle 6 stroke:green,stroke-width:2px;
+    linkStyle 7 stroke:green,stroke-width:2px;
+    linkStyle 9 stroke:green,stroke-width:2px;
 ```
 
 **Command**
@@ -209,6 +216,64 @@ packager build-package
   --build-deps-on-recursive \
   --output ./git-lfs-repo
 ```
+
+### Build Package - all Packages
+
+Build all Packages in Context.
+
+```mermaid
+graph TD
+    A
+    A --> B
+    A --> C
+    B --> D
+    B --> E
+    C --> F
+    C --> G
+    D --> H
+    E --> I
+    F --> J
+    G --> K
+    J --> L
+    J --> M
+
+    style A color:green;
+    style B color:green;
+    style C color:green;
+    style D color:green;
+    style E color:green;
+    style F color:green;
+    style G color:green;
+    style H color:green;
+    style I color:green;
+    style J color:green;
+    style K color:green;
+    style L color:green;
+    style M color:green;
+    linkStyle 0 stroke:green,stroke-width:2px;
+    linkStyle 1 stroke:green,stroke-width:2px;
+    linkStyle 2 stroke:green,stroke-width:2px;
+    linkStyle 3 stroke:green,stroke-width:2px;
+    linkStyle 4 stroke:green,stroke-width:2px;
+    linkStyle 5 stroke:green,stroke-width:2px;
+    linkStyle 6 stroke:green,stroke-width:2px;
+    linkStyle 7 stroke:green,stroke-width:2px;
+    linkStyle 8 stroke:green,stroke-width:2px;
+    linkStyle 9 stroke:green,stroke-width:2px;
+    linkStyle 10 stroke:green,stroke-width:2px;
+    linkStyle 11 stroke:green,stroke-width:2px;
+```
+
+**Command**
+
+```bash
+packager build-package
+  --context ./example \
+  --image-name debian \
+  --all \
+  --output ./git-lfs-repo
+```
+
 
 ## Create Sysroot
 

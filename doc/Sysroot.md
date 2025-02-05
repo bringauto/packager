@@ -1,22 +1,29 @@
 # Sysroot
 
-BAP is creating its own sysroot directory when building Packages. All Package build files are
-copied to this directory. The desired behaviour is to ensure that no Package build files are being
-ovewritten by another Package build files. To ensure this, below described mechanisms have been
+BAP is creating its own sysroot directories when building Packages. The separated sysroot
+directories are created for both debug and release Packages. All Package build files are copied to
+these directories. The desired behaviour is to ensure that no Package build files are being
+ovewritten by another Package build files. To ensure this, following mechanisms have been
 introduced to BAP.
 
-## Behaviour
+## Sysroot consistency mechanisms
 
-At the start of `build-package` command the `install_sysroot` directory is checked. If it isn't empty, the warning is printed.
+- At the start of `build-package` command the both debug and release sysroots are checked. If it
+isn't empty, the warning is printed.
 
-During Package builds, the Package build files are copied to sysroot directory (`install_sysroot`).
+- During Package builds, the Package build files are copied to sysroot directory (`install_sysroot`).
 If any of the file is already in the sysroot, the error is printed that the Package tries to
 overwrite files in sysroot, which would corrupt consistency of sysroot directory. If Package
 doesn't try to ovewrite any files, the build proceeds and Package files are added to Package
 Repository.
 
-When `create-sysroot` command is used, all Packages in Package Repository for given target platform
-files are copied to new sysroot directory. Because of the sysroot consistency mechanism this new sysroot will also be consistent.
+- Copied Package names are added to `built_packages.json` file in `install_sysroot` directory. When
+the `build-package` command with `--build-deps-on` option is used, it is expected that the Package
+with its dependencies are already in sysroot. If it is not (the Package is not in `built_packages.json` file), the error is printed and build fails.
+
+- When `create-sysroot` command is used, all Packages in Package Repository for given target platform
+files are copied to new sysroot directory. Because of the sysroot consistency mechanism this new
+sysroot will also be consistent.
 
 ## Notes
 
