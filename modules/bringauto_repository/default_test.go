@@ -1,6 +1,7 @@
 package bringauto_repository
 
 import (
+	"bringauto/modules/bringauto_testing"
 	"bringauto/modules/bringauto_package"
 	"bringauto/modules/bringauto_prerequisites"
 	"fmt"
@@ -13,13 +14,6 @@ import (
 const (
 	RepoName = "repo"
 	ZipExtension = ".zip"
-
-	pack1Name = "pack1"
-	pack2Name = "pack2"
-	pack3Name = "pack3"
-	pack1FileName = pack1Name + "_file"
-	pack2FileName = pack2Name + "_file"
-	pack3FileName = pack3Name + "_file"
 )
 
 var defaultPlatformString bringauto_package.PlatformString
@@ -43,9 +37,9 @@ func TestMain(m *testing.M) {
 		panic(fmt.Sprintf("can't setup packages - %s", err))
 	}
 	code := m.Run()
-	err = deletePackages()
+	err = bringauto_testing.DeletePackageFiles()
 	if err != nil {
-		panic(fmt.Sprintf("can't delete packages - %s", err))
+		panic(fmt.Sprintf("can't delete package files - %s", err))
 	}
 	os.Exit(code)
 }
@@ -111,7 +105,7 @@ func TestCopyToRepositoryOnePackage(t *testing.T) {
 		t.Fatalf("can't initialize Git repository or struct - %s", err)
 	}
 
-	err = repo.CopyToRepository(pack1, pack1Name)
+	err = repo.CopyToRepository(pack1, bringauto_testing.Pack1Name)
 	if err != nil {
 		t.Errorf("CopyToRepository failed - %s", err)
 	}
@@ -134,17 +128,17 @@ func TestCopyToRepositoryMultiplePackages(t *testing.T) {
 		t.Fatalf("can't initialize Git repository or struct - %s", err)
 	}
 
-	err = repo.CopyToRepository(pack1, pack2Name)
+	err = repo.CopyToRepository(pack1, bringauto_testing.Pack2Name)
 	if err != nil {
 		t.Errorf("CopyToRepository failed - %s", err)
 	}
 
-	err = repo.CopyToRepository(pack2, pack2Name)
+	err = repo.CopyToRepository(pack2, bringauto_testing.Pack2Name)
 	if err != nil {
 		t.Errorf("CopyToRepository failed - %s", err)
 	}
 
-	err = repo.CopyToRepository(pack3, pack3Name)
+	err = repo.CopyToRepository(pack3, bringauto_testing.Pack3Name)
 	if err != nil {
 		t.Errorf("CopyToRepository failed - %s", err)
 	}
@@ -179,7 +173,7 @@ func TestCommitAllChanges(t *testing.T) {
 		t.Fatalf("can't initialize Git repository or struct - %s", err)
 	}
 
-	err = repo.CopyToRepository(pack1, pack1Name)
+	err = repo.CopyToRepository(pack1, bringauto_testing.Pack1Name)
 	if err != nil {
 		t.Errorf("CopyToRepository failed - %s", err)
 	}
@@ -225,7 +219,7 @@ func TestRestoreAllChanges(t *testing.T) {
 		t.Fatalf("can't initialize Git repository or struct - %s", err)
 	}
 
-	err = repo.CopyToRepository(pack1, pack1Name)
+	err = repo.CopyToRepository(pack1, bringauto_testing.Pack1Name)
 	if err != nil {
 		t.Errorf("CopyToRepository failed - %s", err)
 	}
@@ -299,46 +293,9 @@ func deleteGitRepo() error {
 }
 
 func setupPackages() error {
-	err := os.Mkdir(pack1Name, 0755)
+	err := bringauto_testing.SetupPackageFiles()
 	if err != nil {
-		return fmt.Errorf("failed to create a directory - %s", err)
-	}
-	err = os.Mkdir(pack2Name, 0755)
-	if err != nil {
-		return fmt.Errorf("failed to create a directory - %s", err)
-	}
-	err = os.Mkdir(pack3Name, 0755)
-	if err != nil {
-		return fmt.Errorf("failed to create a directory - %s", err)
-	}
-
-	file1, err := os.Create(filepath.Join(pack1Name, pack1FileName))
-	if err != nil {
-		return fmt.Errorf("failed to create a file - %s", err)
-	}
-	defer file1.Close()
-	file2, err := os.Create(filepath.Join(pack2Name, pack2FileName))
-	if err != nil {
-		return fmt.Errorf("failed to create a file - %s", err)
-	}
-	defer file2.Close()
-	file3, err := os.Create(filepath.Join(pack3Name, pack3FileName))
-	if err != nil {
-		return fmt.Errorf("failed to create a file - %s", err)
-	}
-	defer file3.Close()
-
-	_, err = file1.WriteString("file1 content")
-	if err != nil {
-		return fmt.Errorf("failed to write to file - %s", err)
-	}
-	_, err = file2.WriteString("file2 content")
-	if err != nil {
-		return fmt.Errorf("failed to write to file - %s", err)
-	}
-	_, err = file3.WriteString("file3 content")
-	if err != nil {
-		return fmt.Errorf("failed to write to file - %s", err)
+		return err
 	}
 
 	pack1 = bringauto_package.Package{
@@ -368,21 +325,5 @@ func setupPackages() error {
 		IsDebug: false,
 	}
 
-	return nil
-}
-
-func deletePackages() error {
-	err := os.RemoveAll(pack1Name)
-	if err != nil {
-		return err
-	}
-	err = os.RemoveAll(pack2Name)
-	if err != nil {
-		return err
-	}
-	err = os.RemoveAll(pack3Name)
-	if err != nil {
-		return err
-	}
 	return nil
 }

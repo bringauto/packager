@@ -1,6 +1,7 @@
 package bringauto_sysroot
 
 import (
+	"bringauto/modules/bringauto_testing"
 	"bringauto/modules/bringauto_package"
 	"bringauto/modules/bringauto_prerequisites"
 	"fmt"
@@ -11,18 +12,10 @@ import (
 
 const (
 	sysrootDir = "test_sysroot"
-
-	pack1Name = "pack1"
-	pack2Name = "pack2"
-	pack3Name = "pack3"
-	pack1FileName = pack1Name + "_file"
-	pack2FileName = pack2Name + "_file"
-	pack3FileName = pack3Name + "_file"
 )
 
 var defaultPlatformString bringauto_package.PlatformString
 var defaultSysroot Sysroot
-
 
 func TestMain(m *testing.M) {
 	stringExplicit := bringauto_package.PlatformStringExplicit {
@@ -45,12 +38,12 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 
-	err = setupPackageFiles()
+	err = bringauto_testing.SetupPackageFiles()
 	if err != nil {
 		panic(fmt.Sprintf("can't setup package files - %s", err))
 	}
 	code := m.Run()
-	err = deletePackageFiles()
+	err = bringauto_testing.DeletePackageFiles()
 	if err != nil {
 		panic(fmt.Sprintf("can't delete package files - %s", err))
 	}
@@ -107,12 +100,12 @@ func TestCreateSysrootDir(t *testing.T) {
 }
 
 func TestCopyToSysrootOnePackage(t *testing.T) {
-	err := defaultSysroot.CopyToSysroot(pack1Name, pack1Name)
+	err := defaultSysroot.CopyToSysroot(bringauto_testing.Pack1Name, bringauto_testing.Pack1Name)
 	if err != nil {
 		t.Errorf("CopyToSysroot failed - %s", err)
 	}
 
-	pack1Path := filepath.Join(defaultSysroot.GetSysrootPath(), pack1FileName)
+	pack1Path := filepath.Join(defaultSysroot.GetSysrootPath(), bringauto_testing.Pack1FileName)
 	_, err = os.ReadFile(pack1Path)
 	if os.IsNotExist(err) {
 		t.Fail()
@@ -125,34 +118,34 @@ func TestCopyToSysrootOnePackage(t *testing.T) {
 }
 
 func TestCopyToSysrootMultiplePackages(t *testing.T) {
-	err := defaultSysroot.CopyToSysroot(pack1Name, pack1Name)
+	err := defaultSysroot.CopyToSysroot(bringauto_testing.Pack1Name, bringauto_testing.Pack1Name)
 	if err != nil {
 		t.Errorf("CopyToSysroot failed - %s", err)
 	}
 
-	err = defaultSysroot.CopyToSysroot(pack2Name, pack2Name)
+	err = defaultSysroot.CopyToSysroot(bringauto_testing.Pack2Name, bringauto_testing.Pack2Name)
 	if err != nil {
 		t.Errorf("CopyToSysroot failed - %s", err)
 	}
 
-	err = defaultSysroot.CopyToSysroot(pack3Name, pack3Name)
+	err = defaultSysroot.CopyToSysroot(bringauto_testing.Pack3Name, bringauto_testing.Pack3Name)
 	if err != nil {
 		t.Errorf("CopyToSysroot failed - %s", err)
 	}
 
-	pack1Path := filepath.Join(defaultSysroot.GetSysrootPath(), pack1FileName)
+	pack1Path := filepath.Join(defaultSysroot.GetSysrootPath(), bringauto_testing.Pack1FileName)
 	_, err = os.ReadFile(pack1Path)
 	if os.IsNotExist(err) {
 		t.Fail()
 	}
 
-	pack2Path := filepath.Join(defaultSysroot.GetSysrootPath(), pack2FileName)
+	pack2Path := filepath.Join(defaultSysroot.GetSysrootPath(), bringauto_testing.Pack2FileName)
 	_, err = os.ReadFile(pack2Path)
 	if os.IsNotExist(err) {
 		t.Fail()
 	}
 
-	pack3Path := filepath.Join(defaultSysroot.GetSysrootPath(), pack3FileName)
+	pack3Path := filepath.Join(defaultSysroot.GetSysrootPath(), bringauto_testing.Pack3FileName)
 	_, err = os.ReadFile(pack3Path)
 	if os.IsNotExist(err) {
 		t.Fail()
@@ -165,12 +158,12 @@ func TestCopyToSysrootMultiplePackages(t *testing.T) {
 }
 
 func TestCopyToSysrootOvewriteFiles(t *testing.T) {
-	err := defaultSysroot.CopyToSysroot(pack1Name, pack1Name)
+	err := defaultSysroot.CopyToSysroot(bringauto_testing.Pack1Name, bringauto_testing.Pack1Name)
 	if err != nil {
 		t.Errorf("CopyToSysroot failed - %s", err)
 	}
 
-	err = defaultSysroot.CopyToSysroot(pack1Name, pack1Name)
+	err = defaultSysroot.CopyToSysroot(bringauto_testing.Pack1Name, bringauto_testing.Pack1Name)
 	if err == nil {
 		t.Error("ovewriting files not detected")
 	}
@@ -191,20 +184,20 @@ func TestIsPackageInSysroot(t *testing.T) {
 		t.Fatalf("sysroot initialization failed - %s", err)
 	}
 
-	err = sysroot.CopyToSysroot(pack1Name, pack1Name)
+	err = sysroot.CopyToSysroot(bringauto_testing.Pack1Name, bringauto_testing.Pack1Name)
 	if err != nil {
 		t.Errorf("CopyToSysroot failed - %s", err)
 	}
 
-	if !sysroot.IsPackageInSysroot(pack1Name) {
+	if !sysroot.IsPackageInSysroot(bringauto_testing.Pack1Name) {
 		t.Error("IsPackageInSysroot returned false after copying package to sysroot")
 	}
 
-	if sysroot.IsPackageInSysroot(pack2Name) {
+	if sysroot.IsPackageInSysroot(bringauto_testing.Pack2Name) {
 		t.Error("IsPackageInSysroot returned true for not copied package")
 	}
 
-	if sysroot.IsPackageInSysroot(pack3Name) {
+	if sysroot.IsPackageInSysroot(bringauto_testing.Pack3Name) {
 		t.Error("IsPackageInSysroot returned true for not copied package")
 	}
 
@@ -217,66 +210,4 @@ func TestIsPackageInSysroot(t *testing.T) {
 func clearSysroot() error {
 	sysrootPath := defaultSysroot.GetSysrootPath()
 	return os.RemoveAll(filepath.Dir(sysrootPath))
-}
-
-func setupPackageFiles() error {
-	err := os.Mkdir(pack1Name, 0755)
-	if err != nil {
-		return fmt.Errorf("failed to create a directory - %s", err)
-	}
-	err = os.Mkdir(pack2Name, 0755)
-	if err != nil {
-		return fmt.Errorf("failed to create a directory - %s", err)
-	}
-	err = os.Mkdir(pack3Name, 0755)
-	if err != nil {
-		return fmt.Errorf("failed to create a directory - %s", err)
-	}
-
-	file1, err := os.Create(filepath.Join(pack1Name, pack1FileName))
-	if err != nil {
-		return fmt.Errorf("failed to create a file - %s", err)
-	}
-	defer file1.Close()
-	file2, err := os.Create(filepath.Join(pack2Name, pack2FileName))
-	if err != nil {
-		return fmt.Errorf("failed to create a file - %s", err)
-	}
-	defer file2.Close()
-	file3, err := os.Create(filepath.Join(pack3Name, pack3FileName))
-	if err != nil {
-		return fmt.Errorf("failed to create a file - %s", err)
-	}
-	defer file3.Close()
-
-	_, err = file1.WriteString("file1 content")
-	if err != nil {
-		return fmt.Errorf("failed to write to file - %s", err)
-	}
-	_, err = file2.WriteString("file2 content")
-	if err != nil {
-		return fmt.Errorf("failed to write to file - %s", err)
-	}
-	_, err = file3.WriteString("file3 content")
-	if err != nil {
-		return fmt.Errorf("failed to write to file - %s", err)
-	}
-
-	return nil
-}
-
-func deletePackageFiles() error {
-	err := os.RemoveAll(pack1Name)
-	if err != nil {
-		return err
-	}
-	err = os.RemoveAll(pack2Name)
-	if err != nil {
-		return err
-	}
-	err = os.RemoveAll(pack3Name)
-	if err != nil {
-		return err
-	}
-	return nil
 }
