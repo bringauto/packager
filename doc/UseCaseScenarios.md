@@ -71,6 +71,8 @@ graph TD
     G --> K
     J --> L
     J --> M
+    N
+    N --> O
 
     style F color:green;
 ```
@@ -104,6 +106,8 @@ graph TD
     G --> K
     J --> L
     J --> M
+    N
+    N --> O
 
     style F color:green;
     style J color:green;
@@ -145,6 +149,8 @@ graph TD
     G --> K
     J --> L
     J --> M
+    N
+    N --> O
 
     style C color:green;
     style G color:green;
@@ -164,6 +170,8 @@ packager build-package
   --output ./git-lfs-repo
 ```
 
+> **NOTE**: The `--build-deps` option can be added to command to build also the F Package and its
+dependencies (J, L, M).
 
 ### Build Package - with Depends on Packages Recursive
 
@@ -185,6 +193,8 @@ graph TD
     G --> K
     J --> L
     J --> M
+    N
+    N --> O
 
     style C color:green;
     style G color:green;
@@ -217,6 +227,9 @@ packager build-package
   --output ./git-lfs-repo
 ```
 
+> **NOTE**: The `--build-deps` option can be added to command to build also the F Package and its
+dependencies (J, L, M).
+
 ### Build Package - all Packages
 
 Build all Packages in Context.
@@ -236,6 +249,8 @@ graph TD
     G --> K
     J --> L
     J --> M
+    N
+    N --> O
 
     style A color:green;
     style B color:green;
@@ -250,6 +265,8 @@ graph TD
     style K color:green;
     style L color:green;
     style M color:green;
+    style N color:green;
+    style O color:green;
     linkStyle 0 stroke:green,stroke-width:2px;
     linkStyle 1 stroke:green,stroke-width:2px;
     linkStyle 2 stroke:green,stroke-width:2px;
@@ -262,6 +279,7 @@ graph TD
     linkStyle 9 stroke:green,stroke-width:2px;
     linkStyle 10 stroke:green,stroke-width:2px;
     linkStyle 11 stroke:green,stroke-width:2px;
+    linkStyle 12 stroke:green,stroke-width:2px;
 ```
 
 **Command**

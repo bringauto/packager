@@ -11,11 +11,11 @@ introduced to BAP.
 - At the start of `build-package` command the both debug and release sysroots are checked. If it
 isn't empty, the warning is printed.
 
-- During Package builds, the Package build files are copied to sysroot directory (`install_sysroot`).
-If any of the file is already in the sysroot, the error is printed that the Package tries to
-overwrite files in sysroot, which would corrupt consistency of sysroot directory. If Package
-doesn't try to ovewrite any files, the build proceeds and Package files are added to Package
-Repository.
+- During Package builds, the Package build files are copied to the sysroot directory
+(`install_sysroot`). If any of the file is already present in the sysroot, the error is printed
+that the Package tries to overwrite files in sysroot, which would corrupt consistency of sysroot
+directory. If Package doesn't try to overwrite any files, the build proceeds and Package files are
+added to the Package Repository.
 
 - Copied Package names are added to `built_packages.json` file in `install_sysroot` directory. When
 the `build-package` command with `--build-deps-on` option is used, it is expected that the Package
