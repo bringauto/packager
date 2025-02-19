@@ -205,24 +205,29 @@ func (context *ContextManager) getAllDepsOnJsonPaths(config bringauto_config.Con
 				if packageVisited {
 					break
 				}
-				packWithDeps, err := context.GetPackageWithDepsJsonDefPaths(packConfig.Package.Name)
-				if err != nil {
-					return []string{}, err
-				}
-				packsToBuild = append(packsToBuild, packWithDeps...)
-				if recursively {
-					packsDepsOnRecursive, err := context.getAllDepsOnJsonPaths(*packConfig, visited, true)
-					if err != nil {
-						return []string{}, err
-					}
-					packsToBuild = append(packsToBuild, packsDepsOnRecursive...)
-				}
+				context.addDependsOnPackagesToBuild(&packsToBuild, packConfig, visited, recursively)
 				break
 			}
 		}
 	}
 
 	return packsToBuild, nil
+}
+
+func (context *ContextManager) addDependsOnPackagesToBuild(packsToBuild *[]string, packConfig *bringauto_config.Config, visited map[string]struct{}, recursively bool) error {
+	packWithDeps, err := context.GetPackageWithDepsJsonDefPaths(packConfig.Package.Name)
+	if err != nil {
+		return err
+	}
+	*packsToBuild = append(*packsToBuild, packWithDeps...)
+	if recursively {
+		packsDepsOnRecursive, err := context.getAllDepsOnJsonPaths(*packConfig, visited, true)
+		if err != nil {
+			return err
+		}
+		*packsToBuild = append(*packsToBuild, packsDepsOnRecursive...)
+	}
+	return nil
 }
 
 // GetPackageWithDepsJsonDefPaths

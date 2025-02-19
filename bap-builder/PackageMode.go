@@ -295,7 +295,7 @@ func buildAllPackages(
 			continue
 		}
 		count++
-		err = buildAndCopyPackage(cmdLine, &buildConfigs, platformString, repo)
+		err = buildAndCopyPackage(&buildConfigs, platformString, repo)
 		if err != nil {
 			return fmt.Errorf("cannot build package '%s' - %s", config.Package.Name, err)
 		}
@@ -410,7 +410,7 @@ func buildSinglePackage(
 	}
 	for _, config := range configList {
 		buildConfigs := config.GetBuildStructure(*cmdLine.DockerImageName, platformString)
-		err = buildAndCopyPackage(cmdLine, &buildConfigs, platformString, repo)
+		err = buildAndCopyPackage(&buildConfigs, platformString, repo)
 		if err != nil {
 			return fmt.Errorf("cannot build package '%s' - %s", packageName, err)
 		}
@@ -441,15 +441,10 @@ func addConfigsToDefsMap(defsMap *ConfigMapType, packageJsonPathList []string) {
 // buildAndCopyPackage
 // Builds single package, takes care of every step of build for single package.
 func buildAndCopyPackage(
-	cmdLine *BuildPackageCmdLineArgs,
 	build *[]bringauto_build.Build,
 	platformString *bringauto_package.PlatformString,
 	repo bringauto_repository.GitLFSRepository,
 ) error {
-	if *cmdLine.OutputDirMode != OutputDirModeGitLFS {
-		return fmt.Errorf("invalid OutputDirmode. Only GitLFS is supported")
-	}
-
 	var err error
 	var removeHandler func()
 
