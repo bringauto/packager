@@ -246,17 +246,16 @@ func BuildPackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) error {
 	}
 
 	handleRemover := bringauto_process.SignalHandlerAddHandler(repo.RestoreAllChanges)
+	defer handleRemover()
 	if *cmdLine.All {
 		err = buildAllPackages(cmdLine, contextPath, platformString, repo)
 	} else {
 		err = buildSinglePackage(cmdLine, contextPath, platformString, repo)
 	}
 	if err != nil {
-		handleRemover()
 		return err
 	}
 	err = repo.CommitAllChanges()
-	handleRemover()
 	return err
 }
 

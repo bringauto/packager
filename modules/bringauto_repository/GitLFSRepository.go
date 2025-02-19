@@ -245,7 +245,7 @@ func (lfs *GitLFSRepository) gitIsStatusEmpty() bool {
 func (lfs *GitLFSRepository) gitAddAll() error {
 	var ok, _ = lfs.prepareAndRun([]string{
 		"add",
-		"*",
+		".",
 	},
 	)
 	if !ok {

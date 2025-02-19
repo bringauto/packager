@@ -9,10 +9,9 @@ import (
 	"strings"
 )
 
-// Color codes constants
+// ANSI Color codes constants
 const (
 	red = 31
-	blue = 34
 	orange = 33
 	white = 97
 )
