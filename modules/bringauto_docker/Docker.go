@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	defaultImageNameConst = "debian12"
+	defaultImageNameConst = "unknown"
 )
 
 // Docker
