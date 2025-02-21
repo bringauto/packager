@@ -6,10 +6,11 @@ import (
 	"bringauto/modules/bringauto_const"
 	"fmt"
 	"os"
+	"bytes"
 )
 
 const (
-	defaultImageNameConst = "debian11"
+	defaultImageNameConst = "unknown"
 )
 
 // Docker
@@ -28,6 +29,10 @@ type Docker struct {
 	containerId string
 }
 
+type dockerInitArgs struct {
+	ImageName string
+}
+
 func (docker *Docker) FillDefault(*bringauto_prerequisites.Args) error {
 	*docker = Docker{
 		Volumes:     map[string]string{},
@@ -40,7 +45,12 @@ func (docker *Docker) FillDefault(*bringauto_prerequisites.Args) error {
 	return nil
 }
 
-func (docker *Docker) FillDynamic(*bringauto_prerequisites.Args) error {
+func (docker *Docker) FillDynamic(args *bringauto_prerequisites.Args) error {
+	var argsStruct dockerInitArgs
+	bringauto_prerequisites.GetArgs(args, &argsStruct)
+	if argsStruct.ImageName != "" {
+		docker.ImageName = argsStruct.ImageName
+	}
 	return nil
 }
 
@@ -54,17 +64,25 @@ func (docker *Docker) CheckPrerequisites(*bringauto_prerequisites.Args) error {
 	} else if !portAvailable {
 		return fmt.Errorf("default port %d not available", bringauto_const.DefaultSSHPort)
 	}
+	var outBuff bytes.Buffer
 	process := bringauto_process.Process{
 		CommandAbsolutePath: DockerExecutablePathConst,
 		Args: bringauto_process.ProcessArgs{
 			ExtraArgs: &[]string{
 				"images",
+				"-q",
+				docker.ImageName,
 			},
 		},
+		StdOut: &outBuff,
 	}
 	err = process.Run()
 	if err != nil {
 		return err
+	}
+
+	if outBuff.Len() == 0 {
+		return fmt.Errorf("image %s does not exist", docker.ImageName)
 	}
 
 	for hostVolume, _ := range docker.Volumes {

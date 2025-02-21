@@ -14,37 +14,45 @@ type BuildImageCmdLineArgs struct {
 	Name *string
 }
 
-type OutputDirMode int8
-
-const (
-	OutputDirModeGitLFS OutputDirMode = iota
-)
-
 // BuildPackageCmdLineArgs
 // Options/setting for Package mode
 type BuildPackageCmdLineArgs struct {
-	// All build all packages in package/ directory
+	// All build all Packages in package/ directory
 	All *bool
-	// Name of the package to build (name of the directory in packages/ dir)
+	// Name of the Package to build (name of the directory in packages/ dir)
 	Name *string
-	// BuildDeps Build all dependencies of package when building single package
+	// BuildDeps Build all dependencies of Package when building single Package
 	BuildDeps *bool
-	// DockerImageName is a name of docker image to which packages will be build.
-	// If empty all docker images from DockerMatrix in config file are used for a given package.
-	// If not empty, only packages which contains DockerImageName in DockerMatrix will be built.
-	// If not empty, packages are built only by toolchain represented by DockerImageName
+	// BuildDepsOn Build Package with all Packages which depends on it
+	BuildDepsOn *bool
+	// BuildDepsOn Build Package with all Packages which depends on it recursively
+	BuildDepsOnRecursive *bool
+	// DockerImageName is a name of docker image to which Packages will be build.
+	// If empty all docker images from DockerMatrix in config file are used for a given Package.
+	// If not empty, only Packages which contains DockerImageName in DockerMatrix will be built.
+	// If not empty, Packages are built only by toolchain represented by DockerImageName
 	DockerImageName *string
-	// OutputDir relative (to program working dir) ot absolute path where the package will be stored
+	// OutputDir relative (to program working dir) ot absolute path where the Package will be stored
 	OutputDir *string
-	// OutputDirMode Output dir mode
-	OutputDirMode *OutputDirMode
+}
+
+// CreateSysrootCmdLineArgs
+// Options/setting for Sysroot mode
+type CreateSysrootCmdLineArgs struct {
+	// Path to the Git Lfs repository with Packages
+	Repo *string
+	// Name of the new sysroot directory to be created
+	Sysroot *string
+	// Name of the docker image which are the Packages build for
+	ImageName *string
 }
 
 // CmdLineArgs
 // Represents Cmd line arguments passed to  cmd line of the target program.
-// Program operates in two modes
+// Program operates in three modes
 // - build Docker images (Docker mode),
 // - build package (package mode)
+// - create sysroot (Sysroot mode)
 // Exactly one of these modes can be active in a time.
 type CmdLineArgs struct {
 	// Absolute/relative path to config directory
@@ -54,11 +62,15 @@ type CmdLineArgs struct {
 	// Standard Cmd line arguments for Docker mode
 	BuildImagesArgs BuildImageCmdLineArgs
 	// If true the program is in the "Package" mode
-	BuildPackage       bool
-	BuildPackageArgs   BuildPackageCmdLineArgs
-	buildImageParser   *argparse.Command
-	buildPackageParser *argparse.Command
-	parser             *argparse.Parser
+	BuildPackage        bool
+	// If true the program is in the "Sysroot" mode
+	CreateSysroot       bool
+	BuildPackageArgs    BuildPackageCmdLineArgs
+	CreateSysrootArgs   CreateSysrootCmdLineArgs
+	buildImageParser    *argparse.Command
+	buildPackageParser  *argparse.Command
+	createSysrootParser *argparse.Command
+	parser              *argparse.Parser
 }
 
 // InitFlags
@@ -68,9 +80,8 @@ func (cmd *CmdLineArgs) InitFlags() {
 	cmd.parser = argparse.NewParser("BringAuto Packager", "Build and track C++ dependencies")
 	cmd.Context = cmd.parser.String("", "context",
 		&argparse.Options{
-			Required: false,
-			Default:  ".",
-			Help:     "Command context",
+			Required: true,
+			Help:     "Context directory where are the json definition of Packages",
 		},
 	)
 
@@ -78,7 +89,7 @@ func (cmd *CmdLineArgs) InitFlags() {
 	cmd.BuildPackageArgs.All = cmd.buildPackageParser.Flag("", "all",
 		&argparse.Options{
 			Required: false,
-			Help:     "Build all packages in the given context",
+			Help:     "Build all Packages in the given context",
 			Default:  false,
 		},
 	)
@@ -86,29 +97,45 @@ func (cmd *CmdLineArgs) InitFlags() {
 		&argparse.Options{
 			Required: false,
 			Default:  "",
-			Help:     "Name of the package to build",
+			Help:     "Name of the Package to build",
 		},
 	)
 	cmd.BuildPackageArgs.BuildDeps = cmd.buildPackageParser.Flag("", "build-deps",
 		&argparse.Options{
 			Required: false,
 			Default:  false,
-			Help:     "Build all dependencies of package when building single package",
+			Help:     "Build all dependencies of Package when building single Package",
+		},
+	)
+	cmd.BuildPackageArgs.BuildDepsOn = cmd.buildPackageParser.Flag("", "build-deps-on",
+		&argparse.Options{
+			Required: false,
+			Default:  false,
+			Help:     "Build Packages which depends on given Package without itself, " +
+			"the Packages are built with its dependencies",
+		},
+	)
+	cmd.BuildPackageArgs.BuildDepsOnRecursive = cmd.buildPackageParser.Flag("", "build-deps-on-recursive",
+		&argparse.Options{
+			Required: false,
+			Default:  false,
+			Help:     "Build Packages which depends on given Package without itself recursively, " +
+			"the Packages are built with its dependencies",
 		},
 	)
 	cmd.BuildPackageArgs.OutputDir = cmd.buildPackageParser.String("", "output-dir",
 		&argparse.Options{
 			Required: true,
-			Help:     "Directory where to store built package",
+			Help:     "Directory where to store built Package",
 		},
 	)
 	cmd.BuildPackageArgs.DockerImageName = cmd.buildPackageParser.String("", "image-name",
 		&argparse.Options{
-			Required: false,
-			Default:  "",
-			Help: "Docker image name for which packages will be build.\n" +
-				"Only packages that contains image-name in the DockerMatrix will be built.\n" +
-				"Given packages will be build by toolchain represented by image-name",
+			Required: true,
+			Validate: checkForEmpty,
+			Help: "Docker image name for which Packages will be build. " +
+			"Only Packages that contains image-name in the DockerMatrix will be built. " +
+			"Given Packages will be build by toolchain represented by image-name",
 		},
 	)
 
@@ -126,6 +153,38 @@ func (cmd *CmdLineArgs) InitFlags() {
 			Help:     "Name of the docker image to build",
 		},
 	)
+
+	cmd.createSysrootParser = cmd.parser.NewCommand("create-sysroot", "Create Sysroot")
+	cmd.CreateSysrootArgs.Sysroot = cmd.createSysrootParser.String("", "sysroot-dir",
+		&argparse.Options{
+			Required: true,
+			Help:     "Name of the sysroot directory which will be created",
+		},
+	)
+	cmd.CreateSysrootArgs.Repo = cmd.createSysrootParser.String("", "git-lfs",
+		&argparse.Options{
+			Required: true,
+			Help:     "Git Lfs directory where Packages are stored",
+		},
+	)
+	cmd.CreateSysrootArgs.ImageName = cmd.createSysrootParser.String("", "image-name",
+		&argparse.Options{
+			Required: true,
+			Validate: checkForEmpty,
+			Help:     "Name of docker image which are the Packages built for",
+		},
+	)
+}
+
+// checkForEmpty
+// Checks the given argument. If it is empty, returns error, else nil.
+func checkForEmpty(args []string) error {
+	if len(args) == 1 {
+		if len(args[0]) == 0 {
+			return fmt.Errorf("cannot be empty")
+		}
+	}
+	return nil
 }
 
 // ParseArgs
@@ -138,13 +197,24 @@ func (cmd *CmdLineArgs) ParseArgs(args []string) error {
 		return err
 	}
 
-	outputMode := OutputDirModeGitLFS
-	cmd.BuildPackageArgs.OutputDirMode = &outputMode
-
 	cmd.BuildImage = cmd.buildImageParser.Happened()
 	cmd.BuildPackage = cmd.buildPackageParser.Happened()
-	if *cmd.BuildPackageArgs.All && *cmd.BuildPackageArgs.BuildDeps {
-		return fmt.Errorf("all and build-deps flags at the same time")
+	cmd.CreateSysroot = cmd.createSysrootParser.Happened()
+
+	if *cmd.BuildPackageArgs.All {
+		if *cmd.BuildPackageArgs.BuildDeps {
+			return fmt.Errorf("all and build-deps flags at the same time")
+		}
+		if *cmd.BuildPackageArgs.BuildDepsOn {
+			return fmt.Errorf("all and build-deps-on flags at the same time")
+		}
+		if *cmd.BuildPackageArgs.BuildDepsOnRecursive {
+			return fmt.Errorf("all and build-deps-on-recursive flags at the same time")
+		}
+	} else if *cmd.BuildPackageArgs.BuildDepsOn {
+		if *cmd.BuildPackageArgs.BuildDepsOnRecursive {
+			return fmt.Errorf("build-deps-on and build-deps-on-recursive flags at the same time")
+		}
 	}
 
 	return nil

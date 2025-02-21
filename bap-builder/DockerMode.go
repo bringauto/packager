@@ -3,6 +3,7 @@ package main
 import (
 	"bringauto/modules/bringauto_log"
 	"bringauto/modules/bringauto_docker"
+	"bringauto/modules/bringauto_context"
 	"path"
 )
 
@@ -10,7 +11,7 @@ import (
 // process Docker mode of cmd line
 //
 func BuildDockerImage(cmdLine *BuildImageCmdLineArgs, contextPath string) error {
-	contextManager := ContextManager{
+	contextManager := bringauto_context.ContextManager{
 		ContextPath: contextPath,
 	}
 	buildAll := cmdLine.All
@@ -29,7 +30,7 @@ func BuildDockerImage(cmdLine *BuildImageCmdLineArgs, contextPath string) error 
 // builds all docker images in the given contextPath.
 // It returns nil if everything is ok, or not nil in case of error
 //
-func buildAllDockerImages(contextManager ContextManager) error {
+func buildAllDockerImages(contextManager bringauto_context.ContextManager) error {
 	dockerfilePathList, err := contextManager.GetAllImagesDockerfilePaths()
 	if err != nil {
 		return err

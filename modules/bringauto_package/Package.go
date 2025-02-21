@@ -12,8 +12,10 @@ import (
 )
 
 const (
+	ZipExt = ".zip"
 	defaultPackageNameConst = "generic-package"
 	defaultVersionTagConst  = "v0.0.0"
+	stringSeparator = "_"
 )
 
 // Package enables us to easily create a package
@@ -37,8 +39,8 @@ func (packg *Package) FillDefault(*bringauto_prerequisites.Args) error {
 		Name:       defaultPackageNameConst,
 		VersionTag: defaultVersionTagConst,
 		IsDebug:    false,
-		IsDevLib:   true,
-		IsLibrary:  true,
+		IsDevLib:   false,
+		IsLibrary:  false,
 		PlatformString: PlatformString{
 			Mode: ModeAuto,
 		},
@@ -80,7 +82,7 @@ func (packg *Package) CreatePackage(sourceDir string, outputDir string) error {
 		return err
 	}
 
-	packageName := packg.GetFullPackageName() + ".zip"
+	packageName := packg.GetFullPackageName() + ZipExt
 
 	err = createZIPArchive(sourceDir, outputDir+"/"+packageName)
 	if err != nil {
@@ -112,11 +114,9 @@ func (packg *Package) GetShortPackageName() string {
 func (packg *Package) GetFullPackageName() string {
 	var packageName []string
 	packageName = append(packageName, packg.GetShortPackageName())
-	packageName = append(packageName, "_")
 	packageName = append(packageName, packg.VersionTag)
-	packageName = append(packageName, "_")
 	packageName = append(packageName, packg.PlatformString.Serialize())
-	return strings.Join(packageName, "")
+	return strings.Join(packageName, stringSeparator)
 }
 
 func createZIPArchive(sourceDir string, archivePath string) error {

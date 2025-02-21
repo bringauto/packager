@@ -202,7 +202,7 @@ func (session *SSHSession) Wait() error {
 	}
 	err := session.sshSession.Wait()
 	if err != nil {
-		return fmt.Errorf("invalid wait - %s", err)
+		return err
 	}
 	return nil
 }

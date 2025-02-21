@@ -8,7 +8,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"reflect"
 	"regexp"
 )
 
@@ -77,28 +76,30 @@ func (data *DataStruct) ReadFromFile(filePath string, validate bool) {
 	}
 	defer file.Close()
 
-	parseStruct := map[string]func(string){
-		"^Distributor ID:\t([^\t]+)$": func(s string) { data.DistributorID = s },
-		"^Release:\t([^\t]+)$":        func(s string) { data.ReleaseNumber = s },
+	type KeyValue struct {
+		Key      string
+		Callback func(string)
+	}
+	parseStruct := []KeyValue{
+		{"^Distributor ID:\t([^\t]+)$", func(s string) { data.DistributorID = s }},
+		{"^Release:\t([^\t]+)$", func(s string) { data.ReleaseNumber = s }},
 	}
 
 	scanner := bufio.NewScanner(file)
-	keys := reflect.ValueOf(parseStruct).MapKeys()
 
 	handled := 0
 	for scanner.Scan() {
 		line := scanner.Text()
-		for _, key := range keys {
-			keyString := key.String()
-			data := parseLine(line, keyString)
+		for _, keyValue := range parseStruct {
+			data := parseLine(line, keyValue.Key)
 			if data != "" {
-				parseStruct[keyString](data)
+				keyValue.Callback(data)
 				handled++
 				break
 			}
 		}
 	}
-	if validate && len(keys) != handled {
+	if validate && len(parseStruct) != handled {
 		log.Panicf("Not all needed values were extracted!")
 	}
 }

@@ -7,4 +7,4 @@ Requirements
 
 - Project must be able to be installed by GNU Make - `make install`
 - Project must NOT override `CMAKE_INSTALL_PREFIX` CMake variable - it's used for the project installation to
-  a given directory and package creation. If you override it the build fail!
+  a given directory and Package creation. If you override it the build fail!

@@ -1,0 +1,22 @@
+{
+  "DependsOn": [
+    "pack1",
+    "pack5"
+  ],
+  "Package": {
+    "Name": "pack6",
+    "VersionTag": "v1.0.0",
+    "PlatformString": {
+      "Mode": "auto"
+    },
+    "IsLibrary": true,
+    "IsDevLib": true,
+    "IsDebug": false
+  },
+  "DockerMatrix": {
+    "ImageNames": [
+      "image1",
+      "image2"
+    ]
+  }
+}
