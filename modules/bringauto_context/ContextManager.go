@@ -205,7 +205,10 @@ func (context *ContextManager) getAllDepsOnJsonPaths(config bringauto_config.Con
 				if packageVisited {
 					break
 				}
-				context.addDependsOnPackagesToBuild(&packsToBuild, packConfig, visited, recursively)
+				err = context.addDependsOnPackagesToBuild(&packsToBuild, packConfig, visited, recursively)
+				if err != nil {
+					return []string{}, err
+				}
 				break
 			}
 		}
