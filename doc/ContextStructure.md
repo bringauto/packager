@@ -36,6 +36,8 @@ You can use `bap-builder build-image` feature to build docker images instead of 
 
 ## Package Group Name
 
+Package group name can contain only alpha-numeric characters and '-'.
+
 Each Package Group can have multiple Configs.
 
 Each Config represents one Package.
