@@ -36,7 +36,7 @@ func (args *GitClone) ConstructCMDLine() []string {
 	cmd := []string{
 		GitExecutablePath,
 		"clone",
-		"--recursive",
+		"--no-checkout",
 		args.URI,
 		args.ClonePath,
 	}
