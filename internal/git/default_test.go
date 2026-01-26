@@ -16,7 +16,7 @@ func TestGitClone_ConstructCMDLine(t *testing.T) {
 	validCmdLine := []string{
 		git.GitExecutablePath,
 		"clone",
-		"--recursive",
+		"--no-checkout",
 		gitClone.URI,
 		gitClone.ClonePath,
 	}
