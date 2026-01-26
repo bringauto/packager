@@ -5,13 +5,11 @@ import (
 	"github.com/bacpack-system/packager/internal/docker"
 	"github.com/bacpack-system/packager/internal/log"
 	"github.com/bacpack-system/packager/internal/prerequisites"
-	"github.com/bacpack-system/packager/internal/process"
 	"github.com/bacpack-system/packager/internal/ssh"
 	"fmt"
 	"os"
 	"regexp"
 	"strings"
-	"time"
 )
 
 // PlatformStringMode is a fill-up mode of the platform-string.
@@ -111,29 +109,12 @@ func (pstr *PlatformString) CheckPrerequisites(args *prerequisites.Args) error {
 }
 
 // determinePlatformString
-// Computes platform string for ModeAuto.
+// Gets PlatformString for ModeAuto from container using credentials The container must be already running.
 // If the PlatformString is in ModeExplicit the panic raise.
 func (pstr *PlatformString) determinePlatformString(credentials ssh.SSHCredentials, dock *docker.Docker) error {
 	if pstr.Mode == ModeExplicit {
 		panic(fmt.Errorf("cannot determine PlatformString for explicit mode"))
 	}
-
-	dockerRun := (*docker.DockerRun)(dock)
-	removeHandler := process.SignalHandlerAddHandler(func() error {
-		dockerStop := (*docker.DockerStop)(dock)
-		dockerRm := (*docker.DockerRm)(dock)
-		// Waiting for docker run command to get container id
-		time.Sleep(200 * time.Millisecond)
-		dockerStop.Stop()
-		return dockerRm.RemoveContainer()
-	})
-	defer removeHandler()
-
-	err := dockerRun.Run()
-	if err != nil {
-		return err
-	}
-	credentials.Port = dock.Port
 
 	distroName, distroRelease := getDistroIdAndReleaseFromDockerContainer(dock)
 	if distroName == "" || distroRelease == "" {

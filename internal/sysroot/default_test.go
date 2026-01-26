@@ -12,9 +12,7 @@ import (
 )
 
 const (
-	sysrootDir = "test_sysroot"
 	gitUri = "git_uri"
-	gitCommitHash = "hash"
 	sysrootDirName = "machine-distro-1.0"
 )
 
@@ -93,11 +91,14 @@ func TestInitialize(t *testing.T) {
 }
 
 func TestGetSysrootPath(t *testing.T) {
-	sysrootPath := defaultSysroot.GetSysrootPath()
+	sysrootPath, err := defaultSysroot.GetSysrootPath()
+	if err != nil {
+		t.Fatalf("GetSysrootPath failed - %s", err)
+	}
 
 	workingDir, err := os.Getwd()
 	if err != nil {
-		t.Fatalf("can't get workinǵ dir - %s", err)
+		t.Fatalf("can't get working dir - %s", err)
 	}
 	testPath := filepath.Join(workingDir, sysrootDirectoryName, defaultSysroot.PlatformString.Serialize())
 
@@ -107,9 +108,12 @@ func TestGetSysrootPath(t *testing.T) {
 }
 
 func TestCreateSysrootDir(t *testing.T) {
-	sysrootPath := defaultSysroot.GetSysrootPath()
+	sysrootPath, err := defaultSysroot.GetSysrootPath()
+	if err != nil {
+		t.Fatalf("GetSysrootPath failed - %s", err)
+	}
 
-	err := os.RemoveAll(sysrootPath)
+	err = os.RemoveAll(sysrootPath)
 	if err != nil {
 		t.Fatalf("can't remove sysroot dir - %s", err)
 	}
@@ -135,8 +139,12 @@ func TestCopyToSysrootOnePackage(t *testing.T) {
 	if err != nil {
 		t.Errorf("CopyToSysroot failed - %s", err)
 	}
+	sysrootPath, err := defaultSysroot.GetSysrootPath()
+	if err != nil {
+		t.Fatalf("GetSysrootPath failed - %s", err)
+	}
 
-	pack1Path := filepath.Join(defaultSysroot.GetSysrootPath(), testtools.Pack1FileName)
+	pack1Path := filepath.Join(sysrootPath, testtools.Pack1FileName)
 	_, err = os.ReadFile(pack1Path)
 	if os.IsNotExist(err) {
 		t.Fail()
@@ -163,20 +171,24 @@ func TestCopyToSysrootMultiplePackages(t *testing.T) {
 	if err != nil {
 		t.Errorf("CopyToSysroot failed - %s", err)
 	}
+	sysrootPath, err := defaultSysroot.GetSysrootPath()
+	if err != nil {
+		t.Fatalf("GetSysrootPath failed - %s", err)
+	}
 
-	pack1Path := filepath.Join(defaultSysroot.GetSysrootPath(), testtools.Pack1FileName)
+	pack1Path := filepath.Join(sysrootPath, testtools.Pack1FileName)
 	_, err = os.ReadFile(pack1Path)
 	if os.IsNotExist(err) {
 		t.Fail()
 	}
 
-	pack2Path := filepath.Join(defaultSysroot.GetSysrootPath(), testtools.Pack2FileName)
+	pack2Path := filepath.Join(sysrootPath, testtools.Pack2FileName)
 	_, err = os.ReadFile(pack2Path)
 	if os.IsNotExist(err) {
 		t.Fail()
 	}
 
-	pack3Path := filepath.Join(defaultSysroot.GetSysrootPath(), testtools.Pack3FileName)
+	pack3Path := filepath.Join(sysrootPath, testtools.Pack3FileName)
 	_, err = os.ReadFile(pack3Path)
 	if os.IsNotExist(err) {
 		t.Fail()
@@ -268,6 +280,9 @@ func TestIsPackageInSysrootDifferentHash(t *testing.T) {
 }
 
 func clearSysroot() error {
-	sysrootPath := defaultSysroot.GetSysrootPath()
+	sysrootPath, err := defaultSysroot.GetSysrootPath()
+	if err != nil {
+		return err
+	}
 	return os.RemoveAll(filepath.Dir(sysrootPath))
 }

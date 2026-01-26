@@ -7,7 +7,6 @@ import (
 	"github.com/bacpack-system/packager/internal/log"
 	"github.com/bacpack-system/packager/internal/bacpack_package"
 	"github.com/bacpack-system/packager/internal/prerequisites"
-	"github.com/bacpack-system/packager/internal/process"
 	"github.com/bacpack-system/packager/internal/ssh"
 	"github.com/bacpack-system/packager/internal/sysroot"
 	"bufio"
@@ -16,7 +15,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"time"
 	"strconv"
 )
 
@@ -159,13 +157,19 @@ func (build *Build) prepareForBuild() error {
 	build.BuildSystem.InstallPrefix = constants.DockerInstallDirConst
 
 	if build.sysroot != nil {
-		build.sysroot.CreateSysrootDir()
-		sysPath := build.sysroot.GetSysrootPath()
-		err = build.Docker.SetVolume(sysPath, "/sysroot")
+		err := build.sysroot.CreateSysrootDir()
 		if err != nil {
 			return err
 		}
-		build.BuildSystem.PrefixPath = "/sysroot"
+		sysPath, err := build.sysroot.GetSysrootPath()
+		if err != nil {
+			return err
+		}
+		err = build.Docker.SetVolume(sysPath, constants.ContainerSysrootPath)
+		if err != nil {
+			return err
+		}
+		build.BuildSystem.PrefixPath = constants.ContainerSysrootPath
 	}
 
 	return nil
@@ -199,11 +203,7 @@ func (build *Build) RunBuild() (error, bool) { // Long function - it is hard to 
 	}
 
 	dockerRun := (*docker.DockerRun)(build.Docker)
-	removeHandler := process.SignalHandlerAddHandler(func() error {
-		// Waiting for docker run command to get container id
-		time.Sleep(300 * time.Millisecond)
-		return build.stopAndRemoveContainer()
-	})
+	removeHandler := dockerRun.GetUndoHandler()
 	defer removeHandler()
 
 	logger.InfoIndent("Starting docker container")
@@ -284,23 +284,6 @@ func (build *Build) GetLocalInstallDirPath() string {
 	}
 	copyBaseDir := filepath.Join(workingDir, localInstallDirNameConst + suffix)
 	return copyBaseDir
-}
-
-func (build *Build) stopAndRemoveContainer() error {
-	var err error
-
-	dockerStop := (*docker.DockerStop)(build.Docker)
-	dockerRm := (*docker.DockerRm)(build.Docker)
-	logger := log.GetLogger()
-	err = dockerStop.Stop()
-	if err != nil {
-		logger.Error("Can't stop container - %s", err)
-	}
-	err = dockerRm.RemoveContainer()
-	if err != nil {
-		logger.Error("Can't remove container - %s", err)
-	}
-	return nil
 }
 
 func (build *Build) CleanUp() error {

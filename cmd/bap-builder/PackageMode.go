@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"strconv"
 	"slices"
+	"time"
 )
 
 type buildDepList struct {
@@ -122,7 +123,7 @@ func performPreBuildChecks(
 // BuildPackage
 // process Package mode of the program
 func BuildPackage(cmdLine *BuildPackageCmdLineArgs, contextPath string) error {
-	platformString, err := determinePlatformString(*cmdLine.DockerImageName, uint16(*cmdLine.Port))
+	platformString, err := checkDockerEnvironmentAndDeterminePlatformString(*cmdLine.DockerImageName, uint16(*cmdLine.Port))
 	if err != nil {
 		return err
 	}
@@ -401,14 +402,79 @@ func buildAndCopyPackage(
 	return err
 }
 
-// determinePlatformString
-// Will construct platform string suitable for sysroot.
-func determinePlatformString(dockerImageName string, dockerPort uint16) (*bacpack_package.PlatformString, error) {
+// checkDockerEnvironment
+// Checks if the Docker environment is valid. Checks for read/write permissions and volume read
+// permissions.
+func checkDockerEnvironment(credentials ssh.SSHCredentials) error {
+	testDir := "/packager-test-dir-" + strconv.Itoa(time.Now().Nanosecond())
+
+	logger := log.GetLogger()
+
+	shellEvaluator := ssh.ShellEvaluator{
+		Commands: []string{"mkdir " + testDir + " && test -r " + testDir + " && test -w " + testDir + " && rmdir " + testDir},
+	}	
+
+	err := shellEvaluator.RunOverSSH(credentials)
+	if err != nil {
+		logger.ErrorIndent("Cannot create directories, or read or write to them inside Docker container")
+		return fmt.Errorf("invalid Docker environment")
+	}
+
+	shellEvaluator.Commands = []string{"test -r " + constants.ContainerSysrootPath}
+
+	err = shellEvaluator.RunOverSSH(credentials)
+	if err != nil {
+		logger.ErrorIndent("Cannot read volume directory inside Docker container")
+		return fmt.Errorf("invalid Docker environment")
+	}
+
+	return nil
+}
+
+// prepareDockerEnvironmentCheck
+// Prepares Docker environment for check and returns Docker struct to be used for check.
+func prepareDockerEnvironmentCheck(dockerImageName string, dockerPort uint16) (*docker.Docker, error) {
 	defaultDocker, err := prerequisites.CreateAndInitialize[docker.Docker](dockerImageName, dockerPort)
 	if err != nil {
 		return nil, err
 	}
-	defaultDocker.ImageName = dockerImageName
+
+	err = sysroot.CreateBaseSysrootDir()
+	if err != nil {
+		return nil, err
+	}
+
+	sysrootPath, err := sysroot.GetBaseSysrootPath()
+	if err != nil {
+		return nil, err
+	}
+
+	err = defaultDocker.SetVolume(sysrootPath, constants.ContainerSysrootPath)
+	if err != nil {
+		return nil, err
+	}
+	
+	return defaultDocker, nil
+}
+
+// checkDockerEnvironmentAndDeterminePlatformString
+// Checks if the Docker environment is valid and constructs platform string suitable for sysroot.
+func checkDockerEnvironmentAndDeterminePlatformString(dockerImageName string, dockerPort uint16) (*bacpack_package.PlatformString, error) {
+	logger := log.GetLogger()
+	logger.Info("Checking Docker environment")
+
+	defaultDocker, err := prepareDockerEnvironmentCheck(dockerImageName, dockerPort)
+	if err != nil {
+		return nil, err
+	}
+
+	dockerRun := (*docker.DockerRun)(defaultDocker)
+	err = dockerRun.Run()
+	if err != nil {
+		return nil, err
+	}
+	removeHandler := dockerRun.GetUndoHandler()
+	defer removeHandler()
 
 	sshCreds, err := prerequisites.CreateAndInitialize[ssh.SSHCredentials]()
 	if err != nil {
@@ -416,11 +482,16 @@ func determinePlatformString(dockerImageName string, dockerPort uint16) (*bacpac
 	}
 	sshCreds.Port = uint16(defaultDocker.Port)
 
+	err = checkDockerEnvironment(*sshCreds)
+	if err != nil {
+		return nil, err
+	}
+
 	platformString := bacpack_package.PlatformString{
 		Mode: bacpack_package.ModeAuto,
 	}
 
-	err = prerequisites.Initialize[bacpack_package.PlatformString](&platformString, sshCreds, defaultDocker)
+	err = prerequisites.Initialize(&platformString, sshCreds, defaultDocker)
 	return &platformString, err
 }
 

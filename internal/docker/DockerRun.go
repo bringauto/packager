@@ -2,6 +2,7 @@ package docker
 
 import (
 	"github.com/bacpack-system/packager/internal/process"
+	"github.com/bacpack-system/packager/internal/log"
 	"bytes"
 	"fmt"
 	"regexp"
@@ -35,6 +36,27 @@ func (args *DockerRun) Run() error {
 	id := outBuff.String()
 	args.containerId = regexp.FindString(id)
 	return nil
+}
+
+func (args *DockerRun) GetUndoHandler() func() {
+	return process.SignalHandlerAddHandler(func() error {
+		if args.containerId == "" {
+			return nil
+		}
+		dockerStop := (*DockerStop)(args)
+		dockerRm := (*DockerRm)(args)
+
+		logger := log.GetLogger()
+		err := dockerStop.Stop()
+		if err != nil {
+			logger.Error("Can't stop container - %s", err)
+		}
+		err = dockerRm.RemoveContainer()
+		if err != nil {
+			logger.Error("Can't remove container - %s", err)
+		}
+		return nil
+	})
 }
 
 func (runArgs *DockerRun) GenerateCmdLine() ([]string, error) {

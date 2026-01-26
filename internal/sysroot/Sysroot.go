@@ -16,6 +16,7 @@ import (
 
 const (
 	sysrootDirectoryName = "install_sysroot"
+	sysrootDirPermissions = 0777
 	// Constant for number of problematic files which will be printed when trying to overwrite files
 	// in sysroot
 	listFilesCount = 10
@@ -58,7 +59,11 @@ func (sysroot *Sysroot) CopyToSysroot(source string, pack BuiltPackage) error {
 		PreserveOwner: true,
 		PreserveTimes: true,
 	}
-	err = copy.Copy(source, sysroot.GetSysrootPath(), copyOptions)
+	sysrootPath, err := sysroot.GetSysrootPath()
+	if err != nil {
+		return err
+	}
+	err = copy.Copy(source, sysrootPath, copyOptions)
 	if err != nil {
 		return err
 	}
@@ -83,7 +88,11 @@ func (sysroot *Sysroot) IsPackageInSysroot(pack BuiltPackage) bool {
 func (sysroot *Sysroot) checkForOverwritingFiles(dirPath string) error {
 	filesToCopy := getExistingFilesInDir(dirPath)
 	filesInSysrootMap := make(map[string]struct{})
-	for _, file := range getExistingFilesInDir(sysroot.GetSysrootPath()) {
+	sysrootPath, err := sysroot.GetSysrootPath()
+	if err != nil {
+		return err
+	}
+	for _, file := range getExistingFilesInDir(sysrootPath) {
 		filesInSysrootMap[file] = struct{}{}
 	}
 	var intersection []string
@@ -124,37 +133,69 @@ func (sysroot *Sysroot) GetDirNameInSysroot() string {
 	return dirInSysrootName
 }
 
-// GetSysrootPath
-// Returns absolute path to the sysroot.
-func (sysroot *Sysroot) GetSysrootPath() string {
+// GetBaseSysrootPath
+// Returns absolute path to the sysroot base directory.
+func GetBaseSysrootPath() (string, error) {
 	workingDir, err := os.Getwd()
 	if err != nil {
-		panic(fmt.Errorf("cannot call Getwd - %w", err))
+		return "", fmt.Errorf("cannot get working directory - %w", err)
+	}
+
+	return filepath.Join(workingDir, sysrootDirectoryName), nil
+}
+
+// CreateBaseSysrootDir
+// Creates a Sysroot base dir. If not succeed returns error.
+func CreateBaseSysrootDir() error {
+	sysPath, err := GetBaseSysrootPath()
+	if err != nil {
+		return err
+	}
+	err = os.MkdirAll(sysPath, sysrootDirPermissions)
+	if err != nil {
+		return fmt.Errorf("cannot create sysroot dir: '%s' - %w", sysPath, err)
+	}
+
+	return nil
+}
+
+// GetSysrootPath
+// Returns absolute path to the sysroot.
+func (sysroot *Sysroot) GetSysrootPath() (string, error) {
+	baseSysrootPath, err := GetBaseSysrootPath()
+	if err != nil {
+		return "", err
 	}
 
 	dirInSysrootName := sysroot.GetDirNameInSysroot()
 
-	sysrootDir := filepath.Join(workingDir, sysrootDirectoryName, dirInSysrootName)
-	return sysrootDir
+	return filepath.Join(baseSysrootPath, dirInSysrootName), nil
 }
 
 // CreateSysrootDir
-// Creates a Sysroot dir. If not succeed the panic occurrs.
-func (sysroot *Sysroot) CreateSysrootDir() {
+// Creates a Sysroot dir. If not succeed returns error.
+func (sysroot *Sysroot) CreateSysrootDir() error {
 	var err error
-	sysPath := sysroot.GetSysrootPath()
-	if _, err = os.Stat(sysPath); os.IsNotExist(err) {
-		err = os.MkdirAll(sysPath, 0777)
-		if err != nil {
-			panic(fmt.Errorf("cannot create sysroot dir: '%s'", sysPath))
-		}
+	sysPath, err := sysroot.GetSysrootPath()
+	if err != nil {
+		return err
 	}
+	err = os.MkdirAll(sysPath, sysrootDirPermissions)
+	if err != nil {
+		return fmt.Errorf("cannot create sysroot dir: '%s' - %w", sysPath, err)
+	}
+
+	return nil
 }
 
 // IsSysrootDirectoryEmpty
 // Returns true if specified dir do not exists or exists but is empty, otherwise returns false.
 func (sysroot *Sysroot) IsSysrootDirectoryEmpty() bool {
-	f, err := os.Open(sysroot.GetSysrootPath())
+	sysrootPath, err := sysroot.GetSysrootPath()
+	if err != nil {
+		return true
+	}
+	f, err := os.Open(sysrootPath)
 	if err != nil { // The directory do not exists
 		return true
 	}
