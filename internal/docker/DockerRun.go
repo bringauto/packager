@@ -69,7 +69,7 @@ func (runArgs *DockerRun) GenerateCmdLine() ([]string, error) {
 	cmdArgs = append(cmdArgs, "-p")
 	cmdArgs = append(cmdArgs, portPair)
 	for key, value := range runArgs.Volumes {
-		volumePair := key + ":" + value
+		volumePair := key + ":" + value + ":Z" // :Z is for SELinux relabeling
 		cmdArgs = append(cmdArgs, "-v", volumePair)
 	}
 
