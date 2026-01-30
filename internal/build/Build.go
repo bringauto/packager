@@ -202,16 +202,16 @@ func (build *Build) RunBuild() (error, bool) { // Long function - it is hard to 
 		shellEvaluator.StdOut = file
 	}
 
-	dockerRun := (*docker.DockerRun)(build.Docker)
-	removeHandler := dockerRun.GetUndoHandler()
-	defer removeHandler()
-
 	logger.InfoIndent("Starting docker container")
 
+	dockerRun := (*docker.DockerRun)(build.Docker)
 	err = dockerRun.Run()
 	if err != nil {
 		return err, false
 	}
+	removeHandler := dockerRun.GetUndoHandler()
+	defer removeHandler()
+
 	build.SSHCredentials.Port = build.Docker.Port
 
 	logger.InfoIndent("Cloning Package git repository inside docker container")
