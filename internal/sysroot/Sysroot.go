@@ -16,7 +16,7 @@ import (
 
 const (
 	sysrootDirectoryName = "install_sysroot"
-	sysrootDirPermissions = 0777
+	sysrootDirPermissions = 0755
 	// Constant for number of problematic files which will be printed when trying to overwrite files
 	// in sysroot
 	listFilesCount = 10
