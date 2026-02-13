@@ -16,7 +16,7 @@ import (
 
 // BuildApp
 func BuildApp(cmdLine *BuildAppCmdLineArgs, contextPath string) error {
-	platformString, err := determinePlatformString(*cmdLine.DockerImageName, uint16(*cmdLine.Port))
+	platformString, err := checkDockerEnvironmentAndDeterminePlatformString(*cmdLine.DockerImageName, uint16(*cmdLine.Port))
 	if err != nil {
 		return err
 	}

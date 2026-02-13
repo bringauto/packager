@@ -20,4 +20,6 @@ const (
 	EmptyGitCommitHash = ""
 	// Absolute path of Package Repository inside docker container
 	ContainerPackageRepoPath = "/lfsrepo"
+	// Absolute path of sysroot inside docker container
+	ContainerSysrootPath = "/sysroot"
 )

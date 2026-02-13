@@ -2,6 +2,7 @@ package docker
 
 import (
 	"github.com/bacpack-system/packager/internal/process"
+	"github.com/bacpack-system/packager/internal/log"
 	"bytes"
 	"fmt"
 	"regexp"
@@ -37,6 +38,27 @@ func (args *DockerRun) Run() error {
 	return nil
 }
 
+func (args *DockerRun) GetUndoHandler() func() {
+	return process.SignalHandlerAddHandler(func() error {
+		if args.containerId == "" {
+			return nil
+		}
+		dockerStop := (*DockerStop)(args)
+		dockerRm := (*DockerRm)(args)
+
+		logger := log.GetLogger()
+		err := dockerStop.Stop()
+		if err != nil {
+			logger.Error("Can't stop container - %s", err)
+		}
+		err = dockerRm.RemoveContainer()
+		if err != nil {
+			logger.Error("Can't remove container - %s", err)
+		}
+		return nil
+	})
+}
+
 func (runArgs *DockerRun) GenerateCmdLine() ([]string, error) {
 	cmdArgs := make([]string, 0)
 	cmdArgs = append(cmdArgs, "run")
@@ -47,7 +69,7 @@ func (runArgs *DockerRun) GenerateCmdLine() ([]string, error) {
 	cmdArgs = append(cmdArgs, "-p")
 	cmdArgs = append(cmdArgs, portPair)
 	for key, value := range runArgs.Volumes {
-		volumePair := key + ":" + value
+		volumePair := key + ":" + value + ":Z" // :Z is for SELinux relabeling
 		cmdArgs = append(cmdArgs, "-v", volumePair)
 	}
 
