@@ -293,6 +293,24 @@ func (cmd *CmdLineArgs) ParseArgs(args []string) error {
 	cmd.BuildApp = cmd.buildAppParser.Happened()
 	cmd.CreateSysroot = cmd.createSysrootParser.Happened()
 
+	return cmd.checkInvalidOptionCombinations()
+}
+
+// checkInvalidOptionCombinations
+// Return appropriate error when any invalid option combination is detected, else nil.
+func (cmd *CmdLineArgs) checkInvalidOptionCombinations() error {
+	if cmd.BuildPackage {
+		if *cmd.BuildPackageArgs.Name == "" && !*cmd.BuildPackageArgs.All {
+			return fmt.Errorf("build-package requires either --name or --all")
+		}
+	}
+
+	if cmd.BuildApp {
+		if *cmd.BuildAppArgs.Name == "" && !*cmd.BuildAppArgs.All {
+			return fmt.Errorf("build-app requires either --name or --all")
+		}
+	}
+
 	if *cmd.BuildPackageArgs.All {
 		if *cmd.BuildPackageArgs.BuildDeps {
 			return fmt.Errorf("all and build-deps flags at the same time")
